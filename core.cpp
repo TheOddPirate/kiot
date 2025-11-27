@@ -5,6 +5,7 @@
 #include <QtGlobal>
 #include <QHostInfo>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QTimer>
 
@@ -469,4 +470,75 @@ int Number::getValue()
 {
     return m_value;
 }
+
+
+Select::Select(QObject *parent)
+    : Entity(parent)
+{
+    setHaType("select");
+}
+
+void Select::setOptions(const QStringList &opts)
+{
+    m_options = opts;
+
+    // Hvis HA er registrert, må config oppdateres
+    setHaConfig({
+        {"state_topic", baseTopic()},
+        {"command_topic", baseTopic() + "/set"},
+        {"options", QJsonArray::fromStringList(m_options)}
+    });
+}
+
+void Select::setState(const QString &state)
+{
+    m_state = state;
+    publishState();
+}
+
+QString Select::getState() const
+{
+    return m_state;
+}
+
+void Select::init()
+{
+    // Startkonfig for HA
+    setHaConfig({
+        {"state_topic", baseTopic()},
+        {"command_topic", baseTopic() + "/set"},
+        {"options", QJsonArray::fromStringList(m_options)}
+    });
+
+    // Fortell HA at entiteten finnes
+    sendRegistration();
+
+    // Publiser initial state hvis satt
+    publishState();
+
+    // Lytt på kommandoer
+    m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic() + "/set"));
+
+    connect(m_subscription.data(), &QMqttSubscription::messageReceived, this,
+            [this](const QMqttMessage &message) {
+                const QString newValue = QString::fromUtf8(message.payload());
+
+                // Oppdater lokalt
+                m_state = newValue;
+                publishState();
+
+                // Varsle integrasjonen
+                emit optionSelected(newValue);
+            });
+}
+
+void Select::publishState()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
+
+    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+}
+
+
 #include "core.moc"

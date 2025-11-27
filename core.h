@@ -167,3 +167,27 @@ private:
 
     QScopedPointer<QMqttSubscription> m_subscription;
 };
+
+class Select : public Entity
+{
+    Q_OBJECT
+public:
+    explicit Select(QObject *parent = nullptr);
+
+    void setOptions(const QStringList &opts);
+    void setState(const QString &state);
+    QString getState() const;
+
+protected:
+    void init() override;
+
+signals:
+    void optionSelected(const QString &newOption);
+
+private:
+    void publishState();
+
+    QString m_state;
+    QStringList m_options;
+    QScopedPointer<QMqttSubscription> m_subscription;
+};
