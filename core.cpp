@@ -488,6 +488,7 @@ void Select::setOptions(const QStringList &opts)
         {"command_topic", baseTopic() + "/set"},
         {"options", QJsonArray::fromStringList(m_options)}
     });
+    sendRegistration();
 }
 
 void Select::setState(const QString &state)
@@ -501,6 +502,10 @@ QString Select::getState() const
     return m_state;
 }
 
+QStringList Select::getOptions() const
+{
+    return m_options;
+}
 void Select::init()
 {
     // Startkonfig for HA
