@@ -16,6 +16,7 @@ set(KIOT_INTEGRATIONS_SRC
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    bluetooth.cpp
 )
 
 # Hvis PulseAudioQt ble funnet, ta med audio.cpp
@@ -25,9 +26,9 @@ if(KF6PulseAudioQt_FOUND)
 else()
     message(WARNING "PulseAudioQt not found, skipping volume integration")
 endif()
+find_package(KF6BluezQt REQUIRED CONFIG)
 
 add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
-
 target_link_libraries(KIOTIntegrations
     KF6::IdleTime
     KF6::GlobalAccel
@@ -38,6 +39,7 @@ target_link_libraries(KIOTIntegrations
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+    KF6::BluezQt
 )
 
 # Link PulseAudioQt kun hvis funnet
