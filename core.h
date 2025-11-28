@@ -190,5 +190,4 @@ private:
 
     QString m_state;
     QStringList m_options;
-    QScopedPointer<QMqttSubscription> m_subscription;
 };

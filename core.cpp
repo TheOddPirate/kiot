@@ -521,21 +521,25 @@ void Select::init()
     // Publiser initial state hvis satt
     publishState();
 
-    // Lytt på kommandoer
-    m_subscription.reset(HaControl::mqttClient()->subscribe(baseTopic() + "/set"));
+    // Unsubscribe først for å unngå delte subscriptions
+    HaControl::mqttClient()->unsubscribe(baseTopic() + "/set");
 
-    connect(m_subscription.data(), &QMqttSubscription::messageReceived, this,
-            [this](const QMqttMessage &message) {
-                const QString newValue = QString::fromUtf8(message.payload());
+    // Opprett lokal subscription
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    if (subscription) {
+        connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+            const QString newValue = QString::fromUtf8(message.payload());
 
-                // Oppdater lokalt
-                m_state = newValue;
-                publishState();
+            // Oppdater lokalt
+            m_state = newValue;
+            publishState();
 
-                // Varsle integrasjonen
-                emit optionSelected(newValue);
-            });
+            // Varsle integrasjonen
+            emit optionSelected(newValue);
+        });
+    }
 }
+
 
 void Select::publishState()
 {
