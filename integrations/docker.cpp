@@ -28,7 +28,7 @@ private:
     QList<ContainerInfo> m_containers;
     QTimer m_timer;
 
-    void ensureConfigDefaults();
+    bool ensureConfigDefaults();
     bool callDockerSocket(const QByteArray &req, QByteArray &response);
     QStringList listAllContainers();
     bool isRunning(const QString &name);
@@ -39,7 +39,10 @@ private:
 DockerSwitch::DockerSwitch(QObject *parent)
     : QObject(parent)
 {
-    ensureConfigDefaults();
+    if (!ensureConfigDefaults()){
+        qWarning() << "Docker disabled due to missing socket";
+        return;
+    }
 
     auto cfg = KSharedConfig::openConfig();
     KConfigGroup grp = cfg->group("docker");
@@ -75,11 +78,22 @@ DockerSwitch::DockerSwitch(QObject *parent)
     }
 }
 
-void DockerSwitch::ensureConfigDefaults()
+bool DockerSwitch::ensureConfigDefaults()
 {
     auto cfg = KSharedConfig::openConfig();
+    //Auto disables integration if we failed talking to the docker socket
+    KConfigGroup intgrp = cfg->group("Integrations");
+    if (intgrp.readEntry("docker", false)) {
+        QByteArray resp;
+        if (!callDockerSocket("{}", resp) && resp.contains("Cannot connect")) {
+            qWarning() << "Disabling Docker integration because socket is missing or inaccessible";
+            intgrp.writeEntry("docker", false);
+            intgrp.sync();
+            return false;
+        }
+    }
+    //Writes the needed parts to the config file if its missing
     KConfigGroup grp = cfg->group("docker");
-
     if (!grp.exists()) {
         if (!grp.hasKey("polltimer"))
             grp.writeEntry("polltimer", 30);
@@ -91,6 +105,7 @@ void DockerSwitch::ensureConfigDefaults()
 
         cfg->sync();
     }
+    return true;
 }
 
 bool DockerSwitch::callDockerSocket(const QByteArray &req, QByteArray &response)
@@ -98,18 +113,21 @@ bool DockerSwitch::callDockerSocket(const QByteArray &req, QByteArray &response)
     QLocalSocket socket;
     socket.connectToServer("/var/run/docker.sock", QIODevice::ReadWrite);
     if (!socket.waitForConnected(1000)) {
-        qWarning() << "Cannot connect to Docker socket";
+        response = "Cannot connect to Docker socket";
+        qWarning() << response;
         return false;
     }
 
     socket.write(req);
     if (!socket.waitForBytesWritten(5000)) {
-        qWarning() << "Failed to write to Docker socket";
+        response = "Failed to write to Docker socket";
+        qWarning() << response;
         return false;
     }
 
     if (!socket.waitForReadyRead(10000)) {
-        qWarning() << "No response from Docker socket";
+        response =  "No response from Docker socket";
+        qWarning() << response;
         return false;
     }
 
@@ -197,5 +215,5 @@ void setupDockerSwitch()
     new DockerSwitch(qApp);
 }
 
-REGISTER_INTEGRATION("Docker",setupDockerSwitch,true)
+REGISTER_INTEGRATION("Docker",setupDockerSwitch,false)
 #include "docker.moc"
