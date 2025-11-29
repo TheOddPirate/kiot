@@ -3,28 +3,32 @@
 
 #pragma once
 
+#include <KSharedConfig>
+#include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>
-#include <QMqttSubscription>
-#include <KSharedConfig>
 class QMqttClient;
 
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
-    bool onByDefault = true;  // ny flagg for default enabled
+    bool onByDefault = true; // ny flagg for default enabled
 };
 
-class HaControl : public QObject {
+class HaControl : public QObject
+{
     Q_OBJECT
 public:
     HaControl();
     ~HaControl();
 
-    static QMqttClient *mqttClient() { return s_self->m_client; }
+    static QMqttClient *mqttClient()
+    {
+        return s_self->m_client;
+    }
 
     static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
-    
+
 private:
     void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
@@ -34,12 +38,17 @@ private:
 };
 
 // Macro for integrasjoner
-#define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
-static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
+#define REGISTER_INTEGRATION(nameStr, func, onByDefault)                                                                                                       \
+    static bool dummy##func = HaControl::registerIntegrationFactory(                                                                                           \
+        nameStr,                                                                                                                                               \
+        []() {                                                                                                                                                 \
+            func();                                                                                                                                            \
+        },                                                                                                                                                     \
+        onByDefault);
 /**
  * @brief The Entity class is a base class for types (binary sensor, sensor, etc)
  */
-class Entity: public QObject
+class Entity : public QObject
 {
     Q_OBJECT
 public:
@@ -79,8 +88,10 @@ public:
     BinarySensor(QObject *parent = nullptr);
     void setState(bool state);
     bool state() const;
+
 protected:
     void init() override;
+
 private:
     void publish();
     bool m_state = false;
@@ -94,6 +105,8 @@ public:
 
     void setState(const QString &state);
     void setAttributes(const QVariantMap &attrs);
+    QString getState();
+    QVariantMap getAttributes();
 
 protected:
     void init() override;
@@ -106,13 +119,13 @@ private:
     void publishAttributes();
 };
 
-
 class Event : public Entity
 {
     Q_OBJECT
 public:
     Event(QObject *parent = nullptr);
     void trigger();
+
 protected:
     void init() override;
 };
@@ -124,8 +137,10 @@ public:
     Button(QObject *parent = nullptr);
 Q_SIGNALS:
     void triggered();
+
 protected:
     void init() override;
+
 private:
     QScopedPointer<QMqttSubscription> m_subscription;
 };
@@ -138,8 +153,10 @@ public:
     void setState(bool state);
 Q_SIGNALS:
     void stateChangeRequested(bool state);
+
 protected:
     void init() override;
+
 private:
     bool m_state = false;
     QScopedPointer<QMqttSubscription> m_subscription;
@@ -152,12 +169,12 @@ public:
     Number(QObject *parent = nullptr);
     void setValue(int value);
     int getValue();
-// Optional customization for integrations before init()
+    // Optional customization for integrations before init()
     void setRange(int min, int max, int step = 1, const QString &unit = "%");
 
 protected:
     void init() override;
-    
+
 Q_SIGNALS:
     void valueChangeRequested(int value);
 
@@ -170,4 +187,3 @@ private:
 
     QScopedPointer<QMqttSubscription> m_subscription;
 };
-

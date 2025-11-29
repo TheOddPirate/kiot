@@ -16,6 +16,7 @@ set(KIOT_INTEGRATIONS_SRC
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    battery.cpp
 )
 
 # Hvis PulseAudioQt ble funnet, ta med audio.cpp
