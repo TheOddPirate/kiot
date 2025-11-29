@@ -16,6 +16,7 @@ set(KIOT_INTEGRATIONS_SRC
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    gamepad.cpp
 )
 
 # Hvis PulseAudioQt ble funnet, ta med audio.cpp
@@ -27,7 +28,7 @@ else()
 endif()
 
 add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
-
+find_package(SDL2 REQUIRED)
 target_link_libraries(KIOTIntegrations
     KF6::IdleTime
     KF6::GlobalAccel
@@ -38,6 +39,8 @@ target_link_libraries(KIOTIntegrations
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+    SDL2::SDL2
+    
 )
 
 # Link PulseAudioQt kun hvis funnet
