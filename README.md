@@ -1,3 +1,30 @@
+This is my personal testing branch. It includes some extra integrations, has all
+supported entities moved from core.cpp to the entities folder to make the code
+easier to navigate, and comes with some helper scripts to make testing easier.
+
+The current extra integrations in this build are:
+
+- Battery: shows the battery entities of your computer in HA with extra attributes.
+- Bluetooth: gives control over the Bluetooth adapter, with switches for each
+  paired device to connect/disconnect and extra data in attributes.
+- Docker: needs to be enabled per docker image (polling-based), but allows
+  start/stop of containers and provides extra info as attributes.
+- Systemd: needs to be enabled per user service; fills the config file with all
+  available user services at startup and allows starting/stopping selected services.
+
+This build also supports the following entity types in Home Assistant:
+
+- Battery
+- Select
+- Textbox
+
+The helper script `helper.sh` makes it easy to install all dependencies needed to
+build and run Kiot (tested on Manjaro with pacman, but should also work on Debian).
+
+If you test this branch, please provide feedback so I know what is stable enough
+to consider for an upstream PR. Thank you! 🙂
+
+
 # About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions for your local desktop session to a home automation controller like Home Assistant.
