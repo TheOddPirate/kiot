@@ -46,7 +46,19 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-set(SOURCES main.cpp core.cpp dbusproperty.h dbusproperty.cpp)
+set(SOURCES
+    main.cpp
+    core.cpp
+    dbusproperty.cpp
+    dbusproperty.h
+    entities/entity.cpp
+    entities/binarysensor.cpp
+    entities/button.cpp
+    entities/number.cpp
+    entities/switch.cpp
+    entities/event.cpp
+    entities/sensor.cpp
+)
 
 add_subdirectory(integrations)
 

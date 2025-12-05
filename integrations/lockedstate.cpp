@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include <QObject>
+#include "entities/entities.h"
 
+#include <QObject>
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusPendingCall>
