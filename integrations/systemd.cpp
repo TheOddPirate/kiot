@@ -8,7 +8,7 @@
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QDBusMessage>
-#include <QProcess>
+#include <KProcess>
 #include <QRegularExpression>
 
 class SystemDWatcher : public QObject
@@ -92,12 +92,16 @@ void SystemDWatcher::init()
         sw->setId("systemd_" + id);
         sw->setName(svc);
         sw->setState(false); // initial state, will update via DBus
-        m_serviceSwitches[svc] = sw;
         connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
             QString cmd = state ? "start" : "stop";
-            QProcess::execute("systemctl --user " + cmd + " " + svc);
-            qDebug() << "Toggled service" << svc << "to" << (state ? "enabled" : "disabled");
+      
+            KProcess *p = new KProcess();
+            p->setShellCommand("systemctl --user " + cmd + " " + svc);
+            p->startDetached();
+            qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
         });
+        m_serviceSwitches[svc] = sw;
+
     }
 }
 QString SystemDWatcher::sanitizeServiceId(const QString &svc)
@@ -127,7 +131,7 @@ void SystemDWatcher::onPropertiesChanged(const QString &interface, const QVarian
     Q_UNUSED(invalidatedProps)
     if (interface != "org.freedesktop.systemd1.Unit")
         return;
-     QString path = msg.path();
+    QString path = msg.path();
     QString name = path.section('/', -1);
     if (!m_serviceSwitches.contains(name))
         return;
