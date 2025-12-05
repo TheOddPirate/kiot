@@ -5,19 +5,24 @@
 #include <QVariant>
 #include <QVariantMap>
 
-class Switch : public Entity
+
+
+class Battery : public Entity
 {
     Q_OBJECT
 public:
-    Switch(QObject *parent = nullptr);
-    void setState(bool state);
+    Battery(QObject *parent = nullptr);
+
+    void setState(const QString &state);
     void setAttributes(const QVariantMap &attrs);
-Q_SIGNALS:
-    void stateChangeRequested(bool state);
+
 protected:
     void init() override;
+
 private:
-    bool m_state = false;
+    QString m_state;
     QVariantMap m_attributes;
+
+    void publishState();
     void publishAttributes();
 };

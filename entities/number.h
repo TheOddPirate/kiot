@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 
+
 class Number : public Entity
 {
     Q_OBJECT

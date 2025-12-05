@@ -20,6 +20,8 @@ set(KIOT_INTEGRATIONS_SRC
     camera.cpp
     accentcolour.cpp
     activewindow.cpp
+    battery.cpp
+    docker.cpp
 )
 
 # Include audio.cpp only when PulseAudioQt library is found
@@ -48,6 +50,7 @@ target_link_libraries(KIOTIntegrations
     KF6::Notifications
     KF6::ConfigCore
     KF6::CoreAddons
+    KF6::Solid
     Qt6::Gui
     Qt6::Widgets
     Qt6::Mqtt

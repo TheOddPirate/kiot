@@ -42,6 +42,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Notifications
     IdleTime
     GlobalAccel
+    Solid
 )
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
@@ -52,11 +53,13 @@ set(SOURCES
     dbusproperty.cpp
     dbusproperty.h
     entities/entity.cpp
+    entities/battery.cpp
     entities/binarysensor.cpp
     entities/button.cpp
     entities/number.cpp
     entities/switch.cpp
     entities/event.cpp
+    entities/select.cpp
     entities/sensor.cpp
 )
 

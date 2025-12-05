@@ -4,6 +4,8 @@
 #include <QString>
 #include <QVariant>
 #include <QVariantMap>
+
+
 class BinarySensor : public Entity
 {
     Q_OBJECT

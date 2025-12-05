@@ -6,6 +6,7 @@
 #include <QVariantMap>
 
 
+
 class Sensor : public Entity
 {
     Q_OBJECT

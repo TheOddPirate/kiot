@@ -4,6 +4,7 @@
 #include <QVariant>
 #include <QVariantMap>
 
+
 class Entity: public QObject
 {
     Q_OBJECT

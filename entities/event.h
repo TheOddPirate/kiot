@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QVariantMap>
 
+
 class Event : public Entity
 {
     Q_OBJECT
