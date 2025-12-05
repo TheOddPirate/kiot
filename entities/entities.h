@@ -9,3 +9,4 @@
 #include "select.h"
 #include "sensor.h"
 #include "switch.h"
+#include "textbox.h"

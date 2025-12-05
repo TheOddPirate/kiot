@@ -15,6 +15,13 @@ void registerScripts()
     qInfo() << "Loading scripts";
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
+    // TODO make sure this is the best way to support input variables
+    Textbox *textb = nullptr;
+    if(!scriptIds.isEmpty()) {
+        textb = new Textbox(qApp);
+        textb->setId("scripts_arguments");
+        textb->setName("arguments");
+    }
     for (const QString &scriptId : scriptIds) {
         auto scriptConfig = scriptConfigToplevel.group(scriptId);
         const QString name = scriptConfig.readEntry("Name", scriptId);
@@ -30,11 +37,19 @@ void registerScripts()
         button->setName(name);
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
-        QObject::connect(button, &Button::triggered, qApp, [exec, scriptId]() {
+        QObject::connect(button, &Button::triggered, qApp, [exec, scriptId,textb]() {
             qInfo() << "Running script " << scriptId;
+            // TODO make this better
+            QString ex = exec;
+            if(exec.contains("{arg}"))
+            {
+                qInfo() << "test" << textb->state();
+                QString args = textb->state();
+                ex = ex.replace("{arg}",args);
+            }
             // DAVE TODO flatpak escaping
             KProcess *p = new KProcess();
-            p->setShellCommand(exec);
+            p->setShellCommand(ex);
             p->startDetached();
             delete p;
         });

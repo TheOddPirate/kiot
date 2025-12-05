@@ -62,6 +62,7 @@ set(SOURCES
     entities/event.cpp
     entities/select.cpp
     entities/sensor.cpp
+    entities/textbox.cpp
 )
 
 add_subdirectory(integrations)
