@@ -23,6 +23,7 @@ set(KIOT_INTEGRATIONS_SRC
     battery.cpp
     docker.cpp
     bluetooth.cpp
+    systemd.cpp
 )
 
 # Include audio.cpp only when PulseAudioQt library is found
