@@ -7,7 +7,6 @@
 #include <QMqttSubscription>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <QCoreApplication>
 
 Select::Select(QObject *parent)
     : Entity(parent)
@@ -65,7 +64,7 @@ void Select::init()
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-            QString newValue = QString::fromUtf8(message.payload());
+            const QString newValue = QString::fromUtf8(message.payload());
             qDebug() << "Received new value for " << name() << ": " << newValue;
             // Oppdater lokalt
             m_state = newValue;
