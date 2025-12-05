@@ -3,9 +3,8 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
-#include <QObject>
-#include <QDebug>
+
+
 
 #include <PulseAudioQt/Context>
 #include <PulseAudioQt/Server>

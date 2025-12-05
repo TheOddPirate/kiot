@@ -1,15 +1,15 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #pragma once
 #include "entity.h"
-#include <QObject>
-#include <QString>
-#include <QVariant>
-#include <QVariantMap>
+
 
 
 
 class Battery : public Entity
 {
-    Q_OBJECT
+    
 public:
     Battery(QObject *parent = nullptr);
 

@@ -3,10 +3,13 @@
 
 #pragma once
 
+#include <QCoreApplication>
+#include <QDebug>
 #include <QObject>
 #include <QVariantMap>
 #include <QMqttSubscription>
 #include <KSharedConfig>
+
 class QMqttClient;
 
 struct IntegrationFactory {

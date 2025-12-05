@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "battery.h"
 #include "core.h"
 #include <QJsonDocument>
@@ -63,5 +66,3 @@ void Battery::publishAttributes()
     QJsonDocument doc(obj);
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }
-
-#include "battery.moc"

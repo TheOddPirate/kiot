@@ -3,13 +3,10 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <KSharedConfig>
-#include <KConfigGroup>
 #include <QAction>
-#include <QDebug>
-#include <QCoreApplication>
 #include <KProcess>
 
+#include <KConfigGroup>
 void registerScripts()
 {
     qInfo() << "Loading scripts";

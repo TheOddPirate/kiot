@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/entities.h"
 #include <KIdleTime>
-#include <QCoreApplication>
+
 
 void setupActiveSensor()
 {

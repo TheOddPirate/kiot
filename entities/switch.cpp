@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "switch.h"
 #include "core.h"
 #include <QMqttSubscription>
 #include <QMqttClient>
-#include <QObject>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -63,4 +65,3 @@ void Switch::publishAttributes()
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }
 
-#include "switch.moc"

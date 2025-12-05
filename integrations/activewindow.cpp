@@ -3,13 +3,13 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
 #include <QFile>
 #include <QTimer>
-#include <QDebug>
+
 #include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonObject>

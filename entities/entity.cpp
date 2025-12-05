@@ -1,6 +1,7 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
 #include "entity.h"
 #include "core.h"
-#include <QObject>
 #include <QHostInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -85,5 +86,3 @@ void Entity::sendRegistration()
 
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
 }
-
-#include "entity.moc"

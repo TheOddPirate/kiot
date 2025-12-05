@@ -1,10 +1,13 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "textbox.h"
 #include "core.h"
 #include <QMqttSubscription>
 #include <QMqttClient>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QDebug>
+
 
 Textbox::Textbox(QObject *parent)
     : Entity(parent)

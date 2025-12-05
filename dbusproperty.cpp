@@ -5,7 +5,6 @@
 
 #include <QDBusConnection>
 #include <QDBusMessage>
-#include <QDBusPendingCall>
 #include <QDBusPendingReply>
 
 DBusProperty::DBusProperty(const QString &service, const QString &path, const QString &interface, const QString &property, QObject *parent)

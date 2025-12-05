@@ -3,7 +3,6 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
 #include <QDBusConnection>
 #include "login1_manager_interface.h"
 

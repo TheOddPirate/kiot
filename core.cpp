@@ -3,17 +3,13 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QDebug>
+#include <KConfigGroup>
 #include <QMqttClient>
-#include <QtGlobal>
-#include <QHostInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
 
-#include <KConfig>
-#include <KSharedConfig>
-#include <KConfigGroup>
+
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;

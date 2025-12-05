@@ -44,8 +44,12 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     GlobalAccel
     Solid
     BluezQt
-)
 
+)
+find_package(KF6 "1.8.0" REQUIRED COMPONENTS
+
+    PulseAudioQt
+)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 set(SOURCES

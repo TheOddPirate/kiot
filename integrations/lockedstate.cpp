@@ -4,14 +4,14 @@
 #include "core.h"
 #include "entities/entities.h"
 
-#include <QObject>
+
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
 #include <QDBusInterface>
 
-#include <QCoreApplication>
+
 
 class LockedState : public QObject
 {

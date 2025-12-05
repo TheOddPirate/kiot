@@ -4,7 +4,7 @@
 #include "core.h"
 #include "entities/entities.h"
 #include "dbusproperty.h"
-#include <QCoreApplication>
+
 
 #include <QDBusMessage>
 #include <QDBusConnection>

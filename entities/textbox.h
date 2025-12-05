@@ -4,7 +4,6 @@
 #pragma once
 
 #include "entity.h"
-#include <QObject>
 
 class Textbox : public Entity
 {

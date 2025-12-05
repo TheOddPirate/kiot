@@ -3,11 +3,13 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+
 #include <QSocketNotifier>
 #include <QTimer>
+extern "C" {
+#define LIBUDEV_I_KNOW_THE_API_IS_SUBJECT_TO_CHANGE
 #include <libudev.h>
-#include <unistd.h>
+}
 
 class Gamepad : public QObject
 {

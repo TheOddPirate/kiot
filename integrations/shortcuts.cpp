@@ -3,11 +3,10 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <KSharedConfig>
-#include <KConfigGroup>
 #include <QAction>
-#include <QDebug>
-#include <QCoreApplication>
+
+#include <KConfigGroup>
+
 #include <KGlobalAccel>
 
 void registerShortcuts()

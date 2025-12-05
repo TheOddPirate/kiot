@@ -1,24 +1,17 @@
-//This is just a very early poc for a bluetooth integration
-//right now its just a switch to turn the adaper on/off
-//Todo check for devices connected by bluetooth and create a sensor/switch for it with attributes showing battery and such
-//todo implement cusom config to let the user decide what devices should be exposed to home assistant
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+
 #include <BluezQt/Manager>
 #include <BluezQt/Adapter>
 #include <BluezQt/Device>
 // TODO re add this when BluezQt adds it back to cmake
 //#include <BluezQt/Battery>
 #include <BluezQt/InitManagerJob>
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDebug>
 
 
-
-
-
+// ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject
 {
     Q_OBJECT
@@ -29,7 +22,6 @@ public:
         m_switch = new Switch(this);
         m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
         m_switch->setName(device->name());
-
         // Sett initial state og attributes
         updateState();
         updateAttributes();
@@ -73,7 +65,7 @@ private:
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
-        // removed for now
+        // TODO find out why it fails
         //auto battery = m_device->battery();
         //if (battery)
         //    attrs["Battery"] = battery->percentage(); // eller battery->value() hvis det finnes
@@ -88,7 +80,7 @@ private:
 
 
 
-
+// ====== Bluetooth Adapter code ======
 class BluetoothAdapterWatcher : public QObject
 {
     Q_OBJECT

@@ -1,14 +1,10 @@
 #include <QApplication>
-#include <QDebug>
-
 #include "core.h"
 #include <KAboutData>
-#include <KConfigGroup>
 #include <KDBusService>
-#include <KSharedConfig>
 #include <KSignalHandler>
 // Is there a way to get the signal directly from
-#include <csignal>
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
@@ -16,12 +12,12 @@ int main(int argc, char **argv)
     KDBusService service(KDBusService::Unique);
     HaControl appControl;
 
-    KSignalHandler::self()->watchSignal(SIGTERM);
-    KSignalHandler::self()->watchSignal(SIGINT);
+    KSignalHandler::self()->watchSignal(2);
+    KSignalHandler::self()->watchSignal(15);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, [](int sig) {
-        if (sig == SIGTERM || sig == SIGINT) {
-            QApplication::quit();
-        }
+        qDebug() << "Got signal" << sig;
+        QApplication::quit();
+        
     });
 
     app.exec();

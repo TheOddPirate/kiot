@@ -3,7 +3,7 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+
 #include <QMqttClient>
 
 #include <QJsonDocument>

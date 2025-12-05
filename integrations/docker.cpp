@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+#include <KConfigGroup>
 #include <QTimer>
-#include <QDebug>
+
 #include <QFile>
 #include <QTextStream>
 #include <QStandardPaths>
@@ -10,9 +13,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <KConfig>
-#include <KSharedConfig>
-#include <KConfigGroup>
 
 class DockerSwitch : public QObject
 {

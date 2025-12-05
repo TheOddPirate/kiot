@@ -3,8 +3,8 @@
 
 #include "core.h"
 #include "entities/battery.h"
-#include <QCoreApplication>
-#include <QDebug>
+
+
 #include <Solid/DeviceNotifier>
 #include <Solid/Device>
 #include <Solid/Battery>

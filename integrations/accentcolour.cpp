@@ -3,7 +3,7 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+
 
 #include <KSharedConfig>
 #include <KConfigGroup>

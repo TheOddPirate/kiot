@@ -119,7 +119,12 @@ The other focus is on ensuring that device triggers and actions appear in an int
  - Nightmode status (binary sensor)
  - Active window status (sensor)
  - Volume controller (number based slider)
-  
+ - Docker (switch with attributes)
+ - Battery (battery sensor)
+ - Systemd (switches)
+ - GamePad (Binary sensor)
+ - Bluetooth (switches with extra attributes)
+
 # Additional Config
 
 ```
@@ -141,7 +146,12 @@ Exec=google-chrome
 Name=Do a thing
 # This then becomes available in global shortcuts KCM for assignment and will appear as a trigger in HA, so keys can be bound to HA actions
 
+[docker] (this auto fills on first run with available images)
+polltimer=30
+imagename=true
 
+[systemd](This auto fills with available user services on start)
+kiot.service=true
 ```
 
 # Flatpak build

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "number.h"
 #include "core.h"
 #include <QMqttClient>
@@ -57,5 +60,3 @@ int Number::getValue()
 {
     return m_value;
 }
-
-#include "number.moc"

@@ -3,18 +3,12 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include <QCoreApplication>
+#include <KConfigGroup>
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusReply>
-#include <QDBusPendingCallWatcher>
 #include <QDBusMessage>
-#include <QDBusArgument>
 #include <QProcess>
-#include <QDebug>
-#include <KSharedConfig>
-#include <KConfigGroup>
-#include <QHash>
 #include <QRegularExpression>
 
 class SystemDWatcher : public QObject

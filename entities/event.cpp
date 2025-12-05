@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "event.h"
 #include "core.h"
 #include <QMqttClient>
@@ -25,5 +28,3 @@ void Event::trigger()
         HaControl::mqttClient()->publish(baseTopic(), "", 0, true);
     }
 }
-
-#include "event.moc"
