@@ -12,8 +12,9 @@ The current extra integrations in this build are:
   available user services at startup and allows starting/stopping selected services.
 - Scripts updated to suport input variables from a shared textbox in HA
 - Camera updated to try to stop a crash i got every now and then (5 cameras connected)
-This build also supports the following entity types in Home Assistant:
 
+
+This build also supports the following entity types in Home Assistant:
 - Battery
 - Select
 - Textbox
