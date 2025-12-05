@@ -43,9 +43,9 @@ void registerScripts()
             QString ex = exec;
             if(exec.contains("{arg}"))
             {
-                qInfo() << "test" << textb->state();
-                QString args = textb->state();
-                ex = ex.replace("{arg}",args);
+                qInfo() << "inserting into exec command " << textb->state();
+                ex = ex.replace("{arg}",textb->state());
+                textb->setState("");
             }
             // DAVE TODO flatpak escaping
             KProcess *p = new KProcess();
