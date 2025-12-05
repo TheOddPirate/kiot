@@ -4,8 +4,6 @@
    // SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
    //      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
    //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
-// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
-// SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
 #include "entities/entities.h"

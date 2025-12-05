@@ -11,7 +11,8 @@ The current extra integrations in this build are:
   start/stop of containers and provides extra info as attributes.
 - Systemd: needs to be enabled per user service; fills the config file with all
   available user services at startup and allows starting/stopping selected services.
-
+- Scripts updated to suport input variables from a shared textbox in HA
+- Camera updated to try to stop a crash i got every now and then (5 cameras connected)
 This build also supports the following entity types in Home Assistant:
 
 - Battery
