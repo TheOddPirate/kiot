@@ -25,24 +25,30 @@ void Battery::init()
     publishAttributes();
 }
 
-void Battery::setState(const QString &state)
+void Battery::setState(const int &state)
 {
     m_state = state;
     publishState();
 }
-
+int Battery::getState()
+{
+    return  m_state;
+}
 void Battery::setAttributes(const QVariantMap &attrs)
 {
     m_attributes = attrs;
     publishAttributes();
 }
-
+QVariantMap Battery::getAttributes()
+{
+    return m_attributes;
+}
 void Battery::publishState()
 {
     if (HaControl::mqttClient()->state() != QMqttClient::Connected)
         return;
 
-    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+    HaControl::mqttClient()->publish(baseTopic(), QString::number(m_state).toUtf8(), 0, true);
 }
 
 void Battery::publishAttributes()

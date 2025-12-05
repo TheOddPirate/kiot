@@ -43,6 +43,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     IdleTime
     GlobalAccel
     Solid
+    BluezQt
 )
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")

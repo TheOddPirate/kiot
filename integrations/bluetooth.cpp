@@ -1,0 +1,171 @@
+//This is just a very early poc for a bluetooth integration
+//right now its just a switch to turn the adaper on/off
+//Todo check for devices connected by bluetooth and create a sensor/switch for it with attributes showing battery and such
+//todo implement cusom config to let the user decide what devices should be exposed to home assistant
+#include "core.h"
+#include "entities/entities.h"
+#include <QCoreApplication>
+#include <BluezQt/Manager>
+#include <BluezQt/Adapter>
+#include <BluezQt/Device>
+// TODO re add this when BluezQt adds it back to cmake
+//#include <BluezQt/Battery>
+#include <BluezQt/InitManagerJob>
+#include <QDBusConnection>
+#include <QDBusInterface>
+#include <QDebug>
+
+
+
+
+
+class BluetoothDeviceSwitch : public QObject
+{
+    Q_OBJECT
+public:
+    explicit BluetoothDeviceSwitch(const BluezQt::DevicePtr &device, QObject *parent = nullptr)
+    : QObject(parent), m_device(device)
+    {
+        m_switch = new Switch(this);
+        m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
+        m_switch->setName(device->name());
+
+        // Sett initial state og attributes
+        updateState();
+        updateAttributes();
+
+        // Lytt til endringer
+        connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool connected){
+            m_switch->setState(connected);
+            updateAttributes();
+        });
+        // TODO fix after battery 
+        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery> battery){
+            Q_UNUSED(battery)
+            updateAttributes();
+        });
+
+        connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
+            if (!m_device)
+                return;
+            if (requestedState){
+                m_device->connectToDevice();
+            }else {
+                m_device->disconnectFromDevice();
+            }
+        });
+    }
+
+private:
+    BluezQt::DevicePtr m_device;
+    Switch *m_switch = nullptr;
+
+    void updateState()
+    {
+        if (!m_device) return;
+        m_switch->setState(m_device->isConnected());
+    }
+
+    void updateAttributes()
+    {
+        if (!m_device) return;
+
+        QVariantMap attrs;
+        attrs["MAC"] = m_device->address();
+        attrs["RSSI"] = m_device->rssi();
+        // removed for now
+        //auto battery = m_device->battery();
+        //if (battery)
+        //    attrs["Battery"] = battery->percentage(); // eller battery->value() hvis det finnes
+        //else
+        //    attrs["Battery"] =  -1;
+        attrs["Paired"] = m_device->isPaired();
+        attrs["Trusted"] = m_device->isTrusted();
+        attrs["Blocked"] = m_device->isBlocked();
+        m_switch->setAttributes(attrs);
+    }
+};
+
+
+
+
+class BluetoothAdapterWatcher : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit BluetoothAdapterWatcher(QObject *parent = nullptr);
+
+
+    
+private:
+
+    Switch *m_switch = nullptr;
+    BluezQt::Manager *m_manager = nullptr;
+    BluezQt::AdapterPtr m_adapter;
+    bool m_initialized = false;
+};
+
+BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
+    : QObject(parent)
+{
+    m_switch = new Switch(this);
+    m_switch->setId("bluetooth_adapter");
+    m_switch->setName("Bluetooth Adapter");
+
+    m_manager = new BluezQt::Manager(this);
+
+    // Lag init-jobben
+    BluezQt::InitManagerJob *job = m_manager->init();
+
+    connect(job, &BluezQt::InitManagerJob::result, this, [this, job]() {
+        if (job->error()) {
+            qWarning() << "Bluez init failed:" << job->errorText();
+            m_switch->setState(false);
+            return;
+        }
+
+        auto adapters = job->manager()->adapters();
+        if (!adapters.isEmpty()) {
+            m_adapter = adapters.first(); // Første adapter
+            m_initialized = true;
+
+            qDebug() << "Adapter:" << m_adapter->name() << "Powered:" << m_adapter->isPowered();
+            m_switch->setState(m_adapter->isPowered());
+
+            connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, [this](bool powered){
+                m_switch->setState(powered);
+            });
+            for (const auto &dev : m_adapter->devices()) {
+                if (dev->isPaired()) {
+                    new BluetoothDeviceSwitch(dev, this);
+                }
+            }
+
+        } else {
+            qWarning() << "No adapters found";
+            m_switch->setState(false);
+        }
+    });
+
+    job->start();
+
+    // Koble til stateChangeRequested for HA
+    connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
+        if (!m_initialized || !m_adapter)
+            return;
+
+        m_adapter->setPowered(requestedState);
+        qDebug() << "Set adapter powered to" << requestedState;
+    });
+}
+
+// Setup-funksjon som registreres i Kiot
+void setupBluetoothAdapter()
+{
+    new BluetoothAdapterWatcher(qApp);
+}
+
+REGISTER_INTEGRATION("BluetoothAdapter", setupBluetoothAdapter, true)
+
+#include "bluetooth.moc"

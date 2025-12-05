@@ -7,10 +7,10 @@
 #include <QObject>
 #include <QDebug>
 
-#include <KF6/KF6PulseAudioQt/PulseAudioQt/Context>
-#include <KF6/KF6PulseAudioQt/PulseAudioQt/Server>
-#include <KF6/KF6PulseAudioQt/PulseAudioQt/Sink>
-#include <KF6/KF6PulseAudioQt/PulseAudioQt/VolumeObject>
+#include <PulseAudioQt/Context>
+#include <PulseAudioQt/Server>
+#include <PulseAudioQt/Sink>
+#include <PulseAudioQt/VolumeObject>
 
 class Audio : public QObject
 {

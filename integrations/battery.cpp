@@ -94,12 +94,10 @@ void BatteryWatcher::registerBattery(const QString &udi)
     Battery *sensor = new Battery(this);
     sensor->setId("battery_" + udi_e.replace("/", "_").replace(":", "_"));
     sensor->setName(name);
-    sensor->setDiscoveryConfig("icon", "mdi:battery");
-    sensor->setDiscoveryConfig("unit_of_measurement", "%");
-    sensor->setDiscoveryConfig("device_class", "battery");
+ 
     
     // Set initial state and attributes
-    sensor->setState(QString::number(battery->chargePercent()));
+    sensor->setState(battery->chargePercent());
 
     
     // Connect to battery signals
@@ -122,7 +120,7 @@ void BatteryWatcher::batteryChargeChanged(int chargePercent, const QString &udi)
 {
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
-        it.value()->setState(QString::number(chargePercent));
+        it.value()->setState(chargePercent);
         updateBatteryAttributes(udi);
     }
 }

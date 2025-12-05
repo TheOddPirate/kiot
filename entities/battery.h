@@ -13,14 +13,15 @@ class Battery : public Entity
 public:
     Battery(QObject *parent = nullptr);
 
-    void setState(const QString &state);
+    void setState(const int &state);
+    int getState();
     void setAttributes(const QVariantMap &attrs);
-
+    QVariantMap getAttributes();
 protected:
     void init() override;
 
 private:
-    QString m_state;
+    int m_state;
     QVariantMap m_attributes;
 
     void publishState();

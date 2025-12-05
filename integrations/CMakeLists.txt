@@ -22,6 +22,7 @@ set(KIOT_INTEGRATIONS_SRC
     activewindow.cpp
     battery.cpp
     docker.cpp
+    bluetooth.cpp
 )
 
 # Include audio.cpp only when PulseAudioQt library is found
@@ -51,10 +52,12 @@ target_link_libraries(KIOTIntegrations
     KF6::ConfigCore
     KF6::CoreAddons
     KF6::Solid
+    KF6::BluezQt
     Qt6::Gui
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
+
 )
 
 # Link PulseAudioQt if library is found
