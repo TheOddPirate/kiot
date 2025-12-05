@@ -7,8 +7,7 @@ The current extra integrations in this build are:
 - Battery: shows the battery entities of your computer in HA with extra attributes.
 - Bluetooth: gives control over the Bluetooth adapter, with switches for each
   paired device to connect/disconnect and extra data in attributes.
-- Docker: needs to be enabled per docker image (polling-based), but allows
-  start/stop of containers and provides extra info as attributes.
+- Docker: needs to be enabled per docker image (polling-based) in config file, but allows start/stop of containers and provides extra info as attributes.
 - Systemd: needs to be enabled per user service; fills the config file with all
   available user services at startup and allows starting/stopping selected services.
 - Scripts updated to suport input variables from a shared textbox in HA
