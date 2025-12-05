@@ -2,7 +2,7 @@ This is my personal testing branch. It includes some extra integrations, has all
 supported entities moved from core.cpp to the entities folder to make the code
 easier to navigate, and comes with some helper scripts to make testing easier.
 
-The current extra integrations in this build are:
+The current extra/updated integrations in this build are:
 
 - Battery: shows the battery entities of your computer in HA with extra attributes.
 - Bluetooth: gives control over the Bluetooth adapter, with switches for each
