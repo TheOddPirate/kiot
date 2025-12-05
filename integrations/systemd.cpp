@@ -149,5 +149,5 @@ void setupSystemDWatcher()
     new SystemDWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("SystemDWatcher", setupSystemDWatcher, true)
+REGISTER_INTEGRATION("SystemD", setupSystemDWatcher, true)
 #include "systemd.moc"

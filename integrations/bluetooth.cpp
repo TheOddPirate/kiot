@@ -166,6 +166,6 @@ void setupBluetoothAdapter()
     new BluetoothAdapterWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("BluetoothAdapter", setupBluetoothAdapter, true)
+REGISTER_INTEGRATION("Bluetooth", setupBluetoothAdapter, true)
 
 #include "bluetooth.moc"
