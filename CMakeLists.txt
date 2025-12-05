@@ -46,8 +46,8 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     BluezQt
 
 )
+#Why is pusleaudioqt v 1.8.0 and not 5.X.X as the
 find_package(KF6 "1.8.0" REQUIRED COMPONENTS
-
     PulseAudioQt
 )
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")

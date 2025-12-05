@@ -6,10 +6,7 @@
 
 #include <QSocketNotifier>
 #include <QTimer>
-extern "C" {
-#define LIBUDEV_I_KNOW_THE_API_IS_SUBJECT_TO_CHANGE
 #include <libudev.h>
-}
 
 class Gamepad : public QObject
 {

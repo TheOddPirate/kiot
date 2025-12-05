@@ -40,7 +40,11 @@ void registerScripts()
             QString ex = exec;
             if(exec.contains("{arg}"))
             {
-                qInfo() << "inserting into exec command " << textb->state();
+                if( textb->state().isEmpty()){
+                    qDebug() << "no argument provided, aborting execution";
+                    return;
+                }
+                qDebug() << "inserting into exec command " << textb->state();
                 ex = ex.replace("{arg}",textb->state());
                 textb->setState("");
             }
