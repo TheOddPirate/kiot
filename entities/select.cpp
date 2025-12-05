@@ -7,6 +7,7 @@
 #include <QMqttSubscription>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QCoreApplication>
 
 Select::Select(QObject *parent)
     : Entity(parent)
@@ -58,20 +59,20 @@ void Select::init()
     publishState();
 
     // Unsubscribe først for å unngå delte subscriptions
-    HaControl::mqttClient()->unsubscribe(baseTopic() + "/set");
+
 
     // Opprett lokal subscription
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-            const QString newValue = QString::fromUtf8(message.payload());
-
+            QString newValue = QString::fromUtf8(message.payload());
+            qDebug() << "Received new value for " << name() << ": " << newValue;
             // Oppdater lokalt
             m_state = newValue;
             publishState();
 
             // Varsle integrasjonen
-            emit optionSelected(newValue);
+            emit optionSelected(m_state);
         });
     }
 }

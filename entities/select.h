@@ -19,7 +19,7 @@ protected:
     void init() override;
 
 signals:
-    void optionSelected(const QString &newOption);
+    void optionSelected(QString newOption);
 
 private:
     void publishState();
