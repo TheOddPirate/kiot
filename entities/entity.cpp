@@ -56,6 +56,7 @@ void Entity::setName(const QString &newName)
 void Entity::setHaIcon(const QString &newHaIcon)
 {
     m_haIcon = newHaIcon;
+    sendRegistration();
 }
 
 QString Entity::haIcon() const

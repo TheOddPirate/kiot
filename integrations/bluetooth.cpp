@@ -28,12 +28,13 @@ public:
 
         // Lytt til endringer
         connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool connected){
-            m_switch->setState(connected);
+            updateState();
             updateAttributes();
         });
         // TODO fix after battery 
         connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery> battery){
             Q_UNUSED(battery)
+            updateState();
             updateAttributes();
         });
 
@@ -55,6 +56,14 @@ private:
     void updateState()
     {
         if (!m_device) return;
+        if(m_device->isConnected()){
+            m_switch->setHaIcon("mdi:bluetooth");
+            m_switch->setState(true);
+        }
+        else {
+            m_switch->setHaIcon("mdi:bluetooth-off");
+            m_switch->setState(false);
+        }
         m_switch->setState(m_device->isConnected());
     }
 
@@ -126,6 +135,11 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             m_switch->setState(m_adapter->isPowered());
 
             connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, [this](bool powered){
+                if (powered){
+                    m_switch->setHaIcon("mdi:bluetooth");
+                } else {    
+                    m_switch->setHaIcon("mdi:bluetooth-off");
+                }
                 m_switch->setState(powered);
             });
             for (const auto &dev : m_adapter->devices()) {
