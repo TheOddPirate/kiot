@@ -14,15 +14,19 @@
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
 
+
 // core internal sensor
-class ConnectedNode: public Entity
-{
+class ConnectedNode: public Entity {
     Q_OBJECT
 public:
     ConnectedNode(QObject *parent);
     ~ConnectedNode();
-};
 
+    static ConnectedNode *node(){return s_self;}
+private:
+    static ConnectedNode *s_self;
+
+};
 HaControl::HaControl() {
     s_self = this;
     auto config = KSharedConfig::openConfig();
@@ -32,14 +36,14 @@ HaControl::HaControl() {
     m_client->setPort(group.readEntry("port", 1883));
     m_client->setUsername(group.readEntry("user"));
     m_client->setPassword(group.readEntry("password"));
-    m_client->setKeepAlive(3); // set a low ping so we become unavailable on suspend quickly
-
+    m_client->setKeepAlive(10); // set a low ping so we become unavailable on suspend quickly
+    m_client->setAutoKeepAlive(true);
     if (m_client->hostname().isEmpty()) {
         qCritical() << "Server is not configured, please check " << config->name() << "is configured";
         qCritical() << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     }
 
-    new ConnectedNode(this);
+    auto tt = new ConnectedNode(this);
     
 
     QTimer *reconnectTimer = new QTimer(this);
@@ -74,6 +78,8 @@ HaControl::HaControl() {
 
 HaControl::~HaControl()
 {
+    delete ConnectedNode::node();
+    m_client->disconnectFromHost();
 }
 
 void HaControl::doConnect()
@@ -122,12 +128,13 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
 }
 
 
-
+ConnectedNode *ConnectedNode::s_self = nullptr;
 
 
 ConnectedNode::ConnectedNode(QObject *parent):
     Entity(parent)
 {
+    s_self = this;
     setId("connected");
     setName("Connected");
     setHaType("binary_sensor");
@@ -160,7 +167,7 @@ ConnectedNode::ConnectedNode(QObject *parent):
 ConnectedNode::~ConnectedNode()
 {
     // TODO find a good way to let this entity publish before shutdown is done and not cause a coredump
-    //    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
+    HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
     
 }
 
