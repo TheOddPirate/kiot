@@ -7,6 +7,7 @@
 #include <PulseAudioQt/Context>
 #include <PulseAudioQt/Server>
 #include <PulseAudioQt/Sink>
+#include <PulseAudioQt/Source>
 #include <PulseAudioQt/VolumeObject>
 #include <QDebug>
 
@@ -19,17 +20,26 @@ public:
 
 private slots:
     void updateSinks(PulseAudioQt::Sink *sink);
+    void updateSources(PulseAudioQt::Source *source);
     void onSinkSelected(QString newOption);
-    void onVolumeChanged();
-    void setVolume(int v);
+    void onSourceSelected(QString newOption);
+    void onSourceVolumeChanged();
+    void onSinkVolumeChanged();
+
+    void setSinkVolume(int v);
+    void setSourceVolume(int v);
 
 private:
     int paToPercent(qint64 v) const;
     qint64 percentToPa(int percent) const;
 
     Number *m_sinkVolume = nullptr;
-    Select *m_sinSelector = nullptr;
+    Number *m_sourceVolume = nullptr;
+    Select *m_sinkSelector = nullptr;
+    Select *m_sourceSelector = nullptr;
+    
     PulseAudioQt::Sink *m_sink = nullptr;
+    PulseAudioQt::Source *m_source = nullptr;
     PulseAudioQt::Context *m_ctx = nullptr;
 };
 
@@ -38,13 +48,23 @@ Audio::Audio(QObject *parent)
     : QObject(parent)
 {
     m_sinkVolume = new Number(this);
-    m_sinkVolume->setId("volume");
+    m_sinkVolume->setId("output_volume");
     m_sinkVolume->setName("System Volume");
     m_sinkVolume->setHaIcon("mdi:knob");
     m_sinkVolume->setRange(0, 100, 1, "%");
 
     connect(m_sinkVolume, &Number::valueChangeRequested,
-            this, &Audio::setVolume);
+            this, &Audio::setSinkVolume);
+
+    m_sourceVolume = new Number(this);
+    m_sourceVolume->setId("input_volume");
+    m_sourceVolume->setName("Microphone Volume");
+    m_sourceVolume->setHaIcon("mdi:microphone");
+    m_sourceVolume->setRange(0, 100, 1, "%");
+
+    connect(m_sourceVolume, &Number::valueChangeRequested,
+            this, &Audio::setSourceVolume);
+
 
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
@@ -58,21 +78,33 @@ Audio::Audio(QObject *parent)
         return;
     }
 
-    // Opprett Select tidlig og koble signalet
-    m_sinSelector = new Select(this);
-    m_sinSelector->setId("volume_output_selector");
-    m_sinSelector->setHaIcon("mdi:volume-source");
-    m_sinSelector->setName("Output Selector");
-    connect(m_sinSelector, &Select::optionSelected,
+    // Sink selctor and signal connection
+    m_sinkSelector = new Select(this);
+    m_sinkSelector->setId("volume_output_selector");
+    m_sinkSelector->setHaIcon("mdi:volume-source");
+    m_sinkSelector->setName("Output Selector");
+    connect(m_sinkSelector, &Select::optionSelected,
             this, &Audio::onSinkSelected);
+    //Microphone selector and signal connection
+    m_sourceSelector = new Select(this);
+    m_sourceSelector->setId("volume_input_selector");
+    m_sourceSelector->setHaIcon("mdi:microphone-settings");
+    m_sourceSelector->setName("Input Selector");
+    connect(m_sourceSelector, &Select::optionSelected,
+            this, &Audio::onSourceSelected);
 
-    // Lytt på default sink endringer
+    // Connect to signal when default sink changes
     connect(server, &PulseAudioQt::Server::defaultSinkChanged,
             this, &Audio::updateSinks);
 
+    // Connect to signal when default source changes
+    connect(server, &PulseAudioQt::Server::defaultSourceChanged,
+            this, &Audio::updateSources);
     // Hvis default sink allerede finnes, oppdater
     if (auto *initial = server->defaultSink())
         updateSinks(initial);
+    if (auto *initial = server->defaultSource())
+        updateSources(initial);
 }
 
 void Audio::updateSinks(PulseAudioQt::Sink *sink)
@@ -84,10 +116,10 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
     for (auto s : m_ctx->sinks())
         options.append(s->description());
 
-    m_sinSelector->setOptions(options);
+    m_sinkSelector->setOptions(options);
 
     // Sett initial state
-    m_sinSelector->setState(sink->description());
+    m_sinkSelector->setState(sink->description());
 
     // Lagre aktiv sink
     if (m_sink)
@@ -97,11 +129,37 @@ void Audio::updateSinks(PulseAudioQt::Sink *sink)
 
     // Lytt på volumendringer
     connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
-            this, &Audio::onVolumeChanged);
+            this, &Audio::onSinkVolumeChanged);
 
-    onVolumeChanged();
+    onSinkVolumeChanged();
 }
 
+void Audio::updateSources(PulseAudioQt::Source *source)
+{
+    if (!source || !source->isDefault()) return;
+
+    // Fyll options basert på tilgjengelige sinks
+    QStringList options;
+    for (auto s : m_ctx->sources())
+        options.append(s->description());
+
+    m_sourceSelector->setOptions(options);
+
+    // Sett initial state
+    m_sourceSelector->setState(source->description());
+
+    // Lagre aktiv sink
+    if (m_source)
+        disconnect(m_source, nullptr, this, nullptr);
+
+    m_source = source;
+
+    // Lytt på volumendringer
+    connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
+            this, &Audio::onSourceVolumeChanged);
+
+    onSourceVolumeChanged();
+}
 void Audio::onSinkSelected(QString newOption)
 {
     qDebug() << "Sink selected:" << newOption;
@@ -115,9 +173,25 @@ void Audio::onSinkSelected(QString newOption)
             break;
         }
     }
+    
 }
 
-void Audio::onVolumeChanged()
+void Audio::onSourceSelected(QString newOption)
+{
+    qDebug() << "Source selected:" << newOption;
+
+    if (!m_ctx) return;
+
+    for (PulseAudioQt::Source *source : m_ctx->sources()) {
+        if (source->description() == newOption) {
+            qDebug() << "Setting source to" << source->description();
+            source->setDefault(true);
+            break;
+        }
+    }
+}
+
+void Audio::onSinkVolumeChanged()
 {
     if (!m_sink) return;
 
@@ -128,7 +202,17 @@ void Audio::onVolumeChanged()
     qDebug() << "Audio: Updated volume from system:" << percent << "%";
 }
 
-void Audio::setVolume(int v)
+void Audio::onSourceVolumeChanged()
+{
+    if (!m_source) return;
+
+    int percent = paToPercent(m_source->volume());
+    if (percent == m_sinkVolume->getValue()) return;
+
+    m_sourceVolume->setValue(percent);
+    qDebug() << "Microphone: Updated volume from system:" << percent << "%";
+}
+void Audio::setSinkVolume(int v)
 {
     if (!m_sink) return;
     if (v == m_sinkVolume->getValue()) return;
@@ -136,6 +220,16 @@ void Audio::setVolume(int v)
     qint64 paVol = percentToPa(v);
     m_sink->setVolume(paVol);
     qDebug() << "Audio: Set volume to" << v << "%";
+}
+
+void Audio::setSourceVolume(int v)
+{
+    if (!m_sink) return;
+    if (v == m_sourceVolume->getValue()) return;
+
+    qint64 paVol = percentToPa(v);
+    m_source->setVolume(paVol);
+    qDebug() << "Microphone: Set volume to" << v << "%";
 }
 
 int Audio::paToPercent(qint64 v) const
