@@ -25,7 +25,11 @@ QString Entity::baseTopic() const
 
 void Entity::setHaConfig(const QVariantMap &newHaConfig)
 {
-    m_haConfig = newHaConfig;
+    for (auto key : newHaConfig.keys())
+    {
+        m_haConfig[key] = newHaConfig[key];
+    }
+
 }
 
 QString Entity::haType() const

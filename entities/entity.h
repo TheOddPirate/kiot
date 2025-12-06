@@ -43,5 +43,5 @@ private:
     QString m_name;
     QString m_haIcon = "";
     QString m_haType;
-    QVariantMap m_haConfig;
+    QVariantMap m_haConfig = QVariantMap();
 };
