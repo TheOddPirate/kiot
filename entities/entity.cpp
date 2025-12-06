@@ -52,7 +52,7 @@ void Entity::setName(const QString &newName)
 {
     m_name = newName;
 }
-
+// TODO This needs a universal global check making sure we have unique ids to avoid problems with mqtt
 QString Entity::id() const
 {
     return m_id;
