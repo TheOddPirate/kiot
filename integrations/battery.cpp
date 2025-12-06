@@ -4,7 +4,6 @@
 #include "core.h"
 #include "entities/battery.h"
 
-
 #include <Solid/DeviceNotifier>
 #include <Solid/Device>
 #include <Solid/Battery>
