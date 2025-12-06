@@ -44,13 +44,3 @@ static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ f
  */
 
 
-
-
-
-
-
-
-
-
-
-
