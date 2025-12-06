@@ -168,7 +168,7 @@ ConnectedNode::~ConnectedNode()
 {
     // TODO find a good way to let this entity publish before shutdown is done and not cause a coredump
     HaControl::mqttClient()->publish(baseTopic(), "off", 0, false);
-    
+    s_self = nullptr;
 }
 
 
