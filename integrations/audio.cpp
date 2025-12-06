@@ -40,6 +40,7 @@ Audio::Audio(QObject *parent)
     m_sinkVolume = new Number(this);
     m_sinkVolume->setId("volume");
     m_sinkVolume->setName("System Volume");
+    m_sinkVolume->setHaIcon("mdi:knob");
     m_sinkVolume->setRange(0, 100, 1, "%");
 
     connect(m_sinkVolume, &Number::valueChangeRequested,
@@ -60,6 +61,7 @@ Audio::Audio(QObject *parent)
     // Opprett Select tidlig og koble signalet
     m_sinSelector = new Select(this);
     m_sinSelector->setId("volume_output_selector");
+    m_sinSelector->setHaIcon("mdi:volume-source");
     m_sinSelector->setName("Output Selector");
     connect(m_sinSelector, &Select::optionSelected,
             this, &Audio::onSinkSelected);

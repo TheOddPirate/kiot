@@ -28,6 +28,7 @@ public:
 
         // Lytt til endringer
         connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool connected){
+            Q_UNUSED(connected);
             updateState();
             updateAttributes();
         });

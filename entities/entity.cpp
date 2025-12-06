@@ -85,11 +85,15 @@ void Entity::sendRegistration()
     }
     QVariantMap config = m_haConfig;
     config["name"] = name();
-    config["icon"] = haIcon();
+    
     if (id() != "connected") { //special case
         config["availability_topic"] = hostname() + "/connected";
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
+        if (!haIcon().isEmpty()){
+            config["icon"] = haIcon();
+    
+        }
     }
     if (!config.contains("device")) {
         config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
