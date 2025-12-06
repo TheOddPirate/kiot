@@ -49,7 +49,7 @@ Audio::Audio(QObject *parent)
 {
     m_sinkVolume = new Number(this);
     m_sinkVolume->setId("output_volume");
-    m_sinkVolume->setName("System Volume");
+    m_sinkVolume->setName("Output Volume");
     m_sinkVolume->setHaIcon("mdi:knob");
     m_sinkVolume->setRange(0, 100, 1, "%");
 
@@ -58,7 +58,7 @@ Audio::Audio(QObject *parent)
 
     m_sourceVolume = new Number(this);
     m_sourceVolume->setId("input_volume");
-    m_sourceVolume->setName("Microphone Volume");
+    m_sourceVolume->setName("Input Volume");
     m_sourceVolume->setHaIcon("mdi:microphone");
     m_sourceVolume->setRange(0, 100, 1, "%");
 
@@ -82,14 +82,14 @@ Audio::Audio(QObject *parent)
     m_sinkSelector = new Select(this);
     m_sinkSelector->setId("volume_output_selector");
     m_sinkSelector->setHaIcon("mdi:volume-source");
-    m_sinkSelector->setName("Output Selector");
+    m_sinkSelector->setName("Output Device");
     connect(m_sinkSelector, &Select::optionSelected,
             this, &Audio::onSinkSelected);
     //Microphone selector and signal connection
     m_sourceSelector = new Select(this);
     m_sourceSelector->setId("volume_input_selector");
     m_sourceSelector->setHaIcon("mdi:microphone-settings");
-    m_sourceSelector->setName("Input Selector");
+    m_sourceSelector->setName("Input Device");
     connect(m_sourceSelector, &Select::optionSelected,
             this, &Audio::onSourceSelected);
 
