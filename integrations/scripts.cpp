@@ -18,6 +18,7 @@ void registerScripts()
         textb = new Textbox(qApp);
         textb->setId("scripts_arguments");
         textb->setName("arguments");
+        textb->setHaIcon("mdi:console");
     }
     for (const QString &scriptId : scriptIds) {
         auto scriptConfig = scriptConfigToplevel.group(scriptId);

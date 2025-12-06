@@ -44,7 +44,7 @@ ActiveWindowWatcher::ActiveWindowWatcher(QObject *parent)
     m_sensor = new Sensor(this);
     m_sensor->setId("active_window");
     m_sensor->setName("Active Window");
-    m_sensor->setDiscoveryConfig("icon", "mdi:application");
+    m_sensor->setHaIcon("mdi:application");
     // Register DBus service first
     if (!QDBusConnection::sessionBus().registerService("org.davidedmundson.kiot.ActiveWindow")) {
         qWarning() << "ActiveWindowWatcher: Failed to register DBus service";

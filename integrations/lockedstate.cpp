@@ -49,11 +49,15 @@ LockedState::LockedState(QObject *parent)
     auto pendingCall = QDBusConnection::sessionBus().asyncCall(isLocked);
     pendingCall.waitForFinished();
     const bool locked = pendingCall.reply().arguments().at(0).toBool();
+    if(locked){ m_locked.setHaIcon("mdi:lock");}
+    else {m_locked.setHaIcon("mdi:lock-open");}
     m_locked.setState(locked);
 }
 
 void LockedState::screenLockedChanged(bool active)
 {
+    if(active){ m_locked.setHaIcon("mdi:lock");}
+    else {m_locked.setHaIcon("mdi:lock-open");}
     m_locked.setState(active);
 }
 
