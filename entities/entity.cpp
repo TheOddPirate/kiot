@@ -52,6 +52,17 @@ void Entity::setName(const QString &newName)
 {
     m_name = newName;
 }
+
+void Entity::setHaIcon(const QString &newHaIcon)
+{
+    m_haIcon = newHaIcon;
+}
+
+QString Entity::haIcon() const
+{
+    return  m_haIcon;
+}
+
 // TODO This needs a universal global check making sure we have unique ids to avoid problems with mqtt
 QString Entity::id() const
 {
@@ -73,7 +84,7 @@ void Entity::sendRegistration()
     }
     QVariantMap config = m_haConfig;
     config["name"] = name();
-
+    config["icon"] = haIcon();
     if (id() != "connected") { //special case
         config["availability_topic"] = hostname() + "/connected";
         config["payload_available"] = "on";

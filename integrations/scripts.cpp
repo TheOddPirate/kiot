@@ -32,6 +32,7 @@ void registerScripts()
         auto button = new Button(qApp);
         button->setId(scriptId);
         button->setName(name);
+        button->setHaIcon("mdi:script-text");
         // Home assistant integration supports payloads, which we could expose as args
         // maybe via some substitution in the exec line
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId,textb]() {

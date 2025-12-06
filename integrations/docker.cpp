@@ -63,7 +63,7 @@ DockerSwitch::DockerSwitch(QObject *parent)
         auto *sw = new Switch(this);
         sw->setId("docker_" + key);
         sw->setName(key);
-        sw->setDiscoveryConfig("icon", "mdi:application");
+        sw->setHaIcon("mdi:docker");
         sw->setState(isRunning(key));
 
         connect(sw, &Switch::stateChangeRequested, this, [this, key](bool state){

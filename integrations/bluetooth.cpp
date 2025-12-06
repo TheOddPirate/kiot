@@ -22,7 +22,7 @@ public:
         m_switch = new Switch(this);
         m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
         m_switch->setName(device->name());
-        // Sett initial state og attributes
+        m_switch->setHaIcon("mdi:bluetooth");        // Sett initial state og attributes
         updateState();
         updateAttributes();
 
@@ -104,7 +104,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
     m_switch = new Switch(this);
     m_switch->setId("bluetooth_adapter");
     m_switch->setName("Bluetooth Adapter");
-
+    m_switch->setHaIcon("mdi:bluetooth");
     m_manager = new BluezQt::Manager(this);
 
     // Lag init-jobben
