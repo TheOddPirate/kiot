@@ -41,8 +41,7 @@ HaControl::HaControl() {
 
     new ConnectedNode(this);
     
-    loadIntegrations(config);
-    
+
     QTimer *reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(1000);
 
@@ -70,7 +69,7 @@ HaControl::HaControl() {
     });
 
     doConnect();
-
+    loadIntegrations(config);
 }
 
 HaControl::~HaControl()
@@ -153,7 +152,8 @@ ConnectedNode::ConnectedNode(QObject *parent):
 
     connect(HaControl::mqttClient(), &QMqttClient::connected, this, [this]() {
         sendRegistration();
-        HaControl::mqttClient()->publish(baseTopic(), "on", 0, false);
+         HaControl::mqttClient()->publish(baseTopic(), "on", 0, false);
+   
     });
 }
 
