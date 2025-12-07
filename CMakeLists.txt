@@ -58,7 +58,7 @@ set(SOURCES
     dbusproperty.cpp
     dbusproperty.h
     entities/entity.cpp
-    entities/batter2y.cpp
+    entities/batter23y.cpp
     entities/binarysensor.cpp
     entities/button.cpp
     entities/number.cpp
