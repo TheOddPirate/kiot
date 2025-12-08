@@ -7,7 +7,7 @@
 #include <BluezQt/Adapter>
 #include <BluezQt/Device>
 // TODO re add this when BluezQt adds it back to cmake
-//#include <BluezQt/Battery>
+#include <BluezQt/Battery>
 #include <BluezQt/InitManagerJob>
 
 
@@ -65,22 +65,21 @@ private:
             m_switch->setHaIcon("mdi:bluetooth-off");
             m_switch->setState(false);
         }
-        m_switch->setState(m_device->isConnected());
     }
 
     void updateAttributes()
     {
         if (!m_device) return;
-
+        
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
         // TODO find out why it fails
-        //auto battery = m_device->battery();
-        //if (battery)
-        //    attrs["Battery"] = battery->percentage(); // eller battery->value() hvis det finnes
-        //else
-        //    attrs["Battery"] =  -1;
+        auto battery = m_device->battery();
+        if (battery)
+            attrs["Battery"] = battery->percentage(); // eller battery->value() hvis det finnes
+        else
+            attrs["Battery"] =  -1;
         attrs["Paired"] = m_device->isPaired();
         attrs["Trusted"] = m_device->isTrusted();
         attrs["Blocked"] = m_device->isBlocked();

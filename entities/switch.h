@@ -12,7 +12,7 @@ public:
     Switch(QObject *parent = nullptr);
     void setState(bool state);
     void setAttributes(const QVariantMap &attrs);
-    bool getState(){return m_state;};
+    bool state(){return m_state;};
     QVariantMap getAttributes(){ return  m_attributes;}
 Q_SIGNALS:
     void stateChangeRequested(bool state);

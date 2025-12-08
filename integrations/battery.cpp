@@ -20,7 +20,8 @@ private slots:
     void deviceRemoved(const QString &udi);
     void batteryChargeChanged(int chargePercent, const QString &udi);
     void batteryStateChanged(int state, const QString &udi);
-
+    void batteryDoubleChanged(double value, const QString &udi);
+    void batteryLongLongChanged(qlonglong value, const QString &udi);
 private:
     void setupSolidWatching();
     void registerBattery(const QString &udi);
@@ -62,9 +63,11 @@ void BatteryWatcher::deviceAdded(const QString &udi)
 
 void BatteryWatcher::deviceRemoved(const QString &udi)
 {
+    //Do i need to disconnec the battery that was used in "connect" or will this be enough?
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
         qDebug() << "Battery removed:" << udi;
+        it.value()->setState(-1);
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
     }
@@ -103,18 +106,76 @@ void BatteryWatcher::registerBattery(const QString &udi)
     connect(battery, &Solid::Battery::chargePercentChanged,
             this, [this, udi](int chargePercent) {
                 batteryChargeChanged(chargePercent, udi);
-            });
+    });
             
     connect(battery, &Solid::Battery::chargeStateChanged,
             this, [this, udi](int state) {
                 batteryStateChanged(state, udi);
-            });
+    });
 
+    // TODO make sure to connect to updates of other attributes to make sure the needed variables are always up to date in HA
+    if (battery->energy() > 0) {
+        connect(battery, &Solid::Battery::energyChanged,
+            this, [this, udi](double value) {
+                batteryDoubleChanged(value, udi);
+        });
+    }
+    if (battery->energyRate() > 0) {
+        connect(battery, &Solid::Battery::energyRateChanged,
+            this, [this, udi](double value) {
+                batteryDoubleChanged(value, udi);
+        });
+    }
+    if (battery->voltage() > 0) {
+        connect(battery, &Solid::Battery::voltageChanged,
+            this, [this, udi](double value) {
+                batteryDoubleChanged(value, udi);
+        });
+    }
+    if (battery->temperature() > 0) {
+        connect(battery, &Solid::Battery::temperatureChanged,
+            this, [this, udi](double value) {
+                batteryDoubleChanged(value, udi);
+        });
+    }
+    
+    if (battery->timeToEmpty() > 0) {
+        connect(battery, &Solid::Battery::timeToEmptyChanged,
+            this, [this, udi](qlonglong value) {
+                batteryLongLongChanged(value, udi);
+        });
+    }
+    
+    if (battery->timeToFull() > 0) {
+        connect(battery, &Solid::Battery::timeToFullChanged,
+            this, [this, udi](qlonglong value) {
+                batteryLongLongChanged(value, udi);
+        });
+    }
+    
     m_udiToSensor[udi] = sensor;
     updateBatteryAttributes(udi);
     qDebug() << "Registered battery:" << name << "at" << battery->chargePercent() << "%";
 }
 
+void BatteryWatcher::batteryDoubleChanged(double value, const QString &udi)
+{
+    Q_UNUSED(value);
+    auto it = m_udiToSensor.find(udi);
+    if (it != m_udiToSensor.end()) {
+        updateBatteryAttributes(udi);
+    }
+}
+
+
+void BatteryWatcher::batteryLongLongChanged(qlonglong value, const QString &udi)
+{
+    Q_UNUSED(value);
+    auto it = m_udiToSensor.find(udi);
+    if (it != m_udiToSensor.end()) {
+        updateBatteryAttributes(udi);
+    }
+} 
 void BatteryWatcher::batteryChargeChanged(int chargePercent, const QString &udi)
 {
     auto it = m_udiToSensor.find(udi);
@@ -175,6 +236,18 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
         break;
     case Solid::Battery::KeyboardMouseBattery:
         batteryTypeString = "Keyboard/Mouse Battery";
+        break;
+    case Solid::Battery::GamingInputBattery:
+        batteryTypeString = "Gamepad Battery";
+        break;
+    case Solid::Battery::BluetoothBattery:
+        batteryTypeString = "Bluetooth Battery";
+        break;
+    case Solid::Battery::HeadsetBattery:
+        batteryTypeString = "Headset Battery";
+        break;
+    case Solid::Battery::HeadphoneBattery:
+        batteryTypeString = "Headphone Battery";
         break;
     default:
         batteryTypeString = "Unknown";
