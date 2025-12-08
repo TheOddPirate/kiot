@@ -67,6 +67,7 @@ void BatteryWatcher::deviceRemoved(const QString &udi)
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
         qDebug() << "Battery removed:" << udi;
+        // TODO find a way to set sensor as unavailable when battery disconnects so HA shows the correct state of the battery
         it.value()->setState(-1);
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
