@@ -180,24 +180,54 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
         batteryTypeString = "Unknown";
         break;
     }
-
-    QVariantMap attributes = {
-        {"charge_state", chargeStateString},
-        {"battery_type", batteryTypeString},
-        {"energy",battery->energy()},
-        {"energy_rate",battery->energyRate()},
-        {"time_to_full_charge",battery->timeToFull()},
-        {"temperature",battery->temperature()},
-        {"technology", battery->technology()},
-        {"rechargeable", battery->isRechargeable()},
-        {"plugged_in",battery->isPowerSupply()},
-        {"voltage",battery->voltage()},
-        {"vendor", device.vendor()},
-        {"product", device.product()},
-        {"serial", device.as<Solid::Battery>()->serial()},
-        {"udi", udi}
-    };
-
+    QString technologyString;
+    switch (battery->technology()) {
+        case  Solid::Battery::LithiumIon:
+            technologyString = "Lithium Ion";
+            break;
+        case Solid::Battery::LithiumPolymer:
+            technologyString = "Lithium Polymer";
+            break;
+        case Solid::Battery::LithiumIronPhosphate:
+            technologyString = "Lithium Iron Phosphate";
+            break;
+        case Solid::Battery::LeadAcid:
+            technologyString = "Lead Acid";
+            break;
+        case Solid::Battery::NickelCadmium:
+            technologyString = "Nickel cadmium";
+            break;
+        case Solid::Battery::NickelMetalHydride:
+            technologyString = "Nickel metal hydride";
+            break;
+        default:
+            technologyString = "Unknown";
+            break;
+    }
+    QVariantMap attributes = QVariantMap();
+    attributes["charge_state"] = chargeStateString;
+    attributes["battery_type"] = batteryTypeString;
+    attributes["rechargeable"] = battery->isRechargeable();
+    attributes["udi"] = udi;
+    attributes["technology"] = technologyString;
+  
+    if(battery->energy() > 0)
+        attributes["energy"] = battery->energy();
+    if(battery->energyRate() > 0)
+        attributes["energy_rate"] = battery->energyRate();
+    if(battery->temperature() > 0)
+        attributes["temperature"] = battery->temperature();
+    if(battery->voltage() > 0)
+        attributes["voltage"] = battery->voltage();
+    if (!device.product().isEmpty())
+        attributes["product"] = device.product();
+    if ( !device.vendor().isEmpty())
+       attributes["vendor"] = device.vendor();
+    if ( !device.as<Solid::Battery>()->serial().isEmpty())
+       attributes["serial"] = device.as<Solid::Battery>()->serial();        
+    if ( batteryTypeString == "batteryTypeString")
+        attributes["plugged_in"] = battery->isPowerSupply();
+    
     // Add time estimates if available
     if (battery->timeToEmpty() > 0) {
         attributes["time_to_empty_seconds"] = battery->timeToEmpty();
