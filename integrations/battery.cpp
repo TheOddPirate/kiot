@@ -113,7 +113,6 @@ void BatteryWatcher::registerBattery(const QString &udi)
                 batteryStateChanged(state, udi);
     });
 
-    // TODO make sure to connect to updates of other attributes to make sure the needed variables are always up to date in HA
     if (battery->energy() > 0) {
         connect(battery, &Solid::Battery::energyChanged,
             this, [this, udi](double value) {
