@@ -32,12 +32,19 @@ public:
             updateState();
             updateAttributes();
         });
-        // TODO fix after battery 
+
         connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery> battery){
             Q_UNUSED(battery)
             updateState();
             updateAttributes();
         });
+        connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool paired){
+            Q_UNUSED(paired)
+            updateState();
+            updateAttributes();
+        });
+        
+        
 
         connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
             if (!m_device)
@@ -70,16 +77,17 @@ private:
     void updateAttributes()
     {
         if (!m_device) return;
-        
+        if(!m_device->isPaired()){
+            // TODO set entity as unavailable in HA
+            m_switch->setState(false);
+        }
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
-        // TODO find out why it fails
         auto battery = m_device->battery();
         if (battery)
-            attrs["Battery"] = battery->percentage(); // eller battery->value() hvis det finnes
-        else
-            attrs["Battery"] =  -1;
+            attrs["Battery"] = battery->percentage(); 
+
         attrs["Paired"] = m_device->isPaired();
         attrs["Trusted"] = m_device->isTrusted();
         attrs["Blocked"] = m_device->isBlocked();
