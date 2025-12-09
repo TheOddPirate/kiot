@@ -150,12 +150,20 @@ void ActiveWindowWatcher::UpdateAttributes(const QVariantMap &attributes)
 }
 
 
-
+ActiveWindowWatcher *integrationActiveWindow = nullptr;
+void ShutdownActiveWindow()
+{
+    if(integrationActiveWindow){
+        delete integrationActiveWindow;
+        integrationActiveWindow = nullptr;
+    }
+}
 
 void setupActiveWindow()
 {
-    new ActiveWindowWatcher(qApp);
+    integrationActiveWindow = new ActiveWindowWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("ActiveWindow",setupActiveWindow,true)
+
+REGISTER_INTEGRATION("ActiveWindow",setupActiveWindow, ShutdownActiveWindow, true)
 #include "activewindow.moc"

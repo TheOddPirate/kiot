@@ -40,4 +40,10 @@ void registerScripts()
         });
     }
 }
-REGISTER_INTEGRATION("Scripts",registerScripts,true)
+
+
+void ShutdownrScripts()
+{
+}
+
+REGISTER_INTEGRATION("Scripts",registerScripts, ShutdownrScripts , true)

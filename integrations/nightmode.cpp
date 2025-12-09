@@ -62,11 +62,20 @@ NightMode::NightMode(QObject *parent)
     });
 }
 
-void setupNightmode()
+NightMode *integrationNightMode = nullptr;
+void ShutdownNightMode()
 {
-    new NightMode(qApp);
+    if(integrationNightMode){
+        delete integrationNightMode;
+        integrationNightMode = nullptr;
+    }
 }
 
-REGISTER_INTEGRATION("Nightmode",setupNightmode,true)
+void setupNightmode()
+{
+    integrationNightMode = new NightMode(qApp);
+}
+
+REGISTER_INTEGRATION("Nightmode",setupNightmode, ShutdownNightMode , true)
 
 #include "nightmode.moc"

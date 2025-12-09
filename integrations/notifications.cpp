@@ -42,10 +42,21 @@ void Notifications::notificationCallback(const QMqttMessage &message)
     KNotification::event(KNotification::Notification, title, body);
 }
 
-void setupNotifications()
+
+
+Notifications *integrationNotifications = nullptr;
+void ShutdownNotifications()
 {
-    new Notifications(qApp);
+    if(integrationNotifications){
+        delete integrationNotifications;
+        integrationNotifications = nullptr;
+    }
 }
 
-REGISTER_INTEGRATION("Notifications",setupNotifications,true)
+void setupNotifications()
+{
+    integrationNotifications = new Notifications(qApp);
+}
+
+REGISTER_INTEGRATION("Notifications",setupNotifications, ShutdownNotifications , true)
 #include "notifications.moc"

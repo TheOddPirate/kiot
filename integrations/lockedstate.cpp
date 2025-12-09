@@ -74,10 +74,19 @@ void LockedState::stateChangeRequested(bool state)
     }
 }
 
+LockedState *integrationLockedState = nullptr;
+void ShutdownLockedState()
+{
+    if(integrationLockedState){
+        delete integrationLockedState;
+        integrationLockedState = nullptr;
+    }
+}
+
 void registerLockedState()
 {
     new LockedState(qApp);
 }
 
-REGISTER_INTEGRATION("LockedState",registerLockedState,true)
+REGISTER_INTEGRATION("LockedState",registerLockedState, ShutdownLockedState ,true)
 #include "lockedstate.moc"

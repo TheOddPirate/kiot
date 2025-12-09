@@ -185,10 +185,19 @@ void CameraWatcher::onVideoDeviceRemoved(const QString &devicePath)
     inotify_rm_watch(m_inotifyFd, fd);
 }
 
+
+CameraWatcher *integrationCamera = nullptr;
+void ShutdownCamera()
+{
+    if(integrationCamera){
+        delete integrationCamera;
+        integrationCamera = nullptr;
+    }
+}
 void setupCamera()
 {
-    new CameraWatcher(qApp);
+    integrationCamera = new CameraWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("CameraWatcher",setupCamera,true)
+REGISTER_INTEGRATION("CameraWatcher",setupCamera,ShutdownCamera, true)
 #include "camera.moc"

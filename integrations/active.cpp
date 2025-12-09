@@ -29,4 +29,9 @@ void setupActiveSensor()
     sensor->setState(true);
 }
 
-REGISTER_INTEGRATION("Active", setupActiveSensor, true)
+
+void ShutdownActiveSensor()
+{
+}
+
+REGISTER_INTEGRATION("Active", setupActiveSensor, ShutdownActiveSensor , true)

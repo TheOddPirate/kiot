@@ -97,11 +97,20 @@ void Gamepad::updateState()
     udev_enumerate_unref(enumerate);
     m_sensor->setState(connected);
 }
+
+Gamepad *integrationGamePad = nullptr;
+void ShutdownGamepad()
+{
+    if(integrationGamePad){
+        delete integrationGamePad;
+        integrationGamePad = nullptr;
+    }
+}
 void setupGamepad()
 {
-    new Gamepad(qApp);
+    integrationGamePad = new Gamepad(qApp);
 }
 
-REGISTER_INTEGRATION("Gamepad", setupGamepad, true)
+REGISTER_INTEGRATION("Gamepad", setupGamepad, ShutdownGamepad , true)
 
 #include "gamepad.moc"

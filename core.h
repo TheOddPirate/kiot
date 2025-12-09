@@ -16,6 +16,7 @@ class ConnectedNode;
 struct IntegrationFactory {
     QString name;
     std::function<void()> factory;
+    std::function<void()> shutdown;
     bool onByDefault = true;  // ny flagg for default enabled
 };
 
@@ -27,7 +28,7 @@ public:
 
     static QMqttClient *mqttClient() { return s_self->m_client; }
 
-    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
+    static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, std::function<void()> shutdown, bool onByDefault = true);
     
 private:
     void doConnect();
@@ -37,12 +38,9 @@ private:
     QMqttClient *m_client;
     ConnectedNode *m_connectedNode;
 };
-
-// Macro for integrasjoner
-#define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
-static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
-/**
- * @brief The Entity class is a base class for types (binary sensor, sensor, etc)
- */
+//Macro for registration of integrations
+#define REGISTER_INTEGRATION(nameStr, func, shutdown, onByDefault) \
+static bool dummy##func  = HaControl::registerIntegrationFactory( \
+    nameStr, [](){ func(); }, [](){ shutdown(); }, onByDefault);
 
 

@@ -29,5 +29,9 @@ void registerShortcuts()
 
     }
 }
+void ShutdownShortcuts()
+{
 
-REGISTER_INTEGRATION("Shortcuts",registerShortcuts,true)
+}
+
+REGISTER_INTEGRATION("Shortcuts",registerShortcuts, ShutdownShortcuts, true)

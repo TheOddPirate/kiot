@@ -39,11 +39,20 @@ private:
     KConfigWatcher::Ptr m_watcher;
 };
 
+AccentColourWatcher *integrationAccentColour = nullptr;
 void setupAccentColour()
 {
-    new AccentColourWatcher(qApp);
+    integrationAccentColour = new AccentColourWatcher(qApp);
 }
 
-REGISTER_INTEGRATION("AccentColour",setupAccentColour,true)
+void ShutdownAccentColour()
+{
+    if(integrationAccentColour){
+        delete integrationAccentColour;
+        integrationAccentColour = nullptr;
+    }
+}
+
+REGISTER_INTEGRATION("AccentColour",setupAccentColour, ShutdownAccentColour, true)
 
 #include "accentcolour.moc"

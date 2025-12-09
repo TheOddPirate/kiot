@@ -61,5 +61,8 @@ void setupSuspend()
         });
     }
 }
+void ShutdownSuspend()
+{
+}
 
-REGISTER_INTEGRATION("PowerController",setupSuspend,true)
+REGISTER_INTEGRATION("PowerController",setupSuspend, ShutdownSuspend, true)

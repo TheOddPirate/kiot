@@ -126,11 +126,19 @@ qint64 Audio::percentToPa(int percent) const
 {
     return (qint64)(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
+Audio *integrationAudio = nullptr;
+void ShutdownAudio()
+{
+    if(integrationAudio){
+        delete integrationAudio;
+        integrationAudio = nullptr;
+    }
+}
 
 void setupAudio()
 {
-    new Audio(qApp);
+   integrationAudio = new Audio(qApp);
 }
 
-REGISTER_INTEGRATION("Audio",setupAudio,true)
+REGISTER_INTEGRATION("Audio",setupAudio,ShutdownAudio, true)
 #include "audio.moc"

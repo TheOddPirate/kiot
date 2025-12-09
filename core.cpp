@@ -90,9 +90,9 @@ void HaControl::doConnect()
     }
 }
 
-bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault)
+bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin, std::function<void()> shutdown, bool onByDefault)
 {
-    s_integrations.append({name, plugin, onByDefault});
+    s_integrations.append({name, plugin,shutdown, onByDefault});
     return true;
 }
 
