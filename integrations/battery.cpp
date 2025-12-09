@@ -212,7 +212,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
         chargeStateString = "Fully Charged";
         break;
     case Solid::Battery::NoCharge:
-        chargeStateString = "No Charged";
+        chargeStateString = "No Charg";
         break;       
     default:
         chargeStateString = "Unknown";
@@ -316,8 +316,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
        attributes["vendor"] = device.vendor();
     if ( !device.as<Solid::Battery>()->serial().isEmpty())
        attributes["serial"] = device.as<Solid::Battery>()->serial();        
-    if ( batteryTypeString == "batteryTypeString")
-        attributes["plugged_in"] = battery->isPowerSupply();
+    attributes["plugged_in"] = battery->isPowerSupply();
     
     // Add time estimates if available
     if (battery->timeToEmpty() > 0) {
