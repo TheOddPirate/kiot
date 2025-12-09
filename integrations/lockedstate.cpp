@@ -3,7 +3,7 @@
 
 #include "core.h"
 #include "entities/entities.h"
-
+#include <QObject>
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -11,7 +11,7 @@
 #include <QDBusPendingReply>
 #include <QDBusInterface>
 
-
+#include <QCoreApplication>
 
 class LockedState : public QObject
 {
@@ -31,6 +31,13 @@ LockedState::LockedState(QObject *parent)
 {
     m_locked.setId("locked");
     m_locked.setName("Locked");
+    m_locked.setDiscoveryConfig("icon", "mdi:lock");
+    m_locked.setDiscoveryConfig("payload_lock", "true");
+    m_locked.setDiscoveryConfig("payload_unlock", "false");
+    m_locked.setDiscoveryConfig("state_locked", "true");
+    m_locked.setDiscoveryConfig("state_unlocked", "false");
+
+    m_locked.setHaType("lock");
     m_locked.setDiscoveryConfig("device_class", "lock");
 
            // why am I used freedesktop here, and logind later.... I don't know
@@ -49,15 +56,11 @@ LockedState::LockedState(QObject *parent)
     auto pendingCall = QDBusConnection::sessionBus().asyncCall(isLocked);
     pendingCall.waitForFinished();
     const bool locked = pendingCall.reply().arguments().at(0).toBool();
-    if(locked){ m_locked.setHaIcon("mdi:lock");}
-    else {m_locked.setHaIcon("mdi:lock-open");}
     m_locked.setState(locked);
 }
 
 void LockedState::screenLockedChanged(bool active)
 {
-    if(active){ m_locked.setHaIcon("mdi:lock");}
-    else {m_locked.setHaIcon("mdi:lock-open");}
     m_locked.setState(active);
 }
 
@@ -83,5 +86,5 @@ void registerLockedState()
     new LockedState(qApp);
 }
 
-REGISTER_INTEGRATION("LocedState",registerLockedState,true)
+REGISTER_INTEGRATION("LockedState",registerLockedState,true)
 #include "lockedstate.moc"
