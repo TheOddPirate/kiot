@@ -79,6 +79,7 @@ private:
         if (!m_device) return;
         if(!m_device->isPaired()){
             // TODO set entity as unavailable in HA
+            qDebug() << m_switch->name() << "is not paired anymore";
             m_switch->setState(false);
         }
         QVariantMap attrs;
