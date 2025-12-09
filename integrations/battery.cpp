@@ -252,6 +252,24 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
     case Solid::Battery::HeadphoneBattery:
         batteryTypeString = "Headphone Battery";
         break;
+    case Solid::Battery::CameraBattery:
+        batteryTypeString = "Camera Battery";
+        break;
+    case Solid::Battery::PhoneBattery:
+        batteryTypeString = "Phone Battery";
+        break;
+    case Solid::Battery::TabletBattery:
+        batteryTypeString = "Tablet Battery";
+        break;
+    case Solid::Battery::TouchpadBattery:
+        batteryTypeString = "Touchpad Battery";
+        break;
+    case Solid::Battery::WearableBattery:
+        batteryTypeString = "Wearable Battery";
+        break;
+    case Solid::Battery::PdaBattery:
+        batteryTypeString = "PDA Battery";
+        break;
     default:
         batteryTypeString = "Unknown";
         break;
