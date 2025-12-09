@@ -107,6 +107,8 @@ void Entity::sendRegistration()
 void Entity::setAvailablity(bool available){
     if (!m_haConfig.contains("availability_topic")) 
         return;
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
     const QString topic = m_haConfig["availability_topic"].toString();
  //   qDebug() << "found topic " << topic << "";
     if (topic.isEmpty())
@@ -114,7 +116,7 @@ void Entity::setAvailablity(bool available){
     // don't allow individual entities to mark the global device unavailable
     if (topic == hostname() + "/connected")
         return;
-    QString state = available ? "on" : "off";
+
   //  qDebug() << "setting as " << state;
     HaControl::mqttClient()->publish(topic,  available ? "on" : "off" , 0, true);
 }
