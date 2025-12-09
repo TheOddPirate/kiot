@@ -20,6 +20,7 @@ public:
     void setHaIcon(const QString &newHaIcon);
     QString haIcon() const;
 
+    void setAvailablity(bool available);
     void setDiscoveryConfig(const QString &key, const QVariant &value);
 
     Entity(QObject *parent);

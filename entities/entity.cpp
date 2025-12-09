@@ -51,6 +51,7 @@ void Entity::setName(const QString &newName)
 void Entity::setHaIcon(const QString &newHaIcon)
 {
     m_haIcon = newHaIcon;
+    m_haConfig["icon"] = newHaIcon;
     sendRegistration();
 }
 
@@ -82,10 +83,12 @@ void Entity::sendRegistration()
     config["name"] = name();
     
     if (id() != "connected") { //special case
-        config["availability_topic"] = hostname() + "/connected";
+        if (!config.contains("availability_topic")) {
+            config["availability_topic"] = hostname() + "/connected";
+        }
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
-        if (!haIcon().isEmpty()){
+        if (!config.contains("icon") && !haIcon().isEmpty()){
             config["icon"] = haIcon();
     
         }
@@ -96,6 +99,19 @@ void Entity::sendRegistration()
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
     HaControl::mqttClient()->publish(s_discoveryPrefix + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
+        HaControl::mqttClient()->publish(config["availability_topic"].toString(), "on", 0, false);
     }
+    m_haConfig = config;
+}
+
+void Entity::setAvailablity(bool available){
+    if (!m_haConfig.contains("availability_topic")) 
+        return;
+    auto *client = HaControl::mqttClient();
+    if (!client || client->state() != QMqttClient::Connected)
+        return;
+    const QString topic = m_haConfig["availability_topic"].toString();
+    if (topic.isEmpty())
+        return;
+    HaControl::mqttClient()->publish(topic, available ? "on" : "off", 0, false);
 }
