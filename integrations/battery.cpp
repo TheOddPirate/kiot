@@ -212,7 +212,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
         chargeStateString = "Fully Charged";
         break;
     case Solid::Battery::NoCharge:
-        chargeStateString = "No Charg";
+        chargeStateString = "No Charge";
         break;       
     default:
         chargeStateString = "Unknown";

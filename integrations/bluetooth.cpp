@@ -6,7 +6,6 @@
 #include <BluezQt/Manager>
 #include <BluezQt/Adapter>
 #include <BluezQt/Device>
-// TODO re add this when BluezQt adds it back to cmake
 #include <BluezQt/Battery>
 #include <BluezQt/InitManagerJob>
 
