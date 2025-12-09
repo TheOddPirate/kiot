@@ -14,6 +14,7 @@ class BatteryWatcher : public QObject
     Q_OBJECT
 public:
     explicit BatteryWatcher(QObject *parent = nullptr);
+    ~BatteryWatcher();
 
 private slots:
     void deviceAdded(const QString &udi);
@@ -35,15 +36,17 @@ BatteryWatcher::BatteryWatcher(QObject *parent)
     setupSolidWatching();
 }
 
-BatteryWatcher::BatteryWatcher()
+BatteryWatcher::~BatteryWatcher()
 {
-auto it = m_udiToSensor.find(udi);
+    for (auto key : m_udiToSensor.keys()){
+    auto it = m_udiToSensor.find(key);
     if (it != m_udiToSensor.end()) {
-        qDebug() << "Battery removed:" << udi;
+        qDebug() << "Battery removed:" << key;
         // TODO find a way to set sensor as unavailable when battery disconnects so HA shows the correct state of the battery
         it.value()->setAvailablity(false);
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
+    }
     }
 }
 void BatteryWatcher::setupSolidWatching()
@@ -106,12 +109,13 @@ void BatteryWatcher::registerBattery(const QString &udi)
 
     // Create sensor
     Sensor *sensor = new Sensor(this);
+    sensor->setId("battery_" + udi_e.replace("/", "_").replace(":", "_"));
+    sensor->setName(name);
     sensor->setDiscoveryConfig("unit_of_measurement", "%");
     sensor->setDiscoveryConfig("device_class", "battery");
 
     sensor->setDiscoveryConfig("availability_topic", sensor->baseTopic() + "/connected");
-    sensor->setId("battery_" + udi_e.replace("/", "_").replace(":", "_"));
-    sensor->setName(name);
+ 
     sensor->setAvailablity(true);
    // sensor->setAvailable();
     // Set initial state and attributes
@@ -330,11 +334,20 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
     it.value()->setAttributes(attributes);
 }
 
+BatteryWatcher *integrationBattery = nullptr;
 void setupBattery()
 {
-    new BatteryWatcher(qApp);
+    integrationBattery = new BatteryWatcher(qApp);
+}
+void teardownBattery()
+{
+    if (integrationBattery)
+    {
+        delete integrationBattery;
+        integrationBattery = nullptr;
+    }
 }
 
-REGISTER_INTEGRATION("Battery", setupBattery, true)
+REGISTER_INTEGRATION("Battery", setupBattery, teardownBattery, true)
 
 #include "battery.moc"

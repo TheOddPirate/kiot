@@ -75,7 +75,12 @@ HaControl::HaControl() {
 
 HaControl::~HaControl()
 {
+    for (const auto &entry : s_integrations) {
+        entry.shutdown();
+    
+    }
     delete m_connectedNode;
+
 }
 
 void HaControl::doConnect()
