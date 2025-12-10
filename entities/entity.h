@@ -25,7 +25,6 @@ public:
     Entity(QObject *parent);
     QString hostname() const;
     QString baseTopic() const;
-    void setHaType(const QString &newHaType);    
 
 protected:
     /**
@@ -36,6 +35,7 @@ protected:
     void sendRegistration();
 
     QString haType() const;
+    void setHaType(const QString &newHaType);    
     
 
 private:

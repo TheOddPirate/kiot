@@ -23,7 +23,7 @@ private Q_SLOTS:
     void screenLockedChanged(bool active);
     void stateChangeRequested(bool state);
 private:
-    Switch m_locked;
+    Lock m_locked;
 };
 
 LockedState::LockedState(QObject *parent)
@@ -37,7 +37,6 @@ LockedState::LockedState(QObject *parent)
     m_locked.setDiscoveryConfig("state_locked", "true");
     m_locked.setDiscoveryConfig("state_unlocked", "false");
 
-    m_locked.setHaType("lock");
     m_locked.setDiscoveryConfig("device_class", "lock");
 
            // why am I used freedesktop here, and logind later.... I don't know
@@ -47,7 +46,7 @@ LockedState::LockedState(QObject *parent)
                                           QStringLiteral("ActiveChanged"),
                                           this, SLOT(screenLockedChanged(bool)));
 
-    connect(&m_locked, &Switch::stateChangeRequested, this, &LockedState::stateChangeRequested);
+    connect(&m_locked, &Lock::stateChangeRequested, this, &LockedState::stateChangeRequested);
 
     auto isLocked = QDBusMessage::createMethodCall("org.freedesktop.ScreenSaver",
                                                    "/ScreenSaver",
