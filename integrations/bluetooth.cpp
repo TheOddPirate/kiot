@@ -54,6 +54,7 @@ public:
                 m_device->disconnectFromDevice();
             }
         });
+        qDebug() << "Switch created and ready for use for bt device: " << device->name();
     }
 
 private:
