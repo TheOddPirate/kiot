@@ -31,13 +31,6 @@ LockedState::LockedState(QObject *parent)
 {
     m_locked.setId("locked");
     m_locked.setName("Locked");
-    m_locked.setDiscoveryConfig("icon", "mdi:lock");
-    m_locked.setDiscoveryConfig("payload_lock", "true");
-    m_locked.setDiscoveryConfig("payload_unlock", "false");
-    m_locked.setDiscoveryConfig("state_locked", "true");
-    m_locked.setDiscoveryConfig("state_unlocked", "false");
-
-    m_locked.setDiscoveryConfig("device_class", "lock");
 
            // why am I used freedesktop here, and logind later.... I don't know
     QDBusConnection::sessionBus().connect(QStringLiteral("org.freedesktop.ScreenSaver"),
@@ -55,6 +48,10 @@ LockedState::LockedState(QObject *parent)
     auto pendingCall = QDBusConnection::sessionBus().asyncCall(isLocked);
     pendingCall.waitForFinished();
     const bool locked = pendingCall.reply().arguments().at(0).toBool();
+    if(locked)
+        m_locked.setHaIcon("mdi:lock-open");
+    else
+        m_locked.setHaIcon("mdi:lock");
     m_locked.setState(locked);
 }
 
@@ -70,6 +67,7 @@ void LockedState::stateChangeRequested(bool state)
                                                            "/org/freedesktop/login1/session/auto",
                                                            "org.freedesktop.login1.Session",
                                                            "Lock");
+        m_locked.setHaIcon("mdi:lock");                                                            
         QDBusConnection::systemBus().asyncCall(lock);
     } else {
         QDBusMessage unlock = QDBusMessage::createMethodCall("org.freedesktop.login1",
@@ -77,6 +75,7 @@ void LockedState::stateChangeRequested(bool state)
                                                              "org.freedesktop.login1.Session",
                                                              "Unlock");
         QDBusConnection::systemBus().asyncCall(unlock);
+        m_locked.setHaIcon("mdi:lock-open");
     }
 }
 

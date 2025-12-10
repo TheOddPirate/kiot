@@ -27,6 +27,7 @@ void Lock::init()
     setDiscoveryConfig("payload_unlock", "false");
     setDiscoveryConfig("state_locked", "true");
     setDiscoveryConfig("state_unlocked", "false");
+    setDiscoveryConfig("device_class", "lock");
 
     sendRegistration();
     setState(m_state);
