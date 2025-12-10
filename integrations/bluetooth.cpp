@@ -152,6 +152,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             });
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
+                    qDebug() << "Adding switch for bt device: " << dev->name();
                     new BluetoothDeviceSwitch(dev, this);
                 }
             }
