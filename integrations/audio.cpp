@@ -24,6 +24,7 @@ private slots:
     void onSinkSelected(QString newOption);
     void onSourceSelected(QString newOption);
     void onSourceVolumeChanged();
+    void onSourceStateChanged();
     void onSinkVolumeChanged();
 
     void setSinkVolume(int v);
@@ -37,7 +38,7 @@ private:
     Number *m_sourceVolume = nullptr;
     Select *m_sinkSelector = nullptr;
     Select *m_sourceSelector = nullptr;
-    
+    BinarySensor *m_sourceState = nullptr;
     PulseAudioQt::Sink *m_sink = nullptr;
     PulseAudioQt::Source *m_source = nullptr;
     PulseAudioQt::Context *m_ctx = nullptr;
@@ -64,8 +65,12 @@ Audio::Audio(QObject *parent)
 
     connect(m_sourceVolume, &Number::valueChangeRequested,
             this, &Audio::setSourceVolume);
-
-
+    
+    m_sourceState = new BinarySensor(this);
+    m_sourceState->setId("source_state");
+    m_sourceState->setName("Input state");
+    m_sourceState->setHaIcon("mdi:microphone-off");
+    m_sourceState->setState(false);
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
         qWarning() << "Audio: PulseAudio context not valid";
@@ -150,15 +155,31 @@ void Audio::updateSources(PulseAudioQt::Source *source)
 
     // Lagre aktiv sink
     if (m_source)
+    {
         disconnect(m_source, nullptr, this, nullptr);
-
+    }
     m_source = source;
 
     // Lytt på volumendringer
     connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
             this, &Audio::onSourceVolumeChanged);
-
+    connect(m_source, &PulseAudioQt::Device::stateChanged,
+            this, &Audio::onSourceStateChanged);
     onSourceVolumeChanged();
+}
+void Audio::onSourceStateChanged()
+{
+    if(!m_source) return;
+
+    auto state = m_source->state();
+    if(state == PulseAudioQt::Device::State::RunningState)
+    {
+        m_sourceState->setState(true);
+    } else {
+        m_sourceState->setState(false);
+    }
+
+
 }
 void Audio::onSinkSelected(QString newOption)
 {
