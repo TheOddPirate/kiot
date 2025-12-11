@@ -49,7 +49,7 @@ signals:
     void stopRequested();
     void nextRequested();
     void previousRequested();
-    void volumeChanged(qreal volume);
+    void volumeChanged(double volume);
     void playMediaRequested(const QString &payload);
 
 private:

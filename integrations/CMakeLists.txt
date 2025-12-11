@@ -24,6 +24,7 @@ set(KIOT_INTEGRATIONS_SRC
     systemd.cpp
     audio.cpp
     boot_select.cpp
+    mpris.cpp
 
 )
 

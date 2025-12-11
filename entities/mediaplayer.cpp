@@ -17,11 +17,7 @@ void MediaPlayerEntity::init()
 
     setHaConfig({
         {"name",name()},
-        {"availability",  QVariantMap({
-        {"topic", baseTopic() + "/available"},
-        {"payload_available", "online"},
-        {"payload_not_available", "offline"}
-    })},
+
     { "state_state_topic",  baseTopic() + "/state" },
     {"state_title_topic", baseTopic() + "/title"},
     {"state_artist_topic", baseTopic() + "/artist"},
@@ -134,7 +130,7 @@ void MediaPlayerEntity::stop() {
 }
 void MediaPlayerEntity::next() { emit nextRequested(); }
 void MediaPlayerEntity::previous() { emit previousRequested(); }
-void MediaPlayerEntity::setVolume(qreal volume) { 
+void MediaPlayerEntity::setVolume(double volume) { 
     m_state["volume"] = volume; 
     emit volumeChanged(volume); 
     publishState();

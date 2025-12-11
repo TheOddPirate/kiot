@@ -81,8 +81,32 @@ private:
     void setupMediaPlayer()
     {
         m_playerEntity = new MediaPlayerEntity(this);
-        m_playerEntity->setId("kiotprisstate");
+        m_playerEntity->setId("kiot_mpris_player");
         m_playerEntity->setName("Kiot Active MPRIS Player");
+        connect(m_playerEntity, &MediaPlayerEntity::playRequested, this, [this]() {
+            if(!m_activePlayer) return;
+            m_activePlayer->Play();
+        });
+        connect(m_playerEntity, &MediaPlayerEntity::pauseRequested, this, [this]() {
+            if(!m_activePlayer) return;
+            m_activePlayer->Pause();
+        });
+        connect(m_playerEntity, &MediaPlayerEntity::nextRequested, this, [this]() {
+            if(!m_activePlayer) return;
+            m_activePlayer->Next();
+        });
+        connect(m_playerEntity, &MediaPlayerEntity::previousRequested, this, [this]() {
+            if(!m_activePlayer) return;
+            m_activePlayer->Previous();
+        });
+        connect(m_playerEntity, &MediaPlayerEntity::volumeChanged, this, [this](double volume) {
+            if(!m_activePlayer) return;
+            m_activePlayer->setVolume(volume);
+        });
+
+
+        
+        
     }
 
     void discoverPlayers()
