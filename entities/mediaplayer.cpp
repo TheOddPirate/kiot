@@ -138,9 +138,14 @@ void MediaPlayerEntity::setVolume(double volume) {
 void MediaPlayerEntity::publishState()
 {
     auto mqtt = HaControl::mqttClient();
-   
+    if(m_state.value("name").toString() != name())
+       {
+        setName(m_state["name"].toString());
+        sendRegistration();
+       }
+
     mqtt->publish(baseTopic() + "/state", m_state.value("state").toString().toLower().toUtf8(), 0, true);
-    mqtt->publish(baseTopic() + "/title", m_state.value("title").toString().toUtf8(), 0, true);
+    mqtt->publish(baseTopic() + "/title",    m_state.value("title").toString().toUtf8(), 0, true);
     mqtt->publish(baseTopic() + "/artist", m_state.value("artist").toString().toUtf8(), 0, true);
     mqtt->publish(baseTopic() + "/album", m_state.value("album").toString().toUtf8(), 0, true);
     mqtt->publish(baseTopic() + "/duration", QByteArray::number(m_state.value("duration").toInt()), 0, true);

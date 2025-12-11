@@ -72,6 +72,7 @@ public:
     void setVolume(double v) { setProperty("Volume", v); }
     void OpenUri(const QString &uri){ callMethod("OpenUri",uri);   }
     QVariantMap state() const { return m_state; }
+    QString dbusname() const { return m_busName; }
 
 signals:
     void stateChanged();
@@ -232,6 +233,7 @@ private:
 
     void addPlayer(const QString &busName)
     {
+        qDebug() << "Adding player:" << busName;
         auto *container = new PlayerContainer(busName, this);
         connect(container, &PlayerContainer::stateChanged, this, [this, container](){
             handleActivePlayer(container);
@@ -279,7 +281,7 @@ private:
         QVariantMap state;
         state["state"] = cState.value("PlaybackStatus","Stopped").toString();
         state["volume"] = cState.value("Volume",1.0).toDouble();
-
+        state["name"] = m_activePlayer->dbusname().replace("org.mpris.MediaPlayer2.","");
         qint64 pos = cState.value("Position",0).toLongLong()/1000000;
         qint64 dur = 0;
         if(cState.contains("Metadata")){
