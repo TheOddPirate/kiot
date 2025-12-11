@@ -142,8 +142,8 @@ void MediaPlayerEntity::publishState()
    
     mqtt->publish(baseTopic() + "/state", m_state.value("state").toString().toLower().toUtf8(), 0, true);
     mqtt->publish(baseTopic() + "/title", m_state.value("title").toString().toUtf8(), 0, true);
-  //  mqtt->publish(baseTopic() + "/artist", m_state.value("artist").toString().toUtf8(), 0, true);
- //   mqtt->publish(baseTopic() + "/album", m_state.value("album").toString().toUtf8(), 0, true);
+    mqtt->publish(baseTopic() + "/artist", m_state.value("artist").toString().toUtf8(), 0, true);
+    mqtt->publish(baseTopic() + "/album", m_state.value("album").toString().toUtf8(), 0, true);
     mqtt->publish(baseTopic() + "/duration", QByteArray::number(m_state.value("duration").toInt()), 0, true);
     mqtt->publish(baseTopic() + "/position", QByteArray::number(m_state.value("position").toInt()), 0, true);
     mqtt->publish(baseTopic() + "/volume", QByteArray::number(m_state.value("volume").toDouble()), 0, true);
