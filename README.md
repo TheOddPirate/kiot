@@ -13,7 +13,7 @@ The current extra/updated integrations in this build are:
   available user services at startup and allows starting/stopping selected services.
 - Scripts updated to suport input variables from a shared textbox in HA , will replace {arg} from the string in exec= from config
 - Camera updated to try to stop a crash i got every now and then (5 cameras connected)
-
+- MPRIS media player using this integration with AH https://github.com/bkbilly/mqtt_media_player
 
 This build also supports the following entity types in Home Assistant:
 - Battery
