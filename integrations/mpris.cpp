@@ -250,8 +250,7 @@ private:
                 if (albumVal.canConvert<QStringList>()) state["album"] = albumVal.toStringList().join(", ");
                 else state["album"] = albumVal.toString();
                 QVariant artVal = metadata.value("mpris:artUrl");
-                if (artVal.canConvert<QStringList>()) state["art"] = artVal.toStringList().join(", ");
-                else state["art"] = artVal.toString();
+                state["art"] = artVal.toString();
 
                 
                 if (metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong() / 1000000;
