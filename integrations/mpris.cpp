@@ -26,7 +26,10 @@
 #include <QDBusArgument>
 #include <QDebug>
 #include <QVariantMap>
-
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QEventLoop>
 class PlayerContainer : public QObject
 {
     Q_OBJECT
@@ -250,7 +253,26 @@ private:
             updateMediaPlayerEntity(container);
         }
     }
+    QString downloadArtAsBase64(const QString &url)
+    {
+        QNetworkAccessManager manager;
+        QNetworkRequest request(url);
+        QNetworkReply *reply = manager.get(request);
 
+        QEventLoop loop;
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QByteArray data;
+        if(reply->error() == QNetworkReply::NoError) {
+            data = reply->readAll();
+        } else {
+            qWarning() << "Failed to download artwork:" << reply->errorString();
+        }
+
+        reply->deleteLater();
+        return data.toBase64();
+    }
     void updateMediaPlayerEntity(PlayerContainer *container)
     {
         const auto &cState = container->state();
@@ -275,7 +297,7 @@ private:
             if(metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong()/1000000;
         }
         if(cState.contains("Duration") && dur==0) dur = cState.value("Duration").toLongLong()/1000000;
-
+        //qDebug() << "Position:" << pos << "Duration:" << dur;
         state["position"] = pos;
         state["duration"] = dur;
 
@@ -286,7 +308,10 @@ private:
             QFile f(path);
             if(f.open(QIODevice::ReadOnly)) state["albumart"] = f.readAll().toBase64();
         }
-
+        else if(artUrl.startsWith("https://")){
+            qDebug() << "Downloading artwork from" << artUrl;
+            state["albumart"] = downloadArtAsBase64(artUrl);
+        }
         m_playerEntity->setState(state);
     }
     QTimer *m_positionTimer;

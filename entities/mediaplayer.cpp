@@ -99,7 +99,6 @@ QStringList MediaPlayerEntity::getAvailablePlayers() const
 void MediaPlayerEntity::onPlayCommand(const QString &) { play(); }
 void MediaPlayerEntity::onPauseCommand(const QString &) { pause(); }
 void MediaPlayerEntity::onPlayPauseCommand(const QString &payload) { 
-    qDebug() << "MediaPlayerEntity::onPlayPauseCommand - Payload:" << payload;
     if(payload == "Pause")
         pause();
     else if(payload == "Play")
