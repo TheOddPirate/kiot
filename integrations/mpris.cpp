@@ -9,6 +9,7 @@
 
 #include <QString>
 #include <QDBusConnection>
+#include <QJsonObject>
 #include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
@@ -58,7 +59,7 @@ public:
     void Next() { callMethod("Next"); }
     void Previous() { callMethod("Previous"); }
     void setVolume(double v) { setProperty("Volume", v); }
-
+    void OpenUri(const QString &uri){ callMethod("OpenUri",uri);   }
     QVariantMap state() const { return m_state; }
 
 signals:
@@ -108,10 +109,13 @@ private:
         });
     }
 
-    void callMethod(const QString &method)
+    void callMethod(const QString &method,const QString &args=QString())
     {
         QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        iface.call(method);
+        if(args.isEmpty())
+            iface.call(method,args);
+        else
+            iface.call(method);
     }
 
     void setProperty(const QString &prop, const QVariant &val)
@@ -167,6 +171,22 @@ private:
             if (!m_activePlayer) return;
             m_activePlayer->setVolume(volume);
         });
+        connect(m_playerEntity, &MediaPlayerEntity::playMediaRequested, this, [this](QString payload) {
+            if (!m_activePlayer) return;
+            QJsonParseError err;
+            QJsonDocument doc = QJsonDocument::fromJson(payload.toUtf8(), &err);
+
+            if (err.error != QJsonParseError::NoError) {
+                qWarning() << "JSON parse error:" << err.errorString();
+                return;
+            }
+            QJsonObject obj = doc.object();
+            QString mediaId = obj.value("media_id").toString();
+            qDebug() << "Playing media with ID:" << mediaId;
+            m_activePlayer->OpenUri(mediaId);
+        });
+
+        
     }
 
     void discoverPlayers()

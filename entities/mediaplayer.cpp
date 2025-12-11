@@ -46,7 +46,7 @@ void MediaPlayerEntity::init()
         auto subscription = mqtt->subscribe(topic);
         if(subscription){
             connect(subscription, &QMqttSubscription::messageReceived, this, [this, slot](const QMqttMessage &msg){
-                qDebug() << "Message received on topic" << msg.topic() << "payload:" << msg.payload();
+                //qDebug() << "Message received on topic" << msg.topic() << "payload:" << msg.payload();
                 const QString payload = QString::fromUtf8(msg.payload());
                 (this->*slot)(payload);
             });
