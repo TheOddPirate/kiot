@@ -15,7 +15,7 @@ public:
     explicit MediaPlayerEntity(QObject *parent = nullptr);
 
     void setState(const QVariantMap &info); // Setter alle attributter/state
-    QVariantMap getState() const;
+    QVariantMap state() const;
 
     void setAvailablePlayers(const QStringList &players);
     QStringList getAvailablePlayers() const;

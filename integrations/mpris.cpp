@@ -13,9 +13,10 @@
 
 #include <QObject>
 #include <QFile>
-
+#include <QTimer>
 #include <QString>
 #include <QDBusConnection>
+#include <QDBusReply>
 #include <QJsonObject>
 #include <QDBusInterface>
 #include <QDBusMessage>
@@ -59,7 +60,7 @@ public:
             SLOT(onPropertiesChanged(QString,QVariantMap,QStringList))
         );
     }
-
+    QString busName() const { return m_busName; }
     void Play() { callMethod("Play"); }
     void Pause() { callMethod("Pause"); }
     void Stop() { callMethod("Stop"); }
@@ -119,7 +120,7 @@ private:
     void callMethod(const QString &method,const QString &args=QString())
     {
         QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        if(args.isEmpty())
+        if(!args.isEmpty())
             iface.call(method,args);
         else
             iface.call(method);
@@ -144,56 +145,71 @@ public:
     {
         setupMediaPlayer();
         discoverPlayers();
+
+        // Timer for å oppdatere posisjon kontinuerlig
+        m_positionTimer = new QTimer(this);
+        connect(m_positionTimer, &QTimer::timeout, this, &MprisMultiplexer::updatePosition);
+        m_positionTimer->start(500); // hver 0,5s
+        // Listen for new players appearing or stopping
+        QDBusConnection::sessionBus().connect(
+            "org.freedesktop.DBus",
+            "/org/freedesktop/DBus",
+            "org.freedesktop.DBus",
+            "NameOwnerChanged",
+            this,
+            SLOT(onNameOwnerChanged(QString,QString,QString))
+        );
     }
 
 private:
+    void updatePosition()
+    {
+        if (!m_activePlayer) return;
+
+        QDBusInterface iface(m_activePlayer->busName(), "/org/mpris/MediaPlayer2",
+                             "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
+        QDBusReply<qlonglong> reply = iface.call("Position");
+        if (reply.isValid()) {
+            QVariantMap state = m_playerEntity->state();
+            state["position"] = static_cast<qint64>(reply.value() / 1000000); // µs → sek
+            m_playerEntity->setState(state);
+        }
+    }
     void setupMediaPlayer()
     {
         m_playerEntity = new MediaPlayerEntity(this);
         m_playerEntity->setId("kiotprisstate");
         m_playerEntity->setName("Kiot Active MPRIS Player");
 
-        // map HA commands to active MPRIS player
         connect(m_playerEntity, &MediaPlayerEntity::playRequested, this, [this]() {
-            if (!m_activePlayer) return;
-            m_activePlayer->Play();
+            if(m_activePlayer) m_activePlayer->Play();
         });
         connect(m_playerEntity, &MediaPlayerEntity::pauseRequested, this, [this]() {
-            if (!m_activePlayer) return;
-            m_activePlayer->Pause();
+            if(m_activePlayer) m_activePlayer->Pause();
         });
         connect(m_playerEntity, &MediaPlayerEntity::stopRequested, this, [this]() {
-            if (!m_activePlayer) return;
-            m_activePlayer->Stop();
+            if(m_activePlayer) m_activePlayer->Stop();
         });
         connect(m_playerEntity, &MediaPlayerEntity::nextRequested, this, [this]() {
-            if (!m_activePlayer) return;
-            m_activePlayer->Next();
+            if(m_activePlayer) m_activePlayer->Next();
         });
         connect(m_playerEntity, &MediaPlayerEntity::previousRequested, this, [this]() {
-            if (!m_activePlayer) return;
-            m_activePlayer->Previous();
+            if(m_activePlayer) m_activePlayer->Previous();
         });
-        connect(m_playerEntity, &MediaPlayerEntity::volumeChanged, this, [this](double volume) {
-            if (!m_activePlayer) return;
-            m_activePlayer->setVolume(volume);
+        connect(m_playerEntity, &MediaPlayerEntity::volumeChanged, this, [this](double vol){
+            if(m_activePlayer) m_activePlayer->setVolume(vol);
         });
-        connect(m_playerEntity, &MediaPlayerEntity::playMediaRequested, this, [this](QString payload) {
-            if (!m_activePlayer) return;
+        connect(m_playerEntity, &MediaPlayerEntity::playMediaRequested, this, [this](QString payload){
+            if(!m_activePlayer) return;
             QJsonParseError err;
             QJsonDocument doc = QJsonDocument::fromJson(payload.toUtf8(), &err);
-
-            if (err.error != QJsonParseError::NoError) {
+            if(err.error != QJsonParseError::NoError){
                 qWarning() << "JSON parse error:" << err.errorString();
                 return;
             }
-            QJsonObject obj = doc.object();
-            QString mediaId = obj.value("media_id").toString();
-            qDebug() << "Playing media with ID:" << mediaId;
-            m_activePlayer->OpenUri(mediaId);
+            QString mediaId = doc.object().value("media_id").toString();
+            if(!mediaId.isEmpty()) m_activePlayer->OpenUri(mediaId);
         });
-
-        
     }
 
     void discoverPlayers()
@@ -201,48 +217,35 @@ private:
         QDBusInterface dbusIface("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", QDBusConnection::sessionBus());
         QDBusPendingCall call = dbusIface.asyncCall("ListNames");
         auto watcher = new QDBusPendingCallWatcher(call, this);
-        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher]() {
+        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher](){
             QDBusPendingReply<QStringList> reply = *watcher;
             watcher->deleteLater();
-            if (reply.isValid()) {
-                for (const QString &svc : reply.value()) {
-                    if (svc.startsWith("org.mpris.MediaPlayer2.")) {
-                        auto *container = new PlayerContainer(svc, this);
-                        // update whenever container emits stateChanged
-                        connect(container, &PlayerContainer::stateChanged, this, [this, container]() {
-                            handleActivePlayer(container);
-                        });
-                        m_containers.append(container);
-                    }
-                }
+            if(!reply.isValid()) return;
+            for(const QString &svc : reply.value()){
+                if(svc.startsWith("org.mpris.MediaPlayer2.")) addPlayer(svc);
             }
         });
     }
 
+    void addPlayer(const QString &busName)
+    {
+        auto *container = new PlayerContainer(busName, this);
+        connect(container, &PlayerContainer::stateChanged, this, [this, container](){
+            handleActivePlayer(container);
+        });
+        m_containers.append(container);
+    }
+
     void handleActivePlayer(PlayerContainer *container)
     {
-        // Always update entity from this container. If container starts playing, pick it as active.
         const QString status = container->state().value("PlaybackStatus").toString();
-        qDebug() << "Player status:" << status << " from " << container;
-
-        if (status == "Playing") {
-            if (m_activePlayer != container) {
-                m_activePlayer = container;
-                qDebug() << "Active player set to:" << m_activePlayer;
-            }
+        if(status == "Playing"){
+            if(m_activePlayer != container) m_activePlayer = container;
             updateMediaPlayerEntity(container);
             return;
         }
-
-        // If this is already the active player, update it to reflect pause/stop/volume changes
-        if (m_activePlayer == container) {
-            updateMediaPlayerEntity(container);
-            // keep m_activePlayer even if paused/stopped so HA shows last known info and can control
-            return;
-        }
-
-        // If no active player set yet, pick the first non-empty container (fallback)
-        if (!m_activePlayer && container->state().contains("PlaybackStatus")) {
+        if(m_activePlayer == container) updateMediaPlayerEntity(container);
+        if(!m_activePlayer && container->state().contains("PlaybackStatus")){
             m_activePlayer = container;
             updateMediaPlayerEntity(container);
         }
@@ -252,74 +255,62 @@ private:
     {
         const auto &cState = container->state();
         QVariantMap state;
-        // TODO remove after testing
-        //qDebug() << "MPRIS container state raw:" << cState;
+        state["state"] = cState.value("PlaybackStatus","Stopped").toString();
+        state["volume"] = cState.value("Volume",1.0).toDouble();
 
-        // Playback status and volume
-        state["state"]  = cState.value("PlaybackStatus", "Stopped").toString();
-        state["volume"] = cState.value("Volume", 1.0).toDouble();
+        qint64 pos = cState.value("Position",0).toLongLong()/1000000;
+        qint64 dur = 0;
+        if(cState.contains("Metadata")){
+            QVariantMap metadata;
+            QDBusArgument arg = cState.value("Metadata").value<QDBusArgument>();
+            arg >> metadata;
 
-        // position/duration - MPRIS reports microseconds, convert to seconds (use ints for HA)
-        qlonglong pos = 0;
-        if (cState.contains("Position")) pos = cState.value("Position").toLongLong() / 1000000;
-        qlonglong dur = 0;
-        if (cState.contains("Metadata")) {
-            QVariant metadataVar = cState.value("Metadata");
-            if (metadataVar.canConvert<QDBusArgument>()) {
-                QDBusArgument arg = metadataVar.value<QDBusArgument>();
-                QVariantMap metadata;
-                arg >> metadata;
-                state["title"] = metadata.value("xesam:title").toString();
-                QVariant artistVal = metadata.value("xesam:artist");
-                if (artistVal.canConvert<QStringList>()) state["artist"] = artistVal.toStringList().join(", ");
-                else state["artist"] = artistVal.toString();
-                QVariant albumVal = metadata.value("xesam:album");
-                if (albumVal.canConvert<QStringList>()) state["album"] = albumVal.toStringList().join(", ");
-                else state["album"] = albumVal.toString();
-                QVariant artVal = metadata.value("mpris:artUrl");
-                state["art"] = artVal.toString();
-
-                
-                if (metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong() / 1000000;
-            }
+            state["title"] = metadata.value("xesam:title").toString();
+            QVariant artistVal = metadata.value("xesam:artist");
+            state["artist"] = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
+            QVariant albumVal = metadata.value("xesam:album");
+            state["album"] = albumVal.canConvert<QStringList>() ? albumVal.toStringList().join(", ") : albumVal.toString();
+            QVariant artVal = metadata.value("mpris:artUrl");
+            state["art"] = artVal.toString();
+            if(metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong()/1000000;
         }
-        // This is probably not needed as "mpris:length" looks to be correct here
-        if (cState.contains("Duration") && dur == 0) {
-            dur = cState.value("Duration").toLongLong() / 1000000;
+        if(cState.contains("Duration") && dur==0) dur = cState.value("Duration").toLongLong()/1000000;
+
+        state["position"] = pos;
+        state["duration"] = dur;
+
+        // Artwork -> Base64
+        QString artUrl = state.value("art").toString();
+        if(artUrl.startsWith("file://")){
+            QString path = artUrl.mid(QString("file://").length());
+            QFile f(path);
+            if(f.open(QIODevice::ReadOnly)) state["albumart"] = f.readAll().toBase64();
         }
 
-        state["position"] = static_cast<qint64>(pos);
-        state["duration"] = static_cast<qint64>(dur);
-
-        // Ensure strings are valid (avoid QVariant(Invalid) that breaks publishing)
-        if (!state.contains("title")) state["title"] = QString();
-        if (!state.contains("artist")) state["artist"] = QString();
-        if (!state.contains("album")) state["album"] = QString();
-        if(state.contains("art")){
-            QString artUrl = state["art"].toString();
-            if (artUrl.startsWith("file://")) {
-                QString path = artUrl.mid(QString("file://").length());
-                QFile f(path);
-                if (f.open(QIODevice::ReadOnly)) {
-                    QByteArray data = f.readAll();
-                    QByteArray encoded = data.toBase64();
-                    state["albumart"] = encoded;
-                } else {
-                    qWarning() << "Failed to read artwork file:" << path;
-                }
-           } else {
-                qWarning() << "Unsupported artwork URL scheme:" << artUrl;
-            }
-        }
-        //TODO remove when finished testing
-        //qDebug() << "Setting media player state:" << state;
         m_playerEntity->setState(state);
     }
-
-    QList<PlayerContainer *> m_containers;
+    QTimer *m_positionTimer;
+    QList<PlayerContainer*> m_containers;
     PlayerContainer *m_activePlayer = nullptr;
     MediaPlayerEntity *m_playerEntity;
+private slots:
+    void onNameOwnerChanged(const QString &name,const QString &oldOwner,const QString &newOwner)
+    {
+        if(!name.startsWith("org.mpris.MediaPlayer2.")) return;
+
+        if(!newOwner.isEmpty() && oldOwner.isEmpty()) addPlayer(name);
+        else if(!oldOwner.isEmpty() && newOwner.isEmpty()){
+            auto it = std::find_if(m_containers.begin(), m_containers.end(), [&name](PlayerContainer *c){ return c->objectName() == name; });
+            if(it != m_containers.end()){
+                if(m_activePlayer == *it) m_activePlayer = nullptr;
+                (*it)->deleteLater();
+                m_containers.erase(it);
+            }
+        }
+    }
+
 };
+
 
 void setupMprisIntegration()
 {

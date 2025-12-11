@@ -17,7 +17,7 @@ void MediaPlayerEntity::init()
 
     setHaConfig({
         {"name",name()},
-
+        {"state_topic", baseTopic()},
     { "state_state_topic",  baseTopic() + "/state" },
     {"state_title_topic", baseTopic() + "/title"},
     {"state_artist_topic", baseTopic() + "/artist"},
@@ -80,7 +80,7 @@ void MediaPlayerEntity::setState(const QVariantMap &info)
     }
 }
 
-QVariantMap MediaPlayerEntity::getState() const
+QVariantMap MediaPlayerEntity::state() const
 {
     return m_state;
 }
