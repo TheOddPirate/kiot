@@ -21,7 +21,7 @@ public:
         m_switch = new Switch(this);
         m_switch->setId("bluetooth_device_" + device->address().replace(":", ""));
         m_switch->setName(device->name());
-        m_switch->setHaIcon("mdi:bluetooth");        // Sett initial state og attributes
+        m_switch->setDiscoveryConfig("icon","mdi:bluetooth");  
         updateState();
         updateAttributes();
 
@@ -43,7 +43,6 @@ public:
             updateAttributes();
         });
         
-        
 
         connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
             if (!m_device)
@@ -54,7 +53,7 @@ public:
                 m_device->disconnectFromDevice();
             }
         });
-        qDebug() << "Switch created and ready for use for bt device: " << device->name();
+      
     }
 
 private:
@@ -78,8 +77,8 @@ private:
     {
         if (!m_device) return;
         if(!m_device->isPaired()){
-            // TODO set entity as unavailable in HA
-            qDebug() << m_switch->name() << "is not paired anymore";
+            // TODO set entity as unavailable in HA and delete this
+            qDebug() << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
         QVariantMap attrs;
@@ -105,15 +104,13 @@ class BluetoothAdapterWatcher : public QObject
 
 public:
     explicit BluetoothAdapterWatcher(QObject *parent = nullptr);
-
-
     
 private:
-
     Switch *m_switch = nullptr;
     BluezQt::Manager *m_manager = nullptr;
     BluezQt::AdapterPtr m_adapter;
     bool m_initialized = false;
+    QMap<QString, BluetoothDeviceSwitch*> m_btSwitches;
 };
 
 BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
@@ -151,14 +148,37 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
                 }
                 m_switch->setState(powered);
             });
+            // TODO figure out if its a better way to do this. I tested deviceAdded and deviceRemoved but was not what i expected
+            connect(m_adapter.data(), &BluezQt::Adapter::pairableChanged, this, [this]() {
+                for (const auto &dev : m_adapter->devices()) {
+                    const auto key = dev->address();
+                    if (dev->isPaired()) {
+                        if (!m_btSwitches.contains(key)) {
+                            auto sw = new BluetoothDeviceSwitch(dev, this);
+                            m_btSwitches.insert(key, sw);
+                       }
+                    }
+                     else {
+                        // device er unpaired, fjern switch
+                        if (m_btSwitches.contains(key)) {
+                            auto *sw = m_btSwitches.take(key);
+                            sw->deleteLater();
+                        }
+                    }
+                }
+            });
             for (const auto &dev : m_adapter->devices()) {
                 if (dev->isPaired()) {
-                    qDebug() << "Adding switch for bt device: " << dev->name();
-                    new BluetoothDeviceSwitch(dev, this);
+                    const auto key = dev->address();
+                    if (!m_btSwitches.contains(key)) {
+                        auto sw = new BluetoothDeviceSwitch(dev, this);
+                        m_btSwitches.insert(key, sw);
+                    }
                 }
             }
 
-        } else {
+        } 
+        else {
             qWarning() << "No adapters found";
             m_switch->setState(false);
         }

@@ -23,6 +23,7 @@ set(KIOT_INTEGRATIONS_SRC
     bluetooth.cpp
     systemd.cpp
     audio.cpp
+    boot_select.cpp
 )
 
 # Include gamepad.cpp only when libudev library is found
