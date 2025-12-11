@@ -5,6 +5,8 @@
 #include "entities/entities.h"
 
 #include <QObject>
+#include <QFile>
+
 #include <QString>
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -223,7 +225,8 @@ private:
     {
         const auto &cState = container->state();
         QVariantMap state;
-        qDebug() << "MPRIS container state raw:" << cState;
+        //just for testing
+        //qDebug() << "MPRIS container state raw:" << cState;
 
         // Playback status and volume
         state["state"]  = cState.value("PlaybackStatus", "Stopped").toString();
@@ -233,14 +236,12 @@ private:
         qlonglong pos = 0;
         if (cState.contains("Position")) pos = cState.value("Position").toLongLong() / 1000000;
         qlonglong dur = 0;
-        // Some players expose mpris:length in Metadata; try both keys
         if (cState.contains("Metadata")) {
             QVariant metadataVar = cState.value("Metadata");
             if (metadataVar.canConvert<QDBusArgument>()) {
                 QDBusArgument arg = metadataVar.value<QDBusArgument>();
                 QVariantMap metadata;
                 arg >> metadata;
-                // title / artist / album
                 state["title"] = metadata.value("xesam:title").toString();
                 QVariant artistVal = metadata.value("xesam:artist");
                 if (artistVal.canConvert<QStringList>()) state["artist"] = artistVal.toStringList().join(", ");
@@ -248,12 +249,15 @@ private:
                 QVariant albumVal = metadata.value("xesam:album");
                 if (albumVal.canConvert<QStringList>()) state["album"] = albumVal.toStringList().join(", ");
                 else state["album"] = albumVal.toString();
+                QVariant artVal = metadata.value("mpris:artUrl");
+                if (artVal.canConvert<QStringList>()) state["art"] = artVal.toStringList().join(", ");
+                else state["art"] = artVal.toString();
 
-                // mpris:length is microseconds
+                
                 if (metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong() / 1000000;
             }
         }
-        // fallback duration key if provided at top-level
+        // This is probably not needed as "mpris:length" looks to be correct here
         if (cState.contains("Duration") && dur == 0) {
             dur = cState.value("Duration").toLongLong() / 1000000;
         }
@@ -265,7 +269,22 @@ private:
         if (!state.contains("title")) state["title"] = QString();
         if (!state.contains("artist")) state["artist"] = QString();
         if (!state.contains("album")) state["album"] = QString();
-
+        if(state.contains("art")){
+            QString artUrl = state["art"].toString();
+            if (artUrl.startsWith("file://")) {
+                QString path = artUrl.mid(QString("file://").length());
+                QFile f(path);
+                if (f.open(QIODevice::ReadOnly)) {
+                    QByteArray data = f.readAll();
+                    QByteArray encoded = data.toBase64();
+                    state["albumart"] = encoded;
+                } else {
+                    qWarning() << "Failed to read artwork file:" << path;
+                }
+           } else {
+                qWarning() << "Unsupported artwork URL scheme:" << artUrl;
+            }
+        }
         qDebug() << "Setting media player state:" << state;
         m_playerEntity->setState(state);
     }

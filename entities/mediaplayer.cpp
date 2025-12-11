@@ -76,7 +76,6 @@ void MediaPlayerEntity::setState(const QVariantMap &info)
 
     if (changed) {
         emit stateChanged(m_state);
-        qDebug() << "MediaPlayerEntity::setState - State changed to:" << m_state;
         publishState(); // Hvis du har en publishState implementasjon
     }
 }
