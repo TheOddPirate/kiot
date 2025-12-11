@@ -225,7 +225,7 @@ private:
     {
         const auto &cState = container->state();
         QVariantMap state;
-        //just for testing
+        // TODO remove after testing
         //qDebug() << "MPRIS container state raw:" << cState;
 
         // Playback status and volume
@@ -284,7 +284,8 @@ private:
                 qWarning() << "Unsupported artwork URL scheme:" << artUrl;
             }
         }
-        qDebug() << "Setting media player state:" << state;
+        //TODO remove when finished testing
+        //qDebug() << "Setting media player state:" << state;
         m_playerEntity->setState(state);
     }
 
