@@ -11,25 +11,30 @@
 #include "core.h"
 #include "entities/entities.h"
 
+// Qt Core includes
 #include <QObject>
 #include <QFile>
 #include <QTimer>
 #include <QString>
+#include <QVariantMap>
+#include <QJsonObject>
+#include <QDebug>
+#include <QEventLoop>
+
+// Qt DBus includes
 #include <QDBusConnection>
 #include <QDBusReply>
-#include <QJsonObject>
 #include <QDBusInterface>
 #include <QDBusMessage>
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
 #include <QDBusVariant>
 #include <QDBusArgument>
-#include <QDebug>
-#include <QVariantMap>
+
+// Qt Network includes
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QEventLoop>
 class PlayerContainer : public QObject
 {
     Q_OBJECT
