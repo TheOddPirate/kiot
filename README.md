@@ -1,3 +1,16 @@
+This is my personal testing branch. It includes some extra integrations, it comes with some helper scripts to make testing easier.
+
+The current extra/updated integrations in this build are:
+
+- Bluetooth: gives control over the Bluetooth adapter, with switches for each
+  paired device to connect/disconnect and extra data in attributes.
+- Docker: needs to be enabled per docker image (polling-based) in config file, but allows start/stop of containers and provides extra info as attributes.
+- Systemd: needs to be enabled per user service; fills the config file with all
+  available user services at startup and allows starting/stopping selected services.
+- Scripts updated to suport input variables from a shared textbox in HA , will replace {arg} from the string in exec= from config
+- MPRIS media player using this integration with AH https://github.com/bkbilly/mqtt_media_player
+
+
 # About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions for your local desktop session to a home automation controller like Home Assistant.
