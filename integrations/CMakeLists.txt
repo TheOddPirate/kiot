@@ -22,6 +22,7 @@ set(KIOT_INTEGRATIONS_SRC
     battery.cpp
     bluetooth.cpp
     docker.cpp
+    systemd.cpp
 )
 
 # Include gamepad.cpp only when libudev library is found
