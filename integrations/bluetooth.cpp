@@ -42,8 +42,19 @@ public:
             updateState();
             updateAttributes();
         });
+        connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool bloecked){
+            Q_UNUSED(bloecked)
+            updateState();
+            updateAttributes();
+        });
         
+        connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool trusted){
+            Q_UNUSED(trusted)
+            updateState();
+            updateAttributes();
+        });
 
+        
         connect(m_switch, &Switch::stateChangeRequested, this, [this](bool requestedState){
             if (!m_device)
                 return;

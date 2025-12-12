@@ -20,6 +20,7 @@ set(KIOT_INTEGRATIONS_SRC
     activewindow.cpp
     audio.cpp
     battery.cpp
+    bluetooth.cpp
 )
 
 # Include gamepad.cpp only when libudev library is found
@@ -41,6 +42,7 @@ target_link_libraries(KIOTIntegrations
     KF6::ConfigCore
     KF6::CoreAddons
     KF6::PulseAudioQt
+    KF6::BluezQt
     KF6::Solid
     Qt6::Gui
     Qt6::Widgets

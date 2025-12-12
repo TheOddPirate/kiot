@@ -15,30 +15,26 @@ MediaPlayerEntity::MediaPlayerEntity(QObject *parent)
 void MediaPlayerEntity::init()
 {
 
-    setHaConfig({
-        {"name",name()},
-        {"state_topic", baseTopic()},
-    { "state_state_topic",  baseTopic() + "/state" },
-    {"state_title_topic", baseTopic() + "/title"},
-    {"state_artist_topic", baseTopic() + "/artist"},
-    {"state_album_topic", baseTopic() + "/album"},
-    {"state_duration_topic", baseTopic() + "/duration"},
-    {"state_position_topic", baseTopic() + "/position"},
-    {"state_volume_topic", baseTopic() + "/volume"},
-    {"state_albumart_topic", baseTopic() + "/albumart"},
-    {"state_mediatype_topic", baseTopic() + "/mediatype"},
-    {"command_play_topic", baseTopic() + "/play"},
-    {"command_pause_topic", baseTopic() + "/playpause"},
-    {"command_playpause_topic", baseTopic() + "/mediatype"},
-    {"command_next_topic", baseTopic() + "/next"},
-    {"command_previous_topic", baseTopic() + "/previous"},
-    {"command_volume_topic", baseTopic() + "/set_volume"},
-    {"command_playmedia_topic", baseTopic() + "/playmedia"}
-    });
+    setDiscoveryConfig("name",name());
+    setDiscoveryConfig("state_topic", baseTopic());
+    setDiscoveryConfig("state_state_topic",  baseTopic() + "/state");
+    setDiscoveryConfig("state_title_topic", baseTopic() + "/title");
+    setDiscoveryConfig("state_artist_topic", baseTopic() + "/artist");
+    setDiscoveryConfig("state_album_topic", baseTopic() + "/album");
+    setDiscoveryConfig("state_duration_topic", baseTopic() + "/duration");
+    setDiscoveryConfig("state_position_topic", baseTopic() + "/position");
+    setDiscoveryConfig("state_volume_topic", baseTopic() + "/volume");
+    setDiscoveryConfig("state_albumart_topic", baseTopic() + "/albumart");
+    setDiscoveryConfig("state_mediatype_topic", baseTopic() + "/mediatype");
+    setDiscoveryConfig("command_play_topic", baseTopic() + "/play");
+    setDiscoveryConfig("command_pause_topic", baseTopic() + "/playpause");
+    setDiscoveryConfig("command_playpause_topic", baseTopic() + "/mediatype");
+    setDiscoveryConfig("command_next_topic", baseTopic() + "/next");
+    setDiscoveryConfig("command_previous_topic", baseTopic() + "/previous");
+    setDiscoveryConfig("command_volume_topic", baseTopic() + "/set_volume");
+    setDiscoveryConfig("command_playmedia_topic", baseTopic() + "/playmedia");
+    
     sendRegistration();
-
-
-
     //subscriptions
     auto mqtt = HaControl::mqttClient();
 
