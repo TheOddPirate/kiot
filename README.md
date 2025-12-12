@@ -1,4 +1,4 @@
-This branch is now dead and moved to testing_upgraded
+This branch is now dead and moved to testing_updated
 that is updated to the latest upstream version of Kiot 
 i will keep it here a bit longer before deleting the branch
 
