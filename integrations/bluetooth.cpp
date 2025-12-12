@@ -26,30 +26,24 @@ public:
         updateAttributes();
 
         // Lytt til endringer
-        connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool connected){
-            Q_UNUSED(connected);
+        connect(device.data(), &BluezQt::Device::connectedChanged, this, [this](bool){
             updateState();
             updateAttributes();
         });
 
-        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery> battery){
-            Q_UNUSED(battery)
+        connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>){            updateState();
+            updateAttributes();
+        });
+        connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool){
             updateState();
             updateAttributes();
         });
-        connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool paired){
-            Q_UNUSED(paired)
-            updateState();
-            updateAttributes();
-        });
-        connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool bloecked){
-            Q_UNUSED(bloecked)
+        connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool){
             updateState();
             updateAttributes();
         });
         
-        connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool trusted){
-            Q_UNUSED(trusted)
+        connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool){
             updateState();
             updateAttributes();
         });
