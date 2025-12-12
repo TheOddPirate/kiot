@@ -3,23 +3,37 @@
 
 #include "core.h"
 #include "entities/entities.h"
+
 #include <KConfigGroup>
-#include <QThread>
-#include <QLocalSocket>
+#include <KSharedConfig>
+
+#include <QDebug>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
+#include <QLocalSocket>
+#include <QThread>
 #include <QVariantMap>
-#include <QDebug>
 
+#include <atomic>
+
+/**
+ * Listens for Docker container events via Unix socket
+ * Runs in a separate thread to avoid blocking the main thread
+ */
 class DockerEventListener : public QThread
 {
     Q_OBJECT
+    
 public:
     explicit DockerEventListener(QObject *parent = nullptr)
         : QThread(parent) {}
     
-    void stop() { m_stop = true; }
+    void stop() { 
+        m_stop = true;
+        // Interrupt any blocking read operations
+        quit();
+    }
     
 signals:
     void containerEvent(const QString &name, const QVariantMap &attrs);
@@ -28,129 +42,209 @@ protected:
     void run() override {
         QLocalSocket socket;
         socket.connectToServer("/var/run/docker.sock", QIODevice::ReadWrite);
-        if (!socket.waitForConnected(1000)) return;
+        if (!socket.waitForConnected(1000)) {
+            qWarning() << "[docker] Failed to connect to Docker socket";
+            return;
+        }
 
-        QByteArray req = "GET /events HTTP/1.1\r\nHost: localhost\r\n\r\n";
-        socket.write(req);
+        const QByteArray request = "GET /events HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        if (socket.write(request) != request.size()) {
+            qWarning() << "[docker] Failed to write request to socket";
+            return;
+        }
         socket.flush();
 
+        qDebug() << "[docker] Event listener started";
+        
         while (!m_stop && socket.state() == QLocalSocket::ConnectedState) {
-            if (!socket.waitForReadyRead(1000)) continue;
+            if (!socket.waitForReadyRead(1000)) {
+                // Timeout is expected, continue if not stopping
+                continue;
+            }
 
-            QByteArray line = socket.readLine().trimmed();
+            const QByteArray line = socket.readLine().trimmed();
             if (line.isEmpty()) continue;
 
-            QJsonParseError err;
-            auto doc = QJsonDocument::fromJson(line, &err);
-            if (err.error != QJsonParseError::NoError) continue;
-            if (!doc.isObject()) continue;
-
-            auto obj = doc.object();
-            if (obj.value("Type").toString() != "container") continue;
-
-            QString name;
-            auto actor = obj.value("Actor").toObject();
-            auto attrsObj = actor.value("Attributes").toObject();
-            if (attrsObj.contains("name")) name = attrsObj.value("name").toString();
-            if (name.isEmpty()) continue;
-
-            QVariantMap attrs;
-            attrs["status"] = obj.value("status").toString();
-            attrs["id"] = obj.value("id").toString();
-            attrs["image"] = attrsObj.value("image").toString();
-
-            emit containerEvent(name, attrs);
+            if (!processEventLine(line)) continue;
         }
 
         socket.disconnectFromServer();
+        qDebug() << "[docker] Event listener stopped";
+    }
+
+private:
+    bool processEventLine(const QByteArray &line) {
+        QJsonParseError parseError;
+        const QJsonDocument doc = QJsonDocument::fromJson(line, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            //qWarning() << "[docker] JSON parse error:" << parseError.errorString();
+            return false;
+        }
+        
+        if (!doc.isObject()) return false;
+
+        const QJsonObject obj = doc.object();
+        if (obj.value("Type").toString() != "container") return false;
+
+        const QJsonObject actor = obj.value("Actor").toObject();
+        const QJsonObject attrsObj = actor.value("Attributes").toObject();
+        const QString name = attrsObj.value("name").toString();
+        
+        if (name.isEmpty()) return false;
+
+        QVariantMap attrs;
+        attrs["status"] = obj.value("status").toString();
+        attrs["id"] = obj.value("id").toString();
+        attrs["image"] = attrsObj.value("image").toString();
+
+        emit containerEvent(name, attrs);
+        return true;
     }
 
 private:
     std::atomic<bool> m_stop{false};
-    
 };
 
 
+/**
+ * Main Docker integration class that manages container switches
+ * Creates Home Assistant switches for enabled Docker containers
+ */
 class DockerSwitch : public QObject
 {
     Q_OBJECT
+    
 public:
     explicit DockerSwitch(QObject *parent = nullptr)
         : QObject(parent) 
     {
-        if (!ensureConfigDefaults()) {
-            qWarning() << "Docker disabled due to missing socket";
+        if (!isDockerAvailable()) {
+            qWarning() << "[docker] Docker socket not available, integration disabled";
             return;
         }
 
-        auto cfg = KSharedConfig::openConfig();
-        KConfigGroup grp = cfg->group("docker");
+        if (!ensureConfigDefaults()) {
+            qWarning() << "[docker] Failed to initialize configuration";
+            return;
+        }
+
+        initializeSwitches();
+        startEventListener();
+        
+        qDebug() << "[docker] Integration initialized with" << m_containers.size() << "containers";
+    }
+    ~DockerSwitch() override
+    {
+        stopEventListener();
+    }
+private:
+    struct ContainerInfo { 
+        QString name; 
+        Switch *sw; 
+    };
+    
+    QList<ContainerInfo> m_containers;
+    DockerEventListener *m_listener = nullptr;
+    
+    static constexpr int SOCKET_TIMEOUT_MS = 5000;
+    static constexpr const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
+
+    bool isDockerAvailable() const {
+        QLocalSocket testSocket;
+        testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
+        const bool available = testSocket.waitForConnected(1000);
+        if (available) {
+            testSocket.disconnectFromServer();
+        }
+        return available;
+    }
+    
+    void initializeSwitches() {
+        const auto cfg = KSharedConfig::openConfig();
+        const KConfigGroup grp = cfg->group("docker");
 
         // Create switches for enabled containers
         for (const auto &key : grp.keyList()) {
-            if (key == "polltimer") continue;
             if (!grp.readEntry(key, false)) continue;
 
             qDebug() << "[docker] Enabling control for container" << key;
-
-            auto *sw = new Switch(this);
-            sw->setId("docker_" + key);
-            sw->setName(key);
-            sw->setDiscoveryConfig("icon", "mdi:docker");
-
-            // Initial state + attributes
-            updateSwitch(key, sw);
-
-            connect(sw, &Switch::stateChangeRequested, this, [this, key](bool state){
-                toggleContainer(key, state);
-            });
-
-            m_containers.append({key, sw});
+            createContainerSwitch(key);
         }
+    }
+    
+    void createContainerSwitch(const QString &name) {
+        auto *sw = new Switch(this);
+        sw->setId("docker_" + name);
+        sw->setName(name);
+        sw->setDiscoveryConfig("icon", "mdi:docker");
 
-        // Start event listener
+        // Initial state + attributes
+        updateSwitch(name, sw);
+
+        connect(sw, &Switch::stateChangeRequested, this, [this, name](bool state){
+            toggleContainer(name, state);
+        });
+
+        m_containers.append({name, sw});
+    }
+    
+    void startEventListener() {
         m_listener = new DockerEventListener(this);
         connect(m_listener, &DockerEventListener::containerEvent,
                 this, &DockerSwitch::handleEvent, Qt::QueuedConnection);
         m_listener->start();
     }
-    ~DockerSwitch()
-{
-    if (m_listener) {
+    
+    void stopEventListener() {
+        if (!m_listener) return;
+        
         m_listener->stop();
-        // TODO implement so we can abort connection for faster shutdown
-        //m_listener->socket()->abort();
-        m_listener->quit();
-        m_listener->wait();  // Vent til run() er ferdig
+        if (!m_listener->wait(3000)) {
+            qWarning() << "[docker] Event listener did not stop gracefully, terminating";
+            m_listener->terminate();
+            m_listener->wait(1000);
+        }
     }
-}
-private:
-    struct ContainerInfo { QString name; Switch *sw; };
-    QList<ContainerInfo> m_containers;
-    DockerEventListener *m_listener = nullptr;
 
     bool ensureConfigDefaults() {
-        auto cfg = KSharedConfig::openConfig();
+        const auto cfg = KSharedConfig::openConfig();
         KConfigGroup grp = cfg->group("docker");
 
         if (!grp.exists()) {
-            if (!grp.hasKey("polltimer"))
-                grp.writeEntry("polltimer", 30);
-            for (const auto &name : listAllContainers())
-                if (!grp.hasKey(name)) grp.writeEntry(name, false);
+            const QStringList containers = listAllContainers();
+            if (containers.isEmpty()) {
+                qWarning() << "[docker] No containers found";
+                return false;
+            }
+            
+            for (const auto &name : containers) {
+                if (!grp.hasKey(name)) {
+                    grp.writeEntry(name, false);
+                }
+            }
             cfg->sync();
         }
         return true;
     }
 
-    bool callDockerSocket(const QByteArray &req, QByteArray &response) {
+    bool callDockerSocket(const QByteArray &request, QByteArray &response) {
         QLocalSocket socket;
-        socket.connectToServer("/var/run/docker.sock", QIODevice::ReadWrite);
-        if (!socket.waitForConnected(1000)) return false;
+        socket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
+        if (!socket.waitForConnected(1000)) {
+            qWarning() << "[docker] Failed to connect to Docker socket";
+            return false;
+        }
 
-        socket.write(req);
+        if (socket.write(request) != request.size()) {
+            qWarning() << "[docker] Failed to write request to socket";
+            return false;
+        }
+        
         socket.flush();
-        if (!socket.waitForReadyRead(5000)) return false;
+        if (!socket.waitForReadyRead(SOCKET_TIMEOUT_MS)) {
+            qWarning() << "[docker] Timeout waiting for response";
+            return false;
+        }
 
         response = socket.readAll();
         socket.disconnectFromServer();
@@ -159,77 +253,150 @@ private:
 
     QStringList listAllContainers() {
         QStringList names;
-        QByteArray resp;
-        if (!callDockerSocket("GET /containers/json?all=1 HTTP/1.0\r\n\r\n", resp)) return names;
-        int headerEnd = resp.indexOf("\r\n\r\n");
-        if (headerEnd == -1) return names;
-        auto body = resp.mid(headerEnd + 4);
-        auto doc = QJsonDocument::fromJson(body);
-        if (!doc.isArray()) return names;
+        QByteArray response;
+        
+        const QByteArray request = "GET /containers/json?all=1 HTTP/1.0\r\n\r\n";
+        if (!callDockerSocket(request, response)) {
+            return names;
+        }
+        
+        const QByteArray body = extractHttpBody(response);
+        if (body.isEmpty()) return names;
+        
+        const QJsonDocument doc = QJsonDocument::fromJson(body);
+        if (!doc.isArray()) {
+            qWarning() << "[docker] Unexpected response format for container list";
+            return names;
+        }
 
-        for (const auto &val : doc.array()) {
-            if (!val.isObject()) continue;
-            auto arr = val.toObject()["Names"].toArray();
-            if (arr.isEmpty()) continue;
-            QString name = arr.first().toString();
-            if (name.startsWith("/")) name.remove(0,1);
-            if (!name.isEmpty()) names.append(name);
+        for (const auto &value : doc.array()) {
+            if (!value.isObject()) continue;
+            
+            const QJsonArray namesArray = value.toObject()["Names"].toArray();
+            if (namesArray.isEmpty()) continue;
+            
+            QString name = namesArray.first().toString();
+            if (name.startsWith("/")) {
+                name.remove(0, 1);
+            }
+            
+            if (!name.isEmpty()) {
+                names.append(name);
+            }
         }
         return names;
     }
 
     bool isRunning(const QString &name) {
-        QByteArray resp;
-        if (!callDockerSocket("GET /containers/json?all=0 HTTP/1.0\r\n\r\n", resp)) return false;
-        int headerEnd = resp.indexOf("\r\n\r\n");
-        if (headerEnd == -1) return false;
-        auto body = resp.mid(headerEnd + 4);
-        auto doc = QJsonDocument::fromJson(body);
+        QByteArray response;
+        const QByteArray request = "GET /containers/json?all=0 HTTP/1.0\r\n\r\n";
+        if (!callDockerSocket(request, response)) {
+            return false;
+        }
+        
+        const QByteArray body = extractHttpBody(response);
+        if (body.isEmpty()) return false;
+        
+        const QJsonDocument doc = QJsonDocument::fromJson(body);
         if (!doc.isArray()) return false;
 
-        for (const auto &val : doc.array()) {
-            if (!val.isObject()) continue;
-            QString cName = val.toObject()["Names"].toArray().first().toString().remove(0,1);
-            if (cName == name) return true;
+        for (const auto &value : doc.array()) {
+            if (!value.isObject()) continue;
+            
+            const QJsonArray namesArray = value.toObject()["Names"].toArray();
+            if (namesArray.isEmpty()) continue;
+            
+            QString containerName = namesArray.first().toString();
+            if (containerName.startsWith("/")) {
+                containerName.remove(0, 1);
+            }
+            
+            if (containerName == name) {
+                return true;
+            }
         }
         return false;
     }
+    
+    QByteArray extractHttpBody(const QByteArray &response) {
+        const int headerEnd = response.indexOf("\r\n\r\n");
+        if (headerEnd == -1) {
+            qWarning() << "[docker] Invalid HTTP response format";
+            return QByteArray();
+        }
+        return response.mid(headerEnd + 4);
+    }
 
     void toggleContainer(const QString &name, bool start) {
-        QByteArray req = QString("%1 /containers/%2/%3 HTTP/1.0\r\n\r\n")
-                        .arg(start?"POST":"POST", name, start?"start":"stop").toUtf8();
-        QByteArray resp;
-        callDockerSocket(req, resp);
-        for (auto &ci : m_containers)
-            if (ci.name == name) updateSwitch(name, ci.sw);
+        const QString action = start ? "start" : "stop";
+        const QByteArray request = QString("POST /containers/%1/%2 HTTP/1.0\r\n\r\n")
+                                  .arg(name, action).toUtf8();
+        
+        QByteArray response;
+        if (!callDockerSocket(request, response)) {
+            qWarning() << "[docker] Failed to" << action << "container" << name;
+            return;
+        }
+        
+        qDebug() << "[docker] Container" << name << (start ? "started" : "stopped");
+        
+        // Update the specific switch
+        for (auto &containerInfo : m_containers) {
+            if (containerInfo.name == name) {
+                updateSwitch(name, containerInfo.sw);
+                break;
+            }
+        }
     }
 
     void updateSwitch(const QString &name, Switch *sw) {
-        bool running = isRunning(name);
+        const bool running = isRunning(name);
         sw->setState(running);
 
-        QByteArray resp;
-        if (!callDockerSocket(QString("GET /containers/%1/json HTTP/1.0\r\n\r\n").arg(name).toUtf8(), resp)) return;
-        int headerEnd = resp.indexOf("\r\n\r\n");
-        if (headerEnd == -1) return;
-        auto body = resp.mid(headerEnd + 4);
-        auto doc = QJsonDocument::fromJson(body);
-        if (!doc.isObject()) return;
-        auto obj = doc.object();
+        // Get detailed container information
+        QByteArray response;
+        const QByteArray request = QString("GET /containers/%1/json HTTP/1.0\r\n\r\n")
+                                  .arg(name).toUtf8();
+        
+        if (!callDockerSocket(request, response)) {
+            qWarning() << "[docker] Failed to get container details for" << name;
+            return;
+        }
+        
+        const QByteArray body = extractHttpBody(response);
+        if (body.isEmpty()) return;
+        
+        const QJsonDocument doc = QJsonDocument::fromJson(body);
+        if (!doc.isObject()) {
+            qWarning() << "[docker] Invalid container details response for" << name;
+            return;
+        }
+        
+        const QJsonObject containerObj = doc.object();
+        const QJsonObject config = containerObj["Config"].toObject();
+        const QJsonObject state = containerObj["State"].toObject();
+        const QJsonObject networkSettings = containerObj["NetworkSettings"].toObject();
 
-        QVariantMap attrs;
-        attrs["image"] = obj["Config"].toObject()["Image"].toString();
-        attrs["status"] = obj["State"].toObject()["Status"].toString();
-        attrs["running"] = obj["State"].toObject()["Running"].toBool();
-        attrs["created"] = obj["Created"].toString();
-        attrs["ports"] = obj["NetworkSettings"].toObject()["Ports"].toVariant();
-        sw->setAttributes(attrs);
+        QVariantMap attributes;
+        attributes["image"] = config["Image"].toString();
+        attributes["status"] = state["Status"].toString();
+        attributes["running"] = state["Running"].toBool();
+        attributes["created"] = containerObj["Created"].toString();
+        attributes["ports"] = networkSettings["Ports"].toVariant();
+        
+        sw->setAttributes(attributes);
     }
 
 private slots:
-    void handleEvent(const QString &name, const QVariantMap & /*attrs*/) {
-        for (auto &ci : m_containers) {
-            if (ci.name == name) updateSwitch(name, ci.sw);
+    void handleEvent(const QString &name, const QVariantMap &attrs) {
+        Q_UNUSED(attrs) // Currently not using event attributes, but available for future use
+        
+        // Find and update the corresponding switch
+        for (auto &containerInfo : m_containers) {
+            if (containerInfo.name == name) {
+                updateSwitch(name, containerInfo.sw);
+                break;
+            }
         }
     }
 };
@@ -238,5 +405,5 @@ void setupDockerSwitch() {
     new DockerSwitch(qApp);
 }
 
-REGISTER_INTEGRATION("Docker",setupDockerSwitch,false)
+REGISTER_INTEGRATION("Docker", setupDockerSwitch, false)
 #include "docker.moc"
