@@ -158,7 +158,7 @@ public:
         // Timer for å oppdatere posisjon kontinuerlig
         m_positionTimer = new QTimer(this);
         connect(m_positionTimer, &QTimer::timeout, this, &MprisMultiplexer::updatePosition);
-        m_positionTimer->start(500); // hver 0,5s
+        m_positionTimer->start(1000); // hver 0,5s
         // Listen for new players appearing or stopping
         QDBusConnection::sessionBus().connect(
             "org.freedesktop.DBus",
