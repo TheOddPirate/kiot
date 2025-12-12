@@ -305,14 +305,19 @@ private:
 
         // Artwork -> Base64
         QString artUrl = state.value("art").toString();
-        if(artUrl.startsWith("file://")){
-            QString path = artUrl.mid(QString("file://").length());
-            QFile f(path);
-            if(f.open(QIODevice::ReadOnly)) state["albumart"] = f.readAll().toBase64();
-        }
-        else if(artUrl.startsWith("https://")){
-            qDebug() << "Downloading artwork from" << artUrl;
-            state["albumart"] = downloadArtAsBase64(artUrl);
+        if(m_playerEntity->state()["art"] != state.value("art").toString()){
+            if(artUrl.startsWith("file://")){
+                QString path = artUrl.mid(QString("file://").length());
+                QFile f(path);
+                if(f.open(QIODevice::ReadOnly)) state["albumart"] = f.readAll().toBase64();
+            }
+            else if(artUrl.startsWith("https://")){
+                qDebug() << "Downloading artwork from" << artUrl;
+                state["albumart"] = downloadArtAsBase64(artUrl);
+            }
+            else{
+                state["albumart"] = "";
+            }
         }
         m_playerEntity->setState(state);
     }
