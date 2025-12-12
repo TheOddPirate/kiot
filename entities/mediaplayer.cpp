@@ -90,7 +90,7 @@ void MediaPlayerEntity::setAvailablePlayers(const QStringList &players)
     m_players = players;
 }
 
-QStringList MediaPlayerEntity::getAvailablePlayers() const
+QStringList MediaPlayerEntity::availablePlayers() const
 {
     return m_players;
 }
