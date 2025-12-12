@@ -92,6 +92,7 @@ bool SystemDWatcher::init()
         QString id = sanitizeServiceId(svc);
         sw->setId("systemd_" + id);
         sw->setName(svc);
+        //todo find a nice icon fitting here, anyone have a sugestion?
         sw->setState(false); // initial state, will update via DBus
         connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
             QString cmd = state ? "start" : "stop";

@@ -96,7 +96,7 @@ public:
             auto *sw = new Switch(this);
             sw->setId("docker_" + key);
             sw->setName(key);
-            sw->setHaIcon("mdi:docker");
+            sw->setDiscoveryConfig("icon", "mdi:docker");
 
             // Initial state + attributes
             updateSwitch(key, sw);
