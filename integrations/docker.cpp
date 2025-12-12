@@ -18,9 +18,9 @@ class DockerEventListener : public QThread
 public:
     explicit DockerEventListener(QObject *parent = nullptr)
         : QThread(parent) {}
-
+    
     void stop() { m_stop = true; }
-
+    
 signals:
     void containerEvent(const QString &name, const QVariantMap &attrs);
 
@@ -67,6 +67,7 @@ protected:
 
 private:
     std::atomic<bool> m_stop{false};
+    
 };
 
 
@@ -117,6 +118,8 @@ public:
 {
     if (m_listener) {
         m_listener->stop();
+        // TODO implement so we can abort connection for faster shutdown
+        //m_listener->socket()->abort();
         m_listener->quit();
         m_listener->wait();  // Vent til run() er ferdig
     }
