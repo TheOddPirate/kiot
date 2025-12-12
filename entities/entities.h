@@ -10,4 +10,4 @@
 #include "sensor.h"
 #include "switch.h"
 #include "textbox.h"
-
+#include "mediaplayer.h"
