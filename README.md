@@ -1,19 +1,6 @@
-This is my personal testing branch. It includes some extra integrations, has all
-supported entities moved from core.cpp to the entities folder to make the code
-easier to navigate, and comes with some helper scripts to make testing easier.
-
-The current extra/updated integrations in this build are:
-
-- Battery: shows the battery entities of your computer in HA with extra attributes.
-- Bluetooth: gives control over the Bluetooth adapter, with switches for each
-  paired device to connect/disconnect and extra data in attributes.
-- Docker: needs to be enabled per docker image (polling-based) in config file, but allows start/stop of containers and provides extra info as attributes.
-- Audio: Updated audio integration to let you controll active input source and volume
-- Systemd: needs to be enabled per user service; fills the config file with all
-  available user services at startup and allows starting/stopping selected services.
-- Scripts updated to suport input variables from a shared textbox in HA , will replace {arg} from the string in exec= from config
-- Camera updated to try to stop a crash i got every now and then (5 cameras connected)
-- MPRIS media player using this integration with AH https://github.com/bkbilly/mqtt_media_player
+This branch is now dead and moved to testing_upgraded
+that is updated to the latest upstream version of Kiot 
+i will keep it here a bit longer before deleting the branch
 
 This build also supports the following entity types in Home Assistant:
 - Battery
