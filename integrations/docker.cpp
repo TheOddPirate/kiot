@@ -119,7 +119,7 @@ public:
         : QObject(parent) 
     {
         if (!isDockerAvailable()) {
-            qWarning() << "[docker] Docker socket not available, integration disabled";
+            qWarning() << "[docker] Docker socket not available at: " << DOCKER_SOCKET_PATH << " stopping integration";
             return;
         }
 
@@ -147,8 +147,9 @@ private:
     DockerEventListener *m_listener = nullptr;
     
     static constexpr int SOCKET_TIMEOUT_MS = 5000;
+    //Should this be made part of the config or is this universal on every linux? the path failed first time for me on manjaro but worked after a reboot
     static constexpr const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
-
+    
     bool isDockerAvailable() const {
         QLocalSocket testSocket;
         testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
@@ -159,6 +160,7 @@ private:
         return available;
     }
     
+
     void initializeSwitches() {
         const auto cfg = KSharedConfig::openConfig();
         const KConfigGroup grp = cfg->group("docker");
@@ -205,28 +207,46 @@ private:
             m_listener->wait(1000);
         }
     }
-
     bool ensureConfigDefaults() {
         const auto cfg = KSharedConfig::openConfig();
         KConfigGroup grp = cfg->group("docker");
-
-        if (!grp.exists()) {
-            const QStringList containers = listAllContainers();
-            if (containers.isEmpty()) {
-                qWarning() << "[docker] No containers found";
-                return false;
-            }
-            
-            for (const auto &name : containers) {
-                if (!grp.hasKey(name)) {
-                    grp.writeEntry(name, false);
-                }
-            }
-            cfg->sync();
+        
+        const QStringList currentContainers = listAllContainers();
+        if (currentContainers.isEmpty()) {
+            qWarning() << "[docker] No containers found";
+            return false;
         }
+        
+        // Get existing config entries
+        const QStringList configContainers = grp.keyList();
+        bool configChanged = false;
+        
+        // Add new containers that aren't in config yet (default to false)
+        for (const QString &containerName : currentContainers) {
+            if (!grp.hasKey(containerName)) {
+                grp.writeEntry(containerName, false);
+                configChanged = true;
+                qDebug() << "[docker] Added new container to config:" << containerName;
+            }
+                }
+        
+        // Remove containers from config that no longer exist
+        for (const QString &configContainer : configContainers) {
+            if (!currentContainers.contains(configContainer)) {
+                grp.deleteEntry(configContainer);
+                configChanged = true;
+                qDebug() << "[docker] Removed unavailable container from config:" << configContainer;
+            }
+        }
+        
+        if (configChanged) {
+            cfg->sync();
+            qDebug() << "[docker] Configuration updated with current containers";
+        }
+        
         return true;
     }
-
+    //Helper function to let us make calls to the docker socket for needed info
     bool callDockerSocket(const QByteArray &request, QByteArray &response) {
         QLocalSocket socket;
         socket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
