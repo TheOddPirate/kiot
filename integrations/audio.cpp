@@ -189,11 +189,11 @@ void Audio::updateAttributes()
         auto state = m_source->state();
         QVariantMap attributes;
         if(state == PulseAudioQt::Device::State::RunningState)
-            attributes["in_use"] = true;
+            attributes["in_use"] = QVariant(true).toString();
         else
-            attributes["in_use"] = false;
+            attributes["in_use"] = QVariant(false).toString();
 
-        attributes["muted"] = m_source->isMuted();
+        attributes["muted"] = QVariant(m_source->isMuted()).toString();
         m_sourceVolume->setAttributes(attributes);
     }
     if(m_sink && m_sinkVolume)
@@ -201,11 +201,11 @@ void Audio::updateAttributes()
         auto state = m_sink->state();
         QVariantMap attributes;
         if(state == PulseAudioQt::Device::State::RunningState)
-            attributes["in_use"] = true;
+            attributes["in_use"] = QVariant(true).toString();
         else
-            attributes["in_use"] = false;
+            attributes["in_use"] = QVariant(false).toString();
 
-        attributes["muted"] = m_sink->isMuted();
+        attributes["muted"] = QVariant(m_sink->isMuted()).toString();
         m_sinkVolume->setAttributes(attributes);
     }
 }
