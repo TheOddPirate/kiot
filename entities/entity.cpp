@@ -113,9 +113,17 @@ void Entity::publishAttributes()
         return;
 
     QJsonObject obj;
-    for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it)
-        obj[it.key()] = QJsonValue::fromVariant(it.value());
-
+    for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it) {
+        QVariant value = it.value();
+        
+        // Konverter bool til lowercase "true"/"false" string
+        if (value.type() == QVariant::Bool) {
+            value = value.toBool() ? "true" : "false";
+        }
+        
+        obj[it.key()] = QJsonValue::fromVariant(value);
+    }
+    
     QJsonDocument doc(obj);
     HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }

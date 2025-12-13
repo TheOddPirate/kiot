@@ -205,7 +205,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
     if(technologyString != "Unknown")
         attributes["technology"] = technologyString;
 
-    attributes["rechargeable"] = battery->isRechargeable();
+    attributes["rechargeable"] =  QVariant( battery->isRechargeable()).toString();
     attributes["udi"] = udi;
   
     if(battery->energy() > 0)
@@ -222,7 +222,7 @@ void BatteryWatcher::updateBatteryAttributes(const QString &udi)
        attributes["vendor"] = device.vendor();
     if ( !device.as<Solid::Battery>()->serial().isEmpty())
        attributes["serial"] = device.as<Solid::Battery>()->serial();        
-    attributes["plugged_in"] = battery->isPowerSupply();
+    attributes["plugged_in"] = QVariant( battery->isPowerSupply()).toString();
     
     // Add time estimates if available
     if (battery->timeToEmpty() > 0) {
