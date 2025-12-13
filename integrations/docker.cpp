@@ -339,41 +339,38 @@ private:
      * @return QStringList Container names, including stopped containers
      * @brief Discovers all available Docker containers
      */
-    QStringList listAllContainers() {
+    QStringList listAllContainers(int retries = 3) {
         QStringList names;
         QByteArray response;
-        
+
         const QByteArray request = "GET /containers/json?all=1 HTTP/1.0\r\n\r\n";
-        if (!callDockerSocket(request, response)) {
-            return names;
-        }
-        
-        const QByteArray body = extractHttpBody(response);
-        if (body.isEmpty()) return names;
-        
-        const QJsonDocument doc = QJsonDocument::fromJson(body);
-        if (!doc.isArray()) {
-            qWarning() << "[docker] Unexpected response format for container list";
-            return names;
+
+        while (retries-- > 0) {
+            if (!callDockerSocket(request, response)) continue;
+            const QByteArray body = extractHttpBody(response);
+            if (body.isEmpty()) continue;
+
+            const QJsonDocument doc = QJsonDocument::fromJson(body);
+            if (!doc.isArray()) {
+                qWarning() << "[docker] Unexpected response format for container list, retries left:" << retries;
+                continue;
+            }
+
+            for (const auto &value : doc.array()) {
+                if (!value.isObject()) continue;
+                const QJsonArray namesArray = value.toObject()["Names"].toArray();
+                if (namesArray.isEmpty()) continue;
+
+                QString name = namesArray.first().toString();
+                if (name.startsWith("/")) name.remove(0, 1);
+                if (!name.isEmpty()) names.append(name);
+            }
+            break;
         }
 
-        for (const auto &value : doc.array()) {
-            if (!value.isObject()) continue;
-            
-            const QJsonArray namesArray = value.toObject()["Names"].toArray();
-            if (namesArray.isEmpty()) continue;
-            
-            QString name = namesArray.first().toString();
-            if (name.startsWith("/")) {
-                name.remove(0, 1);
-            }
-            
-            if (!name.isEmpty()) {
-                names.append(name);
-            }
-        }
         return names;
     }
+
     
     /**
      * Checks if a specific container is currently running
