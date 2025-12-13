@@ -90,6 +90,7 @@ void Entity::sendRegistration()
     
         }
     }
+    config["json_attributes_topic"] = baseTopic() + "/attributes"; // ny topic for attributes
     if (!config.contains("device")) {
         config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
     }
@@ -98,4 +99,23 @@ void Entity::sendRegistration()
     if (id() != "connected") { //special case
         HaControl::mqttClient()->publish(hostname() + "/connected", "on", 0, false);
     }
+}
+
+void Entity::setAttributes(const QVariantMap &attrs)
+{
+    m_attributes = attrs;
+    publishAttributes();
+}
+
+void Entity::publishAttributes()
+{
+    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+        return;
+
+    QJsonObject obj;
+    for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it)
+        obj[it.key()] = QJsonValue::fromVariant(it.value());
+
+    QJsonDocument doc(obj);
+    HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }

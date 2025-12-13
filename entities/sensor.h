@@ -14,9 +14,7 @@ public:
     Sensor(QObject *parent = nullptr);
 
     void setState(const QString &state);
-    void setAttributes(const QVariantMap &attrs);
     QString state(){return m_state;};
-    QVariantMap attributes(){return m_attributes;};
 protected:
     void init() override;
 
@@ -25,5 +23,5 @@ private:
     QVariantMap m_attributes;
 
     void publishState();
-    void publishAttributes();
+    
 };

@@ -26,7 +26,8 @@ public:
     QString hostname() const;
     QString baseTopic() const;
     
-
+    void setAttributes(const QVariantMap &attrs);
+    QVariantMap attributes(){ return  m_attributes;}
 protected:
     /**
      * Called on MQTT connect, it may be called more than once
@@ -35,12 +36,14 @@ protected:
     void sendRegistration();
     void setHaType(const QString &newHaType);
     QString haType() const;
-    
+    void publishAttributes();
 
 private:
+    
     QString m_id;
     QString m_name;
     QString m_haIcon = "";
     QString m_haType;
     QVariantMap m_haConfig;
+    QVariantMap m_attributes;
 };
