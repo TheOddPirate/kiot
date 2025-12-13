@@ -25,7 +25,7 @@ private slots:
     void onSourceSelected(const QString &newOption);
     void onSourceVolumeChanged();
     void onSinkVolumeChanged();
-
+    void updateAttributes();
     void setSinkVolume(int v);
     void setSourceVolume(int v);
 
@@ -136,6 +136,13 @@ void Audio::updateSinks()
         m_sinkSelector->setState(m_sink->description());
         connect(m_sink, &PulseAudioQt::VolumeObject::volumeChanged,
                 this, &Audio::onSinkVolumeChanged);
+        connect(m_sink, &PulseAudioQt::VolumeObject::mutedChanged,
+                this, &Audio::updateAttributes);
+        connect(m_sink, &PulseAudioQt::Device::stateChanged,
+                this, &Audio::updateAttributes);
+
+
+        updateAttributes();
     }
     onSinkVolumeChanged();
 }
@@ -162,8 +169,45 @@ void Audio::updateSources()
         m_sourceSelector->setState(m_source->description());
         connect(m_source, &PulseAudioQt::VolumeObject::volumeChanged,
                 this, &Audio::onSourceVolumeChanged);
+        connect(m_source, &PulseAudioQt::VolumeObject::mutedChanged,
+                this, &Audio::updateAttributes);
+        connect(m_source, &PulseAudioQt::Device::stateChanged,
+                this, &Audio::updateAttributes);
+
+
+        updateAttributes();
+        
     }
+    
     onSourceVolumeChanged();
+}
+
+void Audio::updateAttributes()
+{
+    if(m_source && m_sourceVolume)
+    {
+        auto state = m_source->state();
+        QVariantMap attributes;
+        if(state == PulseAudioQt::Device::State::RunningState)
+            attributes["in_use"] = true;
+        else
+            attributes["in_use"] = false;
+
+        attributes["muted"] = m_source->isMuted();
+        m_sourceVolume->setAttributes(attributes);
+    }
+    if(m_sink && m_sinkVolume)
+    {
+        auto state = m_sink->state();
+        QVariantMap attributes;
+        if(state == PulseAudioQt::Device::State::RunningState)
+            attributes["in_use"] = true;
+        else
+            attributes["in_use"] = false;
+
+        attributes["muted"] = m_sink->isMuted();
+        m_sinkVolume->setAttributes(attributes);
+    }
 }
 void Audio::onSinkSelected(const QString &newOption)
 {
