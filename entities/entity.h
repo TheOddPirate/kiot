@@ -37,6 +37,7 @@ protected:
     void setHaType(const QString &newHaType);
     QString haType() const;
     void publishAttributes();
+    QVariant convertForHomeAssistant(const QVariant &value);
 
 private:
     

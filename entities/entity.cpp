@@ -5,6 +5,7 @@
 #include <QHostInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QMqttClient>
 
 Entity::Entity(QObject *parent):
@@ -106,6 +107,42 @@ void Entity::setAttributes(const QVariantMap &attrs)
     m_attributes = attrs;
     publishAttributes();
 }
+//Genereic type converter for use before sending attributes to HA so we are sure they are working in automations
+QVariant Entity::convertForHomeAssistant(const QVariant &value) {
+    switch (value.type()) {
+        case QVariant::Bool:
+            return value.toBool() ? "true" : "false";
+        
+        case QVariant::DateTime:
+            return value.toDateTime().toString(Qt::ISODate);
+        
+        case QVariant::List: {
+            QJsonArray jsonArray;
+            for (const QVariant &item : value.toList()) {
+                jsonArray.append(QJsonValue::fromVariant(item));
+            }
+            return jsonArray;
+        }
+        
+        case QVariant::Map: {
+            QJsonObject jsonObj;
+            QVariantMap map = value.toMap();
+            for (auto it = map.begin(); it != map.end(); ++it) {
+                jsonObj[it.key()] = QJsonValue::fromVariant(it.value());
+            }
+            return jsonObj;
+        }
+        
+        case QVariant::UserType: {
+            // TODO implement custom type converter if needed
+            return value;
+        }
+        
+        default:
+            return value;
+    }
+    return value;
+}
 
 void Entity::publishAttributes()
 {
@@ -114,14 +151,8 @@ void Entity::publishAttributes()
 
     QJsonObject obj;
     for (auto it = m_attributes.constBegin(); it != m_attributes.constEnd(); ++it) {
-        QVariant value = it.value();
-        
-        // Konverter bool til lowercase "true"/"false" string
-        if (value.type() == QVariant::Bool) {
-            value = value.toBool() ? "true" : "false";
-        }
-        
-        obj[it.key()] = QJsonValue::fromVariant(value);
+        QVariant convertedValue = convertForHomeAssistant(it.value());
+        obj[it.key()] = QJsonValue::fromVariant(convertedValue);
     }
     
     QJsonDocument doc(obj);
