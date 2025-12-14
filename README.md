@@ -206,7 +206,8 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 1. **Graphical Configuration UI** - Simplify setup without manual config file editing
 2. **Enhanced Integration** - More desktop environment features and system monitoring
 3. **Better Documentation** - Comprehensive guides and examples
-4. **Plugin System** - Allow community developed integrations
+4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
+
 
 ## Contributing
 
