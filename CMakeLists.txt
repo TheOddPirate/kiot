@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(kiot)
-set(PROJECT_VERSION "0.1")
+set(PROJECT_VERSION "0.2")
 set(PROJECT_VERSION_MAJOR 0)
+#For automatic firmware updates in connected node
+add_definitions(-DKIOT_VERSION="${PROJECT_VERSION}")
 
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.15")
