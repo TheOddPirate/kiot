@@ -26,9 +26,18 @@ void Camera::init()
 
     // MQTT topics
     setDiscoveryConfig("topic", baseTopic()); // state/topic for image
-    setDiscoveryConfig("encoding", "base64"); 
-
+    setDiscoveryConfig("image_encoding", "b64");
+    //This is not suported by default, but can be used to publish a trigger command to update camera image from ha
+    setDiscoveryConfig("command_topic",baseTopic() + "/command");
     sendRegistration();
+
+    //This is not suported by default from Home Assistants MQTT camera integration, 
+    // but lets you publish a command and use it from the signal to trigger a fresh image in a integration
+    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/command");
+    connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
+        qDebug() << name() << "Camera command received:" << QString::fromUtf8(message.payload());
+        emit commandReceived(QString::fromUtf8(message.payload()));
+    });
 }
 
 void Camera::publishImage(const QByteArray &imageDataBase64)

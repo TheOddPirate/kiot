@@ -15,7 +15,8 @@ public:
     Camera(QObject *parent = nullptr);
     void publishImage(const QByteArray &imageDataBase64);
 
-
+Q_SIGNALS:
+    void commandReceived(const QString &command);
 protected:
     void init() override;
 };
