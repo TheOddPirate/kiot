@@ -19,7 +19,6 @@ void Textbox::init()
 {
     setDiscoveryConfig("state_topic", baseTopic());
     setDiscoveryConfig("command_topic", baseTopic() + "/set");
-    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes");
 
     sendRegistration();
     setState(m_text);

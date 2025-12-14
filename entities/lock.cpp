@@ -23,7 +23,6 @@ void Lock::init()
     setDiscoveryConfig("state_locked", "true");
     setDiscoveryConfig("state_unlocked", "false");
     setDiscoveryConfig("device_class", "lock");
-    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); 
 
 
     sendRegistration();

@@ -91,7 +91,8 @@ void Entity::sendRegistration()
     
         }
     }
-    config["json_attributes_topic"] = baseTopic() + "/attributes"; // ny topic for attributes
+    //Attributes topic, since every mqtt entity looks like it supports attributes
+    config["json_attributes_topic"] = baseTopic() + "/attributes";
     if (!config.contains("device")) {
         config["device"] = QVariantMap({{"identifiers", "linux_ha_bridge_" + hostname() }});
     }
@@ -108,8 +109,11 @@ void Entity::setAttributes(const QVariantMap &attrs)
     publishAttributes();
 }
 //Genereic type converter for use before sending attributes to HA so we are sure they are working in automations
+/*
+
+*/
 QVariant Entity::convertForHomeAssistant(const QVariant &value) {
-    switch (value.type()) {
+    switch (value.typeId()) {
         case QVariant::Bool:
             return value.toBool() ? "true" : "false";
         
