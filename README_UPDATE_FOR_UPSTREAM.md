@@ -1,7 +1,5 @@
 # Kiot - KDE Internet Of Things
 
-This is my personal testing branch. It includes additional integrations and comes with helper scripts to make testing easier.
-
 ## About
 
 Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.
@@ -104,15 +102,9 @@ Compared to similar projects, Kiot focuses on practical desktop integration rath
 | Battery Status | Sensor | Battery charge level and attributes |
 | Do Not Disturb | Binary Sensor | DnD mode status |
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
+| Scripts | Button | Execute custom scripts |
 
-### Experimental Integrations
-| Feature | Entity Type | Description |
-|---------|-------------|-------------|
-| Docker | Switch | Start/stop Docker containers (per-image configuration) |
-| SystemD | Switch | Start/stop user services (per-service configuration) |
-| MPRIS Media Player | Media Player | Media control using [MQTT Media Player integration](https://github.com/bkbilly/mqtt_media_player) |
-| Bluetooth | Switch | Bluetooth adapter control and device connection management |
-| Scripts | Button + Text Input | Execute custom scripts with argument support and custom icons |
+
 
 ## Configuration Examples
 
@@ -131,29 +123,17 @@ useSSL=false
 [Scripts][launch_chrome]
 Name=Launch Chrome
 Exec=google-chrome
-icon=mdi:web
 
-[Scripts][open_url]
-Name=Open URL
-Exec=xdg-open '{arg}'
-icon=mdi:open-in-app
+[Scripts][steam_bigpicture]
+Exec=steam steam://open/bigpicture
+Name=Launch steam bigpicture
 ```
 
-### Docker and SystemD Configuration
-```ini
-[docker]
-nginx=true
-postgres=true
-
-[systemd]
-kiot.service=true
-user-service.service=true
-```
 
 ### Shortcuts Configuration
 ```ini
-[Shortcuts][media_play_pause]
-Name=Media Play/Pause
+[Shortcuts][myShortcut1]
+Name=Do a thing
 # Becomes available in KDE's Global Shortcuts KCM for key assignment
 # Appears as a trigger in Home Assistant for keyboard-driven automations
 ```
@@ -229,5 +209,3 @@ Contributions are welcome!
 - Examine system logs for error messages
 
 ---
-
-**Note:** This is a testing branch with additional features beyond the main repository. Some integrations may be experimental or require specific system configurations.
