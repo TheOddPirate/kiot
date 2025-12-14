@@ -72,6 +72,7 @@ set(SOURCES
     entities/lock.cpp
     entities/mediaplayer.cpp
     entities/notify.cpp
+    entities/camera.cpp
 )
 
 add_subdirectory(integrations)

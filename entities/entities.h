@@ -12,3 +12,4 @@
 #include "textbox.h"
 #include "mediaplayer.h"
 #include "notify.h"
+#include "camera.h"

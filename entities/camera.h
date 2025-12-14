@@ -13,7 +13,7 @@ class Camera : public Entity
     Q_OBJECT
 public:
     Camera(QObject *parent = nullptr);
-
+    void publishImage(const QByteArray &imageDataBase64);
 
 
 protected:

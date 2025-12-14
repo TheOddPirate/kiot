@@ -1,4 +1,5 @@
 build/
+build-dir/
 CMakeLists.txt.user
 backups/
 kiot.code-workspace

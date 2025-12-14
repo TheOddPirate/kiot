@@ -26,7 +26,6 @@ void Camera::init()
 
     // MQTT topics
     setDiscoveryConfig("topic", baseTopic()); // state/topic for image
-    setDiscoveryConfig("json_attributes_topic", baseTopic() + "/attributes"); 
     setDiscoveryConfig("encoding", "base64"); 
 
     sendRegistration();
@@ -44,14 +43,15 @@ void Camera::publishImage(const QByteArray &imageDataBase64)
     QVariantMap attrs;
     attrs["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
     attrs["size_bytes"] = imageDataBase64.size();
-    publishAttributes(attrs);
+    setAttributes(attrs);
 }
 
-// Just example of how to send a screenshot here
-void publishScreenshot()
-{
-    QScreen *screen = QGuiApplication::primaryScreen();
-    if (!screen) return;
+/*
+ * Just example of how to send a screenshot here
+ * void publishScreenshot()
+ * {
+ *     QScreen *screen = QGuiApplication::primaryScreen();
+ *     if (!screen) return;
 
     QPixmap pixmap = screen->grabWindow(0);
     QByteArray bytes;
@@ -62,3 +62,4 @@ void publishScreenshot()
     QByteArray base64Image = bytes.toBase64();
     publishImage(base64Image);
 }
+*/
