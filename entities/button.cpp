@@ -1,5 +1,8 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
+
+// Based on Home Assistant's MQTT button integration documentation:
+// https://www.home-assistant.io/integrations/button.mqtt/
 #include "button.h"
 #include "core.h"
 #include <QMqttSubscription>

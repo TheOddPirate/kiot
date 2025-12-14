@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+// Based on Home Assistant's MQTT sensor integration documentation:
+// https://www.home-assistant.io/integrations/sensor.mqtt/
 #include "sensor.h"
 #include "core.h"
 #include <QJsonDocument>

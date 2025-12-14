@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+// Based on Home Assistant's MQTT select integration documentation:
+// https://www.home-assistant.io/integrations/select.mqtt/
 #include "select.h"
 #include "core.h"
 #include <QMqttClient>

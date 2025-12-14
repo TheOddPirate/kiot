@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+// Based on Home Assistant's MQTT text integration documentation:
+// https://www.home-assistant.io/integrations/text.mqtt/
+
 #include "textbox.h"
 #include "core.h"
 #include <QMqttSubscription>

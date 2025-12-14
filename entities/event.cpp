@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+
+// Based on Home Assistant's MQTT  Device trigger integration documentation:
+//https://www.home-assistant.io/integrations/device_trigger.mqtt/
+
 #include "event.h"
 #include "core.h"
 #include <QMqttClient>
