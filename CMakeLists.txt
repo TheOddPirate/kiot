@@ -71,6 +71,7 @@ set(SOURCES
     entities/textbox.cpp
     entities/lock.cpp
     entities/mediaplayer.cpp
+    entities/notify.cpp
 )
 
 add_subdirectory(integrations)
