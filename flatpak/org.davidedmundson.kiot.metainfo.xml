@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>org.davidedmundson.kiot</id>
+  
+  <name>kiot</name>
+  <summary>KDE Internet Of Things</summary>
+  
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>LGPL-2.1-or-later</project_license>
+  
+  <description>
+    <p>
+      Kiot (KDE Internet Of Things) is a background daemon that exposes useful information and actions from your local desktop session to a home automation controller like Home Assistant.
+    </p>
+    <p>
+      
+    </p>
+  </description>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Prototype settings page</caption>
+      <image>https://private-user-images.githubusercontent.com/2776077/525627954-028138fb-94bb-49f9-94bb-b354009c55d2.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjU4Mjc1MzYsIm5iZiI6MTc2NTgyNzIzNiwicGF0aCI6Ii8yNzc2MDc3LzUyNTYyNzk1NC0wMjgxMzhmYi05NGJiLTQ5ZjktOTRiYi1iMzU0MDA5YzU1ZDIucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI1MTIxNSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNTEyMTVUMTkzMzU2WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9MDkwM2Y0ZTFlNGIwYTBiMTU3NDdkN2YzMzVlYThhZmIwMjQ1NzdmNmE5YjBkZDUxNGFiOTIzNzRkMDYyM2UxMCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.T7PUvKoDUUolJsVyNptJ1jB0exJ4OOcjfh7ZEXp5IL4</image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://github.com/davidedmundson/kiot</url>
+  <icon type="stock">org.davidedmundson.kiot.svg</icon>
+  
+  <categories>
+    <category>System</category>
+    <category>KDE</category>
+  </categories>
+  
+  <provides>
+    <binary>kiot</binary>
+  </provides>
+</component>

@@ -36,3 +36,4 @@
 #include "mediaplayer.h"
 #include "notify.h"
 #include "camera.h"
+#include "update.h"

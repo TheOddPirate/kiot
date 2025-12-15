@@ -3,3 +3,4 @@ build-dir/
 CMakeLists.txt.user
 backups/
 kiot.code-workspace
+flatpak-repo/

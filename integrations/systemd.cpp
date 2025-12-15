@@ -10,7 +10,8 @@
 #include <QDBusMessage>
 #include <QRegularExpression>
 #include <QProcess>
-
+#include <QTimer>
+#include <QFileInfo>
 #include <KConfigGroup>
 #include <KProcess>
 
@@ -22,13 +23,14 @@ public:
     ~SystemDWatcher() = default;
 
     bool ensureConfig();
-    bool init();
+    void delayedInit();
 
 private slots:
     void onUnitPropertiesChanged(const QString &interface,
                                  const QVariantMap &changedProps,
                                  const QStringList &invalidatedProps,
                                  const QDBusMessage &msg);
+    void performInit();
 
 private:
     KSharedConfig::Ptr cfg;
@@ -36,7 +38,9 @@ private:
     QDBusInterface *m_systemdUser = nullptr;
     QString sanitizeServiceId(const QString &svc);
     QStringList listUserServices() const;
+
     QString pathToUnitName(const QString &path) const;
+    bool m_initialized = false;
 };
 
 namespace {
@@ -47,11 +51,7 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
     : QObject(parent)
 {
     cfg = KSharedConfig::openConfig("kiotrc");
-    if (!ensureConfig()) {
-        qWarning() << "SystemD: Failed to ensure config, aborting";
-        return;
-    }
-
+    
     m_systemdUser = new QDBusInterface(
         "org.freedesktop.systemd1",
         "/org/freedesktop/systemd1",
@@ -65,10 +65,8 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
         return;
     }
 
-    if (!init()) {
-        qWarning() << "SystemD: Initialization failed";
-        return;
-    }
+    // Use single-shot timer to delay initialization
+    QTimer::singleShot(1000, this, &SystemDWatcher::delayedInit);
 }
 
 // Ensure SystemD integration is enabled and create config entries
@@ -79,25 +77,53 @@ bool SystemDWatcher::ensureConfig()
         qWarning() << "Aborting: SystemD integration disabled, should not be running";
         return false;
     }
-    // TODO clean up in services no longer available to make sure config is clean
+    
+    // Don't list services here - do it in delayed initialization
     KConfigGroup grp(cfg, "systemd");
     if (!grp.exists()) {
-        for (const QString &svc : listUserServices()) {
-            grp.writeEntry(svc, false); // default: disabled
-        }
+        // Create empty config group, will be populated later
+        grp.writeEntry("initialized", false);
         cfg->sync();
     }
     return true;
 }
 
-// Initialize switches and query initial state
-bool SystemDWatcher::init()
+void SystemDWatcher::delayedInit()
 {
-    KConfigGroup grp(cfg, "systemd");
-    if (!grp.exists()) 
-        return false;
+    if (!ensureConfig()) {
+        qWarning() << "SystemD: Failed to ensure config, aborting";
+        return;
+    }
+    
+    // Use another timer to ensure we're fully initialized
+    QTimer::singleShot(500, this, &SystemDWatcher::performInit);
+}
 
-    for (const QString &svc : listUserServices()) {
+void SystemDWatcher::performInit()
+{
+    if (m_initialized) {
+        return;
+    }
+    
+    KConfigGroup grp(cfg, "systemd");
+    
+    // Get services list
+    QStringList services = listUserServices();
+    
+    // Update config with current services if needed
+    bool configUpdated = false;
+    for (const QString &svc : services) {
+        if (!grp.hasKey(svc)) {
+            grp.writeEntry(svc, false); // default: disabled
+            configUpdated = true;
+        }
+    }
+    if (configUpdated) {
+        cfg->sync();
+    }
+    
+    // Initialize switches for enabled services
+    for (const QString &svc : services) {
         if (!grp.hasKey(svc) || !grp.readEntry(svc, false))
             continue; // skip disabled
 
@@ -133,19 +159,30 @@ bool SystemDWatcher::init()
             );
         }
 
-        // Connect switch to systemctl for toggling service
-        connect(sw, &Switch::stateChangeRequested, this, [svc](bool state) {
-            QString cmd = state ? "start" : "stop"; 
-            KProcess *p = new KProcess(); 
-            p->setShellCommand("systemctl --user " + cmd + " " + svc); 
-            p->startDetached(); 
-            qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
+        // Connect switch to D-Bus for toggling service (works in flatpak)
+        connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
+            if (!m_systemdUser || !m_systemdUser->isValid()) {
+                qWarning() << "SystemD: D-Bus interface not available for toggling service";
+                return;
+            }
+            
+            QString method = state ? "StartUnit" : "StopUnit";
+            QString mode = "replace"; // replace existing job if any
+            
+            QDBusReply<QDBusObjectPath> reply = m_systemdUser->call(method, svc, mode);
+            if (!reply.isValid()) {
+                qWarning() << "SystemD: Failed to" << (state ? "start" : "stop") 
+                           << "service" << svc << ":" << reply.error().message();
+            } else {
+                qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
+            }
         });
 
         m_serviceSwitches[svc] = sw;
     }
-
-    return true;
+    
+    m_initialized = true;
+    qDebug() << "SystemD: Initialized" << m_serviceSwitches.size() << "service switches";
 }
 
 QString SystemDWatcher::sanitizeServiceId(const QString &svc)
@@ -155,21 +192,41 @@ QString SystemDWatcher::sanitizeServiceId(const QString &svc)
     return id;
 }
 
-// List all user services (*.service)
+// List all user services (*.service) - Use ListUnitFiles which actually works
 QStringList SystemDWatcher::listUserServices() const
 {
     QStringList services;
-    QProcess p;
-    p.start("systemctl", {"--user", "list-unit-files", "--type=service", "--no-pager", "--no-legend"});
-    p.waitForFinished(3000);
-    QString output = p.readAllStandardOutput();
-    for (const QString &line : output.split("\n", Qt::SkipEmptyParts)) {
-        QString svc = line.section(' ', 0, 0);
-        if (!svc.isEmpty())
-            services.append(svc);
+
+    QDBusMessage reply = m_systemdUser->call("ListUnitFiles");
+    if (reply.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "SystemD: ListUnitFiles failed:" << reply.errorMessage();
+        return services;
     }
+
+    const QDBusArgument arg = reply.arguments().first().value<QDBusArgument>();
+
+    arg.beginArray();
+    while (!arg.atEnd()) {
+        arg.beginStructure();
+
+        QString path;
+        QString state;
+        arg >> path >> state;
+
+        arg.endStructure();
+
+        const QString unit = QFileInfo(path).fileName();
+        if (unit.endsWith(".service")) {
+            services.append(unit);
+        }
+    }
+    arg.endArray();
+
+
     return services;
 }
+
+
 
 // Convert D-Bus path to proper unit name
 QString SystemDWatcher::pathToUnitName(const QString &path) const

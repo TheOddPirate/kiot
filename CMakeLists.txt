@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(kiot)
-set(PROJECT_VERSION "0.2")
+set(PROJECT_VERSION "0.1")
 set(PROJECT_VERSION_MAJOR 0)
 #For automatic firmware updates in connected node
 add_definitions(-DKIOT_VERSION="${PROJECT_VERSION}")
@@ -79,6 +79,11 @@ set(SOURCES
 
 add_subdirectory(integrations)
 add_subdirectory(ui)
+option(BUILD_FLATPAK "Build and install Flatpak metadata" OFF)
+
+if(BUILD_FLATPAK)
+    add_subdirectory(flatpak)
+endif()
 
 add_executable(kiot ${SOURCES})
 
@@ -91,6 +96,8 @@ target_link_libraries(
     KF6::CoreAddons
     KF6::DBusAddons
 )
+
+
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 

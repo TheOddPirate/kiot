@@ -20,6 +20,8 @@ while true; do
     echo "1 Install dependencies (Arch/Debian, tested on Manjaro via pacman)"
     echo "2 Build kiot"
     echo "3 Build and install kiot (will ask for sudo)"
+    # TODO ccreate native build and install menu
+    echo "4 Flatpak build and install menu"
     echo
     echo "======================================="
     read -rp "Select an option: " choice
@@ -42,6 +44,11 @@ while true; do
         3)
             echo "Building and installing kiot..."
             bash "$SCRIPTS_PATH/install.sh"
+            pause
+            ;;
+        4)
+            echo "Building and installing kiot flatpak..."
+            bash "$SCRIPTS_PATH/build_flatpak_installer.sh"
             pause
             ;;
         *)

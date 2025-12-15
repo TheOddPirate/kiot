@@ -1,5 +1,6 @@
 id: org.davidedmundson.kiot
 branch: master
+version: 0.1
 runtime: org.kde.Platform
 runtime-version: "6.10" # don't forget to change QtMqtt
 sdk: org.kde.Sdk
@@ -10,6 +11,7 @@ desktop-file-name-suffix: " (Nightly)"
 finish-args:
   - "--share=ipc"
   - "--share=network"
+  - "--filesystem=/run/docker.sock"
   - "--device=all"
   - "--socket=wayland"
   - "--socket=fallback-x11"
@@ -21,6 +23,7 @@ finish-args:
   - "--talk-name=org.kde.StatusNotifierWatcher"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--talk-name=org.kde.KWin"
+  - "--talk-name=org.freedesktop.systemd1"
 
 
 
@@ -58,4 +61,6 @@ modules:
     sources:
       - type: dir
         path: "."
-
+    config-opts:
+      - -DBUILD_FLATPAK=ON
+  

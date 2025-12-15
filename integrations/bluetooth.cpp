@@ -6,7 +6,7 @@
 #include <BluezQt/Manager>
 #include <BluezQt/Adapter>
 #include <BluezQt/Device>
-#include <BluezQt/Battery>
+//#include <BluezQt/Battery>
 #include <BluezQt/InitManagerJob>
 
 
@@ -89,9 +89,9 @@ private:
         QVariantMap attrs;
         attrs["MAC"] = m_device->address();
         attrs["RSSI"] = m_device->rssi();
-        auto battery = m_device->battery();
-        if (battery)
-            attrs["Battery"] = battery->percentage(); 
+        //auto battery = m_device->battery();
+        //if (battery)
+        //    attrs["Battery"] = battery->percentage(); 
 
         attrs["Paired"] = m_device->isPaired();
         attrs["Trusted"] = m_device->isTrusted();
