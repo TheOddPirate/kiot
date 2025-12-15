@@ -27,9 +27,10 @@ modules:
   - name: extra-cmake-modules
     buildsystem: cmake-ninja
     sources:
-      - type: archive
-        url: https://download.kde.org/stable/frameworks/6.21/extra-cmake-modules-6.21.0.tar.xz
-        sha256: 267c5467cd6555a0af0d4010f0ec06971f80f1bd5c90563424a8593bc0976a70
+      - type: git
+        url: https://invent.kde.org/frameworks/extra-cmake-modules
+        tag: v6.21.0
+
   - name: qtmqtt
     buildsystem: cmake-ninja
     sources:
@@ -43,7 +44,7 @@ modules:
       - type: git
         url: https://invent.kde.org/libraries/pulseaudio-qt
         tag: v1.7.0
-        
+
   - name: bluez-qt
     buildsystem: cmake-ninja
     sources:
