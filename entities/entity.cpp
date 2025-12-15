@@ -146,7 +146,11 @@ void Entity::setHaIcon(const QString &newHaIcon)
  */
 QString Entity::haIcon() const
 {
-    return  m_haIcon;
+    if (!m_haIcon.isEmpty()) {
+        return m_haIcon;
+    }
+
+    return m_haConfig.value("icon").toString();
 }
 
 /**
@@ -160,6 +164,10 @@ QString Entity::haIcon() const
  */
  QString Entity::id() const
 {
+    if (m_id.isEmpty()) {
+        qWarning() << "Entity ID not set for entity" << name()
+                   << " remember to use setId(IDstring)";
+    }
     return m_id;
 }
 
@@ -221,9 +229,9 @@ void Entity::sendRegistration()
         config["availability_topic"] = hostname() + "/connected";
         config["payload_available"] = "on";
         config["payload_not_available"] = "off";
-        if (!haIcon().isEmpty()){
-            config["icon"] = haIcon();
-    
+        const QString icon = haIcon();
+        if (!icon.isEmpty()) {
+            config["icon"] = icon;
         }
     }
     //Attributes topic, since every mqtt entity looks like it supports attributes
@@ -307,6 +315,42 @@ QVariant Entity::convertForHomeAssistant(const QVariant &value) {
     return value;
 }
 
+/**
+ * @brief Publishes current entity attributes to Home Assistant via MQTT
+ * 
+ * @details
+ * This method publishes the entity's current attributes to Home Assistant
+ * through the MQTT attributes topic. Attributes provide additional contextual
+ * information about the entity's state beyond the primary value.
+ * 
+ * The method performs the following steps:
+ * 1. Checks if the MQTT client is connected (returns early if not)
+ * 2. Converts all attributes to Home Assistant-compatible formats using
+ *    convertForHomeAssistant()
+ * 3. Serializes the attributes to JSON format
+ * 4. Publishes the JSON data to the entity's attributes topic with
+ *    retained flag set to true
+ * 
+ * The attributes are published to the topic pattern:
+ * `[hostname]/[entity_id]/attributes`
+ * 
+ * Example published JSON:
+ * @code
+ * {
+ *   "timestamp": "2025-01-15T10:30:00Z",
+ *   "battery_level": 75,
+ *   "charging": "true",
+ *   "temperature": 25.5
+ * }
+ * @endcode
+ * 
+ * @note The method uses retained messages (flag=true) so Home Assistant
+ *       receives the latest attributes even if it restarts or reconnects
+ * @note Attributes are only published when the MQTT client is connected
+ * @note The JSON is compact (no whitespace) to minimize bandwidth usage
+ * @see setAttributes() for setting attribute values
+ * @see convertForHomeAssistant() for attribute value conversion
+ */
 void Entity::publishAttributes()
 {
     if (HaControl::mqttClient()->state() != QMqttClient::Connected)
