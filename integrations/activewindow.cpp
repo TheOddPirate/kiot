@@ -92,8 +92,12 @@ bool ActiveWindowWatcher::registerKWinScript()
     }
     if (m_scriptPath.startsWith(QLatin1String("/app/")))
     {
-        QFile::copy(m_scriptPath, "/var/config/activewindow_kwin.js");
-        m_scriptPath =    QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/activewindow_kwin.js";
+        if( !QDir("/var/cache/kiot/").exists())
+        {
+            QDir().mkdir("/var/cache/kiot/");
+        }
+        QFile::copy(m_scriptPath, "/var/cache/kiot/activewindow_kwin.js");
+        m_scriptPath =    QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/activewindow_kwin.js";
     }
     QDBusMessage reply = m_kwinIface->call("loadScript", m_scriptPath, "kiot_activewindow");
     if (reply.type() == QDBusMessage::ErrorMessage) {
