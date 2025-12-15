@@ -16,6 +16,7 @@ public:
         : KQuickManagedConfigModule(parent, metaData)
         , m_settings(new KiotSettings(KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig), this))
     {
+        Q_UNUSED(args);
         setButtons(Apply | Default);
         qDebug() << m_settings->host() << m_settings->config()->name();
     }
