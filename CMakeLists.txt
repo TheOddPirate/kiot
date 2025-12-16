@@ -62,6 +62,8 @@ set(SOURCES
     core.cpp
     dbusproperty.cpp
     dbusproperty.h
+    flatpakhelper.cpp
+    flatpakhelper.h
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp
@@ -101,7 +103,8 @@ target_link_libraries(
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
-ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
-
+if(NOTBUILD_FLATPAK)
+    ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+    ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
+endif()
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
+#include "flatpakhelper.h"
 #include "entities/entities.h"
 #include <QAction>
 #include <KProcess>
@@ -51,15 +52,11 @@ void registerScripts()
                 ex = ex.replace("{arg}",textb->state());
                 textb->setState(""); //Clears the textbox after use, should it be kept?
             }
-            // TODO find better way to detect flatpak
-            if(QDir("/app/").exists())
-            {
-               qDebug() << "Flatpak detected, using flatpak-spawn";
-               ex = "flatpak-spawn --host " + ex + "";
-            }
+
             // DAVE TODO flatpak escaping
+            // Is more or less escaped now
             KProcess *p = new KProcess();
-            p->setShellCommand(ex);
+            p->setShellCommand(FlatpakHelper::adaptCommand(ex));
             p->startDetached();
             delete p;
         });
