@@ -4,8 +4,8 @@
 #include "core.h"
 #include "entities/entities.h"
 #include <QAction>
+
 #include <KProcess>
-#include <QDir>
 #include <KConfigGroup>
 #include <KSandbox>
 void registerScripts()
