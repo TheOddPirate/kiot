@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core.h"
-#include "flatpakhelper.h"
 #include "entities/entities.h"
 #include <QAction>
 #include <KProcess>
 #include <QDir>
 #include <KConfigGroup>
+#include <KSandbox>
 void registerScripts()
 {
     qInfo() << "Loading scripts";
@@ -52,11 +52,21 @@ void registerScripts()
                 ex = ex.replace("{arg}",textb->state());
                 textb->setState(""); //Clears the textbox after use, should it be kept?
             }
+            qDebug() << "Running script " << scriptId << " with command " << ex;
+            QStringList args = QProcess::splitCommand(ex);  
+            QString program = args.takeFirst();           
 
-            // DAVE TODO flatpak escaping
-            // Is more or less escaped now
             KProcess *p = new KProcess();
-            p->setShellCommand(FlatpakHelper::adaptCommand(ex));
+            p->setProgram(program);
+            p->setArguments(args);
+
+            if (KSandbox::isFlatpak()) {
+            // lager host context
+                KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*p);
+                p->setProgram(ctx.program);
+                p->setArguments(ctx.arguments);
+            }
+
             p->startDetached();
             delete p;
         });
