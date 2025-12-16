@@ -23,7 +23,7 @@ public:
     ~SystemDWatcher() = default;
 
     bool ensureConfig();
-    void delayedInit();
+
 
 private slots:
     void onUnitPropertiesChanged(const QString &interface,
@@ -66,7 +66,8 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
     }
 
     // Use single-shot timer to delay initialization
-    QTimer::singleShot(1000, this, &SystemDWatcher::delayedInit);
+    //QTimer::singleShot(1000, this, &SystemDWatcher::delayedInit);
+    performInit();
 }
 
 // Ensure SystemD integration is enabled and create config entries
@@ -88,16 +89,6 @@ bool SystemDWatcher::ensureConfig()
     return true;
 }
 
-void SystemDWatcher::delayedInit()
-{
-    if (!ensureConfig()) {
-        qWarning() << "SystemD: Failed to ensure config, aborting";
-        return;
-    }
-    
-    // Use another timer to ensure we're fully initialized
-    QTimer::singleShot(500, this, &SystemDWatcher::performInit);
-}
 
 void SystemDWatcher::performInit()
 {
@@ -129,11 +120,12 @@ void SystemDWatcher::performInit()
 
         auto *sw = new Switch(this);
         sw->setId("systemd_" + sanitizeServiceId(svc));
-        sw->setName(svc);
-
+        sw->setName(sanitizeServiceId(svc));
+        sw->setState(false);//temp
         // Query initial state from D-Bus
         QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("GetUnit", svc);
         if (unitPathReply.isValid()) {
+            qDebug() << "Getting inital state for " << svc;
             QDBusObjectPath unitPath = unitPathReply.value();
 
             QDBusInterface unitIface(
@@ -147,6 +139,9 @@ void SystemDWatcher::performInit()
             if (stateReply.isValid()) {
                 sw->setState(stateReply.value().toString() == "active");
             }
+            else{
+                qDebug() << "Failed to get state for " << svc << ": " << stateReply.error().message();
+            }
 
             // Listen for live property changes
             QDBusConnection::sessionBus().connect(
@@ -157,10 +152,15 @@ void SystemDWatcher::performInit()
                 this,
                 SLOT(onUnitPropertiesChanged(QString,QVariantMap,QStringList,QDBusMessage))
             );
+            qDebug() << "Connected to " << unitPath.path();
         }
+        connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state){
+            qDebug() << "Statechange for " << svc << " requested";
+        });
 
         // Connect switch to D-Bus for toggling service (works in flatpak)
         connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
+            qDebug() << "Statechange for  requested";
             if (!m_systemdUser || !m_systemdUser->isValid()) {
                 qWarning() << "SystemD: D-Bus interface not available for toggling service";
                 return;
@@ -177,7 +177,6 @@ void SystemDWatcher::performInit()
                 qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
             }
         });
-
         m_serviceSwitches[svc] = sw;
     }
     
