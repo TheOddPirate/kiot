@@ -18,7 +18,7 @@ finish-args:
   - "--socket=pulseaudio"
   - "--filesystem=home:rw"
   - "--filesystem=/run/docker.sock"
-  - "--filesystem=xdg-config/kiotrc"
+  - "--filesystem=xdg-config/kiotrc:rw"
   - "--own-name=org.kde.StatusNotifierItem-2-2"
   - "--own-name=org.davidedmundson.kiot"
   - "--talk-name=org.kde.StatusNotifierWatcher"
