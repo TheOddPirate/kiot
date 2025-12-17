@@ -25,7 +25,7 @@ finish-args:
   - "--talk-name=org.kde.KWin"
   - "--talk-name=org.bluez"
   - "--talk-name=org.freedesktop.Flatpak"
-
+  - "--talk-name=org.mpris.MediaPlayer2"
 
 
 modules:
