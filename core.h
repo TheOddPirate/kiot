@@ -4,7 +4,7 @@
 #pragma once
 
 #include <QCoreApplication>
-#include <QDebug>
+
 #include <QObject>
 #include <QVariantMap>
 #include <QMqttSubscription>

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
-
+// TODO rewrite ensureconfig to follow docker integrations layout
 #include "core.h"
 #include "entities/entities.h"
 
@@ -14,6 +14,10 @@
 #include <QFileInfo>
 #include <KConfigGroup>
 #include <KProcess>
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(SystemD)
+Q_LOGGING_CATEGORY(SystemD, "integration.SystemD")
+
 
 class SystemDWatcher : public QObject
 {
@@ -61,7 +65,7 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
     );
 
     if (!m_systemdUser->isValid()) {
-        qWarning() << "SystemDWatcher: Failed to connect to systemd user D-Bus";
+        qCWarning(SystemD) << "Failed to connect to systemd user D-Bus";
         return;
     }
 
@@ -75,7 +79,7 @@ bool SystemDWatcher::ensureConfig()
 {
     KConfigGroup intgrp(cfg, "Integrations");
     if (!intgrp.readEntry("SystemD", false)) {
-        qWarning() << "Aborting: SystemD integration disabled, should not be running";
+        qCWarning(SystemD) << "Aborting: integration disabled";
         return false;
     }
     
@@ -123,9 +127,9 @@ void SystemDWatcher::performInit()
         sw->setName(sanitizeServiceId(svc));
         sw->setState(false);//temp
         // Query initial state from D-Bus
-        QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("GetUnit", svc);
+        QDBusReply<QDBusObjectPath> unitPathReply = m_systemdUser->call("LoadUnit", svc);
         if (unitPathReply.isValid()) {
-            qDebug() << "Getting inital state for " << svc;
+            qCDebug(SystemD) << "Getting inital state for " << svc;
             QDBusObjectPath unitPath = unitPathReply.value();
 
             QDBusInterface unitIface(
@@ -140,7 +144,7 @@ void SystemDWatcher::performInit()
                 sw->setState(stateReply.value().toString() == "active");
             }
             else{
-                qDebug() << "Failed to get state for " << svc << ": " << stateReply.error().message();
+                qCDebug(SystemD) << "Failed to get state for " << svc << ": " << stateReply.error().message();
             }
 
             // Listen for live property changes
@@ -152,17 +156,14 @@ void SystemDWatcher::performInit()
                 this,
                 SLOT(onUnitPropertiesChanged(QString,QVariantMap,QStringList,QDBusMessage))
             );
-            qDebug() << "Connected to " << unitPath.path();
+        }else {
+            qCWarning(SystemD) << "Failed to get unit path for " << svc << ": " << unitPathReply.error().message();
         }
-        connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state){
-            qDebug() << "Statechange for " << svc << " requested";
-        });
 
         // Connect switch to D-Bus for toggling service (works in flatpak)
         connect(sw, &Switch::stateChangeRequested, this, [this, svc](bool state) {
-            qDebug() << "Statechange for  requested";
             if (!m_systemdUser || !m_systemdUser->isValid()) {
-                qWarning() << "SystemD: D-Bus interface not available for toggling service";
+                qCWarning(SystemD) << "SystemD: D-Bus interface not available for toggling service";
                 return;
             }
             
@@ -171,17 +172,17 @@ void SystemDWatcher::performInit()
             
             QDBusReply<QDBusObjectPath> reply = m_systemdUser->call(method, svc, mode);
             if (!reply.isValid()) {
-                qWarning() << "SystemD: Failed to" << (state ? "start" : "stop") 
+                qCWarning(SystemD) << "SystemD: Failed to" << (state ? "start" : "stop") 
                            << "service" << svc << ":" << reply.error().message();
             } else {
-                qDebug() << "Toggled service" << svc << "to" << (state ? "start" : "stop");
+                //qCDebug(SystemD) << "Toggled service" << svc << "to" << (state ? "start" : "stop");
             }
         });
         m_serviceSwitches[svc] = sw;
     }
     
     m_initialized = true;
-    qDebug() << "SystemD: Initialized" << m_serviceSwitches.size() << "service switches";
+    qCInfo(SystemD) << "SystemD: Initialized" << m_serviceSwitches.size() << "service switches";
 }
 
 QString SystemDWatcher::sanitizeServiceId(const QString &svc)
@@ -198,7 +199,7 @@ QStringList SystemDWatcher::listUserServices() const
 
     QDBusMessage reply = m_systemdUser->call("ListUnitFiles");
     if (reply.type() == QDBusMessage::ErrorMessage) {
-        qWarning() << "SystemD: ListUnitFiles failed:" << reply.errorMessage();
+        qCWarning(SystemD) << "SystemD: ListUnitFiles failed:" << reply.errorMessage();
         return services;
     }
 
@@ -254,7 +255,7 @@ void SystemDWatcher::onUnitPropertiesChanged(const QString &interface,
         QString state = changedProps["ActiveState"].toString();
         if (m_serviceSwitches[unitName]->state() != (state == "active")) {
             m_serviceSwitches[unitName]->setState(state == "active");
-            qDebug() << "Updated state for" << unitName << "to" << state;
+            qCInfo(SystemD) << "Updated state for" << unitName << "to" << (state == "active");
         }
     }
 }

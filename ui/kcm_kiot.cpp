@@ -7,6 +7,10 @@
 
 #include "kiotsettings.h"
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(ui)
+Q_LOGGING_CATEGORY(ui, "ui.kcm")
+
 class KCMKiot : public KQuickManagedConfigModule
 {
     Q_OBJECT
@@ -18,7 +22,7 @@ public:
     {
         Q_UNUSED(args);
         setButtons(Apply | Default);
-        qDebug() << m_settings->host() << m_settings->config()->name();
+        qCDebug(ui) << m_settings->host() << m_settings->config()->name();
     }
 
     KiotSettings *settings() const { return m_settings; }

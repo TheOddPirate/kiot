@@ -8,9 +8,11 @@
 #include <KProcess>
 #include <KConfigGroup>
 #include <KSandbox>
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(Scripts)
+Q_LOGGING_CATEGORY(Scripts, "integration.Scripts")
 void registerScripts()
 {
-    qInfo() << "Loading scripts";
     auto scriptConfigToplevel = KSharedConfig::openConfig()->group("Scripts");
     const QStringList scriptIds = scriptConfigToplevel.groupList();
     // TODO make sure this is the best way to support input variables
@@ -22,7 +24,7 @@ void registerScripts()
         const QString exec = scriptConfig.readEntry("Exec");
 
         if (exec.isEmpty()) {
-            qWarning() << "Could not find script Exec entry for" << scriptId;
+            qCWarning(Scripts) << "Could not find script Exec entry for" << scriptId;
             continue;
         }
         //Creates a shared textbox for input variables to script only if user has defined {arg} in the Exec line
@@ -42,17 +44,14 @@ void registerScripts()
         // maybe via some substitution in the exec line
         // I tried to include some substitution and support for custom icons, it it okay?
         QObject::connect(button, &Button::triggered, qApp, [exec, scriptId,textb]() {
-            qInfo() << "Running script " << scriptId;
             // TODO make this better
             QString ex = exec;
             if(exec.contains("{arg}")  && textb != nullptr)
             {
-
-                qDebug() << "customizing exec \""<< ex << "\" to: \""  << ex.replace("{arg}",textb->state()) << "\"";
                 ex = ex.replace("{arg}",textb->state());
                 textb->setState(""); //Clears the textbox after use, should it be kept?
             }
-            qDebug() << "Running script " << scriptId << " with command " << ex;
+            qCInfo(Scripts) << "Running script " << scriptId << " with command " << ex;
             QStringList args = QProcess::splitCommand(ex);  
             QString program = args.takeFirst();           
 
@@ -61,7 +60,6 @@ void registerScripts()
             p->setArguments(args);
 
             if (KSandbox::isFlatpak()) {
-            // lager host context
                 KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*p);
                 p->setProgram(ctx.program);
                 p->setArguments(ctx.arguments);
@@ -71,5 +69,7 @@ void registerScripts()
             delete p;
         });
     }
+    if( scriptIds.length() >= 1 )
+        qCInfo(Scripts) << "Loaded" << scriptIds.length() << " scripts:" << scriptIds.join(", ");
 }
 REGISTER_INTEGRATION("Scripts",registerScripts,true)

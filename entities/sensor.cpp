@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
+
 Sensor::Sensor(QObject *parent)
     : Entity(parent)
 {

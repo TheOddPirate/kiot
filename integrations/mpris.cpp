@@ -20,7 +20,9 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QEventLoop>
-
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(mpris)
+Q_LOGGING_CATEGORY(mpris, "integration.MPRIS")
 // Qt DBus includes
 #include <QDBusConnection>
 #include <QDBusReply>
@@ -213,7 +215,7 @@ private:
             QJsonParseError err;
             QJsonDocument doc = QJsonDocument::fromJson(payload.toUtf8(), &err);
             if(err.error != QJsonParseError::NoError){
-                qWarning() << "JSON parse error:" << err.errorString();
+                qCWarning(mpris) << "JSON parse error:" << err.errorString();
                 return;
             }
             QString mediaId = doc.object().value("media_id").toString();
@@ -238,7 +240,7 @@ private:
 
     void addPlayer(const QString &busName)
     {
-        qDebug() << "Adding player:" << busName;
+        qCDebug(mpris) << "Adding player:" << busName;
         auto *container = new PlayerContainer(busName, this);
         connect(container, &PlayerContainer::stateChanged, this, [this, container](){
             handleActivePlayer(container);
@@ -274,7 +276,7 @@ private:
         if(reply->error() == QNetworkReply::NoError) {
             data = reply->readAll();
         } else {
-            qWarning() << "Failed to download artwork:" << reply->errorString();
+            qCWarning(mpris) << "Failed to download artwork:" << reply->errorString();
         }
 
         reply->deleteLater();
@@ -304,7 +306,7 @@ private:
             if(metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong()/1000000;
         }
         if(cState.contains("Duration") && dur==0) dur = cState.value("Duration").toLongLong()/1000000;
-        //qDebug() << "Position:" << pos << "Duration:" << dur;
+        //qCDebug(mpris) << "Position:" << pos << "Duration:" << dur;
         state["position"] = pos;
         state["duration"] = dur;
 
@@ -317,7 +319,7 @@ private:
                 if(f.open(QIODevice::ReadOnly)) state["albumart"] = f.readAll().toBase64();
             }
             else if(artUrl.startsWith("https://")){
-                qDebug() << "Downloading artwork from" << artUrl;
+                qCDebug(mpris) << "Downloading artwork from" << artUrl;
                 state["albumart"] = downloadArtAsBase64(artUrl);
             }
             else{

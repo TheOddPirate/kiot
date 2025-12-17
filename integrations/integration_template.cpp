@@ -5,13 +5,19 @@
  * @file integration_template.cpp
  * @brief Template for creating new KIOT integrations
  * 
- * This template demonstrates the common patterns used in KIOT integrations.
- * Based on audio.cpp pattern - QObject-based class for complex integrations.
+ * This template demonstrates the common patterns used in KIOT integration.
+ * Based on audio.cpp pattern - QObject-based class for complex integration.
  */
 
 #include "core.h"
 #include "entities/entities.h"
 #include <QCoreApplication>
+
+// To make your terminal output more readable, use a logging category
+// Look at the Macro Documentation here for more info https://doc.qt.io/qt-6/qtlogging.html#qInstallMessageHandler
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(integration_category_name)
+Q_LOGGING_CATEGORY(integration_category_name, "integration.NAME")
 
 // Include additional headers as needed for your integration
 // #include <QDBusConnection>

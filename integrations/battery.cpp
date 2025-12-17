@@ -9,6 +9,9 @@
 #include <Solid/Battery>
 #include <Solid/DeviceInterface>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(batt)
+Q_LOGGING_CATEGORY(batt, "integration.Battery")
 
 //Helper functions to map the types to human strings
 static QString mapBatteryTechnology(Solid::Battery::Technology tech)
@@ -93,14 +96,14 @@ void BatteryWatcher::setupSolidWatching()
     for (const Solid::Device &device : batteries) {
         registerBattery(device.udi());
     }    
-    qDebug() << "BatteryWatcher: Found" << batteries.count() << "battery devices";
+    qCInfo(batt) << "Found" << batteries.count() << "battery devices";
 }
 
 void BatteryWatcher::deviceAdded(const QString &udi)
 {
     Solid::Device device(udi);
     if (device.is<Solid::Battery>()) {
-        qDebug() << "Battery added:" << device.displayName();
+        qCDebug(batt) << "Battery added:" << device.displayName();
         registerBattery(udi);
     }
 }
@@ -109,7 +112,7 @@ void BatteryWatcher::deviceRemoved(const QString &udi)
 {
     auto it = m_udiToSensor.find(udi);
     if (it != m_udiToSensor.end()) {
-        qDebug() << "Battery removed:" << udi;
+        qCDebug(batt) << "Battery removed:" << udi;
         // TODO find a way to set sensor as unavailable when battery disconnects so HA shows the correct state of the battery
         it.value()->deleteLater();
         m_udiToSensor.erase(it);
@@ -122,7 +125,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     Solid::Battery *battery = device.as<Solid::Battery>();
     
     if (!battery) {
-        qWarning() << "Device is not a battery:" << udi;
+        qCWarning(batt) << "Device is not a battery:" << udi;
         return;
     }
     QString udi_e = udi;
@@ -183,7 +186,7 @@ void BatteryWatcher::registerBattery(const QString &udi)
     
     m_udiToSensor[udi] = sensor;
     updateBatteryAttributes(udi);
-    qDebug() << "Registered battery:" << name << "at" << battery->chargePercent() << "%";
+    qCInfo(batt) << "Registered battery:" << name << "at" << battery->chargePercent() << "%";
 }
 
 void BatteryWatcher::updateBatteryAttributes(const QString &udi)

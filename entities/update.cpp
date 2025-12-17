@@ -10,6 +10,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(upd)
+Q_LOGGING_CATEGORY(upd, "entities.Update")
+
 Update::Update(QObject *parent)
     : Entity(parent)
 {
@@ -36,7 +40,7 @@ void Update::init()
             if (message.payload() == "install") {
                 Q_EMIT installRequested();
             } else {
-                qWarning() << "Unknown update command:" << message.payload();
+                qCWarning(upd) << "Unknown update command:" << message.payload();
             }
         });
     }
@@ -102,7 +106,7 @@ void Update::setUpdatePercentage(int percentage)
 {
     // Validate percentage range (-1 to clear, 0-100 for progress)
     if (percentage < -1 || percentage > 100) {
-        qWarning() << "Invalid update percentage:" << percentage << "(must be -1 to 100)";
+        qCWarning(upd) << "Invalid update percentage:" << percentage << "(must be -1 to 100)";
         return;
     }
     

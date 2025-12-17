@@ -26,6 +26,10 @@
 #include "core.h"
 #include <QMqttClient>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(notify)
+Q_LOGGING_CATEGORY(notify, "entities.Notify")
+
 /**
  * @brief Constructs a Notify entity
  * @param parent Parent QObject (optional)
@@ -68,7 +72,7 @@ void Notify::init()
     
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/notifications");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-        qDebug() << "Notify message received" << QString::fromUtf8(message.payload());
+        qCDebug(notify) << "Notify message received" << QString::fromUtf8(message.payload());
         emit notificationReceived(QString::fromUtf8(message.payload()));
     });
 }

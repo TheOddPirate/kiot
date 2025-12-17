@@ -11,6 +11,9 @@
 #include <PulseAudioQt/VolumeObject>
 #include <QDebug>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(audio)
+Q_LOGGING_CATEGORY(audio, "integration.Audio")
 class Audio : public QObject
 {
     Q_OBJECT
@@ -67,7 +70,7 @@ Audio::Audio(QObject *parent)
 
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
-        qWarning() << "Audio: PulseAudio context not valid";
+        qCWarning(audio) << "Audio: PulseAudio context not valid";
         return;
     }
     //Connect to the events for sink added/removed
@@ -83,7 +86,7 @@ Audio::Audio(QObject *parent)
 
     auto *server = m_ctx->server();
     if (!server) {
-        qWarning() << "Audio: No PulseAudio server";
+        qCWarning(audio) << "Audio: No PulseAudio server";
         return;
     }
 
@@ -215,13 +218,13 @@ void Audio::onSinkSelected(const QString &newOption)
 
     for (PulseAudioQt::Sink *sink : m_ctx->sinks()) {
         if (sink->description() == newOption) {
-            qDebug() << "Setting sink to" << sink->description();
+            qCDebug(audio) << "Setting sink to" << sink->description();
             sink->setDefault(true);
-            qDebug() << "Sink selected:" << newOption;
+            qCDebug(audio) << "Sink selected:" << newOption;
             return;;
         }
     }
-    qWarning() << "Audio: Sink not found:" << newOption;
+    qCWarning(audio) << "Audio: Sink not found:" << newOption;
 }
 
 void Audio::onSourceSelected(const QString &newOption)
@@ -230,12 +233,12 @@ void Audio::onSourceSelected(const QString &newOption)
 
     for (PulseAudioQt::Source *source : m_ctx->sources()) {
         if (source->description() == newOption) {
-            qDebug() << "Setting source to" << source->description();
+            qCDebug(audio) << "Setting source to" << source->description();
             source->setDefault(true);
             return;
         }
     }
-    qWarning() << "Audio: Source not found:" << newOption;
+    qCWarning(audio) << "Audio: Source not found:" << newOption;
 }
 
 void Audio::onSinkVolumeChanged()
@@ -246,7 +249,7 @@ void Audio::onSinkVolumeChanged()
     if (percent == m_sinkVolume->value()) return;
 
     m_sinkVolume->setValue(percent);
-    qDebug() << "Audio: Updated volume from system:" << percent << "%";
+    qCDebug(audio) << "Audio: Updated volume from system:" << percent << "%";
 }
 
 void Audio::onSourceVolumeChanged()
@@ -257,7 +260,7 @@ void Audio::onSourceVolumeChanged()
     if (percent == m_sourceVolume->value()) return;
 
     m_sourceVolume->setValue(percent);
-    qDebug() << "Microphone: Updated volume from system:" << percent << "%";
+    qCDebug(audio) << "Microphone: Updated volume from system:" << percent << "%";
 }
 void Audio::setSinkVolume(int v)
 {
@@ -266,7 +269,7 @@ void Audio::setSinkVolume(int v)
 
     qint64 paVol = percentToPa(v);
     m_sink->setVolume(paVol);
-    qDebug() << "Audio: Set volume to" << v << "%";
+    qCDebug(audio) << "Audio: Set volume to" << v << "%";
 }
 
 void Audio::setSourceVolume(int v)
@@ -276,7 +279,7 @@ void Audio::setSourceVolume(int v)
 
     qint64 paVol = percentToPa(v);
     m_source->setVolume(paVol);
-    qDebug() << "Microphone: Set volume to" << v << "%";
+    qCDebug(audio) << "Microphone: Set volume to" << v << "%";
 }
 
 int Audio::paToPercent(qint64 v) const

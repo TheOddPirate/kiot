@@ -21,7 +21,9 @@
 #include "core.h"
 #include <QMqttClient>
 #include <QGuiApplication>
-
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(camentity)
+Q_LOGGING_CATEGORY(camentity, "entities.Camera")
 /**
  * @brief Constructs a Camera entity
  * @param parent Parent QObject (optional)
@@ -68,7 +70,7 @@ void Camera::init()
     // but lets you publish a command and use it from the signal to trigger a fresh image in a integration
     auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/command");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-        qDebug() << name() << "Camera command received:" << QString::fromUtf8(message.payload());
+        qCDebug(camentity) << name() << "Camera command received:" << QString::fromUtf8(message.payload());
         emit commandReceived(QString::fromUtf8(message.payload()));
     });
 }

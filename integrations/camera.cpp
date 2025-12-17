@@ -17,6 +17,10 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(cam)
+Q_LOGGING_CATEGORY(cam, "integration.CameraWatcher")
+
 class CameraWatcher : public QObject
 {
     Q_OBJECT
@@ -161,7 +165,7 @@ void CameraWatcher::onVideoDeviceAdded(const QString &devicePath)
     int wd = inotify_add_watch(m_inotifyFd, devicePath.toUtf8().constData(),
                                IN_OPEN | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE | IN_DELETE_SELF);
     if (wd == -1) {
-        qWarning() << "Failed to watch" << devicePath;
+        qCWarning(cam) << "Failed to watch" << devicePath;
         return;
     }
     m_watchFds[devicePath] = wd;

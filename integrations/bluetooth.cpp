@@ -9,6 +9,9 @@
 //#include <BluezQt/Battery>
 #include <BluezQt/InitManagerJob>
 
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(bt)
+Q_LOGGING_CATEGORY(bt, "integration.Bluetooth")
 
 // ==== Bluetooth devices code ==========
 class BluetoothDeviceSwitch : public QObject
@@ -83,7 +86,7 @@ private:
         if (!m_device) return;
         if(!m_device->isPaired()){
             // TODO set entity as unavailable in HA and delete this
-            qDebug() << m_device->name() << " is not paired anymore";
+            qCDebug(bt) << m_device->name() << " is not paired anymore";
             m_switch->setState(false);
         }
         QVariantMap attrs;
@@ -132,7 +135,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
     connect(job, &BluezQt::InitManagerJob::result, this, [this, job]() {
         if (job->error()) {
-            qWarning() << "Bluez init failed:" << job->errorText();
+            qCWarning(bt) << "Bluez init failed:" << job->errorText();
             m_switch->setState(false);
             return;
         }
@@ -142,7 +145,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             m_adapter = adapters.first(); // Første adapter
             m_initialized = true;
 
-            qDebug() << "Adapter:" << m_adapter->name() << "Powered:" << m_adapter->isPowered();
+            qCDebug(bt) << "Adapter:" << m_adapter->name() << "Powered:" << m_adapter->isPowered();
             m_switch->setState(m_adapter->isPowered());
 
             connect(m_adapter.data(), &BluezQt::Adapter::poweredChanged, this, [this](bool powered){
@@ -184,7 +187,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
 
         } 
         else {
-            qWarning() << "No adapters found";
+            qCWarning(bt) << "No adapters found";
             m_switch->setState(false);
         }
     });
@@ -197,7 +200,7 @@ BluetoothAdapterWatcher::BluetoothAdapterWatcher(QObject *parent)
             return;
 
         m_adapter->setPowered(requestedState);
-        qDebug() << "Set adapter powered to" << requestedState;
+        qCDebug(bt) << "Set adapter powered to" << requestedState;
     });
 }
 

@@ -9,6 +9,9 @@
 #include <QDBusMessage>
 #include <QDBusConnection>
 #include <QDBusReply>
+#include <QLoggingCategory>
+Q_DECLARE_LOGGING_CATEGORY(nightmode)
+Q_LOGGING_CATEGORY(nightmode, "integration.Nightmode")
 
 class NightMode : public QObject
 {
@@ -46,7 +49,7 @@ NightMode::NightMode(QObject *parent)
                                                                       QStringLiteral("inhibit"));
             QDBusReply<uint32_t> reply = QDBusConnection::sessionBus().call(inhibitCall);
             if (!reply.isValid()) {
-                qWarning() << "Failed to inhibit nightmode";
+                qCWarning(nightmode) << "Failed to inhibit nightmode";
                 return;
             }
             m_inhibitCookie = reply.value();

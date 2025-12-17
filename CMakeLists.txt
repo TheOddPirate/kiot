@@ -16,6 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
+
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
@@ -62,8 +63,6 @@ set(SOURCES
     core.cpp
     dbusproperty.cpp
     dbusproperty.h
-    flatpakhelper.cpp
-    flatpakhelper.h
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp
@@ -99,7 +98,9 @@ target_link_libraries(
     KF6::DBusAddons
 )
 
-
+target_compile_definitions(kiot PRIVATE
+    $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
+)
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
