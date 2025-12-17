@@ -254,7 +254,7 @@ QString setting = config.readEntry("Setting", "default");
 1. **Follow audio.cpp Pattern**: Use QObject-based classes for complex integrations
 2. **Bidirectional Sync**: Always update entity state after system changes
 3. **Resource Cleanup**: Implement destructor for resource management
-4. **Error Logging**: Use appropriate qWarning/qInfo/qDebug levels
+4. **Error Logging**: Use appropriate qCWarning/qCInfo/qCDebug levels
 5. **State Initialization**: Set initial entity states in constructor
 6. **Signal Disconnection**: Disconnect signals in destructor if needed
 

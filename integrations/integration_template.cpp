@@ -164,7 +164,7 @@ void ExampleIntegration::initializeResources()
     );
     
     if (!m_dbusInterface->isValid()) {
-        qWarning() << "Failed to connect to DBus service";
+        qCWarning() << "Failed to connect to DBus service";
         m_sensor->setState("DBus Unavailable");
         return;
     }
@@ -189,7 +189,7 @@ void ExampleIntegration::cleanupResources()
 // Handle Number value changes from Home Assistant
 void ExampleIntegration::onNumberValueChanged(int newValue)
 {
-    qInfo() << "Number value changed to:" << newValue;
+    qCInfo() << "Number value changed to:" << newValue;
     
     // Apply the change to the actual system
     // Example: Set system volume, brightness, etc.
@@ -204,7 +204,7 @@ void ExampleIntegration::onNumberValueChanged(int newValue)
 // Handle Select option changes from Home Assistant
 void ExampleIntegration::onSelectOptionChanged(const QString &newOption)
 {
-    qInfo() << "Select option changed to:" << newOption;
+    qCInfo(integration_category_name) << "Select option changed to:" << newOption;
     
     // Apply the selection to the actual system
     // Example: Change audio output device, theme, etc.
@@ -216,7 +216,7 @@ void ExampleIntegration::onSelectOptionChanged(const QString &newOption)
 // Handle Button triggers from Home Assistant
 void ExampleIntegration::onButtonTriggered()
 {
-    qInfo() << "Button triggered";
+    qCInfo(integration_category_name) << "Button triggered";
     
     // Perform the button action
     // Example: Execute command, send notification, etc.
@@ -227,7 +227,7 @@ void ExampleIntegration::onButtonTriggered()
 // Handle Switch state changes from Home Assistant
 void ExampleIntegration::onSwitchStateChanged(bool newState)
 {
-    qInfo() << "Switch state changed to:" << newState;
+    qCInfo(integration_category_name) << "Switch state changed to:" << newState;
     
     // Apply the switch state to the actual system
     // Example: Enable/disable feature, start/stop service, etc.
