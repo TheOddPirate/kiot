@@ -104,14 +104,15 @@ Compared to similar projects, Kiot focuses on practical desktop integration rath
 | Battery Status | Sensor | Battery charge level and attributes |
 | Do Not Disturb | Binary Sensor | DnD mode status |
 | Gamepad Connected | Binary Sensor | Gamepad/joystick connection detection |
+| Bluetooth | Switch | Bluetooth adapter control and device connection management |
+| MPRIS Media Player | Media Player | Media control using [MQTT Media Player integration](https://github.com/bkbilly/mqtt_media_player) or patched to support seek [Patched MQTT Media Player](https://github.com/TheOddPirate/mqtt_media_player) |
 
 ### Experimental Integrations
 | Feature | Entity Type | Description |
 |---------|-------------|-------------|
 | Docker | Switch | Start/stop Docker containers (per-image configuration) |
 | SystemD | Switch | Start/stop user services (per-service configuration) |
-| MPRIS Media Player | Media Player | Media control using [MQTT Media Player integration](https://github.com/bkbilly/mqtt_media_player) |
-| Bluetooth | Switch | Bluetooth adapter control and device connection management |
+
 | Scripts | Button + Text Input | Execute custom scripts with argument support and custom icons |
 
 ## Configuration Examples
