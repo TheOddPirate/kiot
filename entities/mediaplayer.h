@@ -6,7 +6,7 @@
  * @brief Media Player entity for Home Assistant integration
  * 
  * @details
- * This header defines the MediaPlayerEntity class which implements a media
+ * This header defines the MediaPlayer class which implements a media
  * player entity for Home Assistant. Media player entities provide comprehensive
  * media control functionality including play/pause, volume control, track
  * navigation, and media information display.
@@ -25,34 +25,36 @@
 #include <QMqttMessage>
 
 /**
- * @class MediaPlayerEntity
+ * @class MediaPlayer
  * @brief Media player entity for comprehensive media control
  * 
  * @details
- * The MediaPlayerEntity class represents a media player entity in Home Assistant,
+ * The MediaPlayer class represents a media player entity in Home Assistant,
  * used for controlling media playback on the desktop. It supports the full
  * range of media player functionality including playback control, volume
  * adjustment, track navigation, and media information display.
  * 
  * This entity works with the custom MQTT Media Player integration:
  * https://github.com/bkbilly/mqtt_media_player
- * 
+ *
+ * I made some updates to the mqtt media player here that supports seek to
+ * https://github.com/TheOddPirate/mqtt_media_player 
+ *
  * Common use cases:
  * - MPRIS media player control (via separate integration)
- * - System audio control
- * - Media playback status monitoring
+ * - Media playback status monitoring and controlling
  * 
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-class MediaPlayerEntity : public Entity
+class MediaPlayer : public Entity
 {
     Q_OBJECT
 public:
     /**
-     * @brief Constructs a MediaPlayerEntity
+     * @brief Constructs a MediaPlayer
      * @param parent Parent QObject for memory management (optional)
      */
-    explicit MediaPlayerEntity(QObject *parent = nullptr);
+    explicit MediaPlayer(QObject *parent = nullptr);
 
     /**
      * @brief Sets the complete media player state
@@ -76,21 +78,6 @@ public:
      */
     QVariantMap state() const;
 
-    /**
-     * @brief Sets the list of available media players
-     * @param players List of available media player names
-     * 
-     * @details
-     * Defines the list of media players available for control. This is
-     * typically used when multiple media players are available on the system.
-     */
-    void setAvailablePlayers(const QStringList &players);
-    
-    /**
-     * @brief Gets the list of available media players
-     * @return QStringList List of available media player names
-     */
-    QStringList availablePlayers() const;
 
 protected:
     /**
@@ -122,7 +109,7 @@ private slots:
     void onPreviousCommand(const QString &payload);
     void onSetVolumeCommand(const QString &payload);
     void onPlayMediaCommand(const QString &payload);
-
+    void onPositionCommand(const QString &payload);
 public slots:
     /**
      * @brief Starts media playback
@@ -198,11 +185,17 @@ signals:
      * @param payload Media playback request payload (e.g., URL, media identifier)
      */
     void playMediaRequested(const QString &payload);
+    
+    /**
+     * @brief Signal emitted when position change is requested from Home Assistant
+     * @param payload Position request payload in seconds
+     */
+    void positionChanged(const qint64 &payload);
+
+    
 
 private:
     /** @private Current media player state information */
     QVariantMap m_state;
-    
-    /** @private List of available media players */
-    QStringList m_players;
+
 };
