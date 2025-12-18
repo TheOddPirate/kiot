@@ -76,6 +76,7 @@ set(SOURCES
     entities/mediaplayer.cpp
     entities/notify.cpp
     entities/camera.cpp
+    entities/update.cpp
 )
 
 add_subdirectory(integrations)

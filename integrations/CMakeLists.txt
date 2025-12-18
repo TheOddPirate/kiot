@@ -24,6 +24,7 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     mpris.cpp
+    flatpak_updater.cpp
 )
 
 # Include gamepad.cpp only when libudev library is found
