@@ -51,12 +51,13 @@ void registerScripts()
                 ex = ex.replace("{arg}",textb->state());
                 textb->setState(""); //Clears the textbox after use, should it be kept?
             }
-            qCInfo(Scripts) << "Running script " << scriptId << " with command " << ex;
             QStringList args = QProcess::splitCommand(ex);  
-            if (exec.isEmpty()) {
-               qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
+            if (args.isEmpty()) {
+               qCWarning(Scripts) << "Could not find script Exec entry for" << scriptId;
                 return;
             }
+            qCInfo(Scripts) << "Running script " << scriptId << " with command " << ex;
+           
             QString program = args.takeFirst();           
 
             KProcess *p = new KProcess();
