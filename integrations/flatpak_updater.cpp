@@ -14,6 +14,7 @@
 #include <QEventLoop>
 #include <QFile>
 #include <QDir>
+#include <QTimer>
 
 #include <KSharedConfig>
 #include <KConfigGroup>
@@ -21,14 +22,17 @@
 #include <KSandbox>
 
 #include <QLoggingCategory>
+
 Q_DECLARE_LOGGING_CATEGORY(auf)
-Q_LOGGING_CATEGORY(auf, "integration.AutoUpdater-Flatpak")
+Q_LOGGING_CATEGORY(auf, "integration.Updater-Flatpak")
 
 class FlatpakUpdater : public QObject
 {
     Q_OBJECT
 public:
-    explicit FlatpakUpdater(QObject *parent = nullptr) : QObject(parent)
+    explicit FlatpakUpdater(QObject *parent = nullptr) 
+    : QObject(parent)
+     , m_updateTimer(new QTimer(this))
     {
         // TODO add the update entity so its available from HA
         m_updater = new Update(this);
@@ -45,14 +49,21 @@ public:
         updaterGroup = config->group("Updater");
         lastCheck = updaterGroup.readEntry("LastCheck", QDateTime());
 
-        // TODO start timer to check for updates and run a manual check on startup
+        // Timer to check for updates every 3 hours, will only check once every 24 hours
+        m_updateTimer->setInterval(1000 * 60 * 60 * 3); // 3 hours
+        connect(m_updateTimer, &QTimer::timeout, this, &FlatpakUpdater::checkForUpdates);
+
+        // Grabs the latest release data from github
         lastRepoData = fetchLatestRelease(repo_url);
-        qCDebug(auf) << "Latest release" << lastRepoData;
-        // TODO get latest version from github release
+        // Sets the update entity to latest release info
         m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
         m_updater->setReleaseSummary(lastRepoData.value("body","No release summary found").toString()); 
         m_updater->setTitle(lastRepoData.value("name","kiot").toString());
         m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
+
+        // Update config with current time 
+        updaterGroup.writeEntry("LastCheck", QDateTime::currentDateTimeUtc());
+        config->sync();
     }
 
 
@@ -125,9 +136,15 @@ public:
         installProc->setArguments(ctxInstall.arguments);
         installProc->execute();
         delete installProc;
+
         m_updater->setUpdatePercentage(-1);
         m_updater->setInProgress(false);
-       // Start appen på nytt med flatpak run
+
+        //Removes the file after we installed the update
+        if (QFile(fullFilePath).exists())
+            QFile(fullFilePath).remove();
+        
+        // Starts a new instance of kiot in flatpak to replace our old one
         QStringList runArgs = QProcess::splitCommand(QString("flatpak run org.davidedmundson.kiot"));
         QString runProgram = runArgs.takeFirst();
         KProcess *runProc = new KProcess();
@@ -136,10 +153,9 @@ public:
         KSandbox::ProcessContext ctxRun = KSandbox::makeHostContext(*runProc);
         runProc->setProgram(ctxRun.program);
         runProc->setArguments(ctxRun.arguments);
+        qCDebug(auf) << "Update completed, restarting kiot";
         runProc->startDetached();
         delete runProc;
-
-        qCDebug(auf) << "Update complete and Kiot restarted";
     }
 
 
@@ -151,10 +167,12 @@ public:
         if (lastCheck.isValid() && lastCheck.secsTo(QDateTime::currentDateTimeUtc()) < time)
             return;
         qCDebug(auf) << "Checking for updates";
-        // TODO call fetchLatestRelease from repo url and compare with our installed info
-        // set update entity with latest release info if its mewer than installed version
-        // if update entity is newer than current version, set update available
- 
+        lastRepoData = fetchLatestRelease(repo_url);
+        m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
+        m_updater->setReleaseSummary(lastRepoData.value("body","No release summary found").toString()); 
+        m_updater->setTitle(lastRepoData.value("name","kiot").toString());
+        m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
+
         updaterGroup.writeEntry("LastCheck", QDateTime::currentDateTimeUtc());
         config->sync();
     }
@@ -230,6 +248,7 @@ private:
     QDateTime lastCheck;
     QString repo_url = "https://github.com/TheOddPirate/kiot/";
     QVariantMap lastRepoData;
+    QTimer *m_updateTimer = nullptr;
     Update *m_updater;
 };
 

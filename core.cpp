@@ -41,7 +41,8 @@ HaControl::HaControl() {
 
     if (m_client->hostname().isEmpty()) {
         qCCritical(core) << "Server is not configured, please check " << config->name() << "is configured";
-        qCCritical(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+        qCFatal(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+        
     }
 
     m_connectedNode = new ConnectedNode(this);
