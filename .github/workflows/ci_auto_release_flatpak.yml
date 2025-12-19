@@ -67,7 +67,7 @@ jobs:
           flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
           rm -rf repo
           flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
-          flatpak build-bundle repo kiot-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot testing_updated
+          flatpak build-bundle repo kiot-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot master
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

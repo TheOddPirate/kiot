@@ -32,11 +32,7 @@ public:
         m_updater->setName("KIOT Flatpak Updater");
         m_updater->setId("flatpak_updates");
         m_updater->setInstalledVersion(QStringLiteral(KIOT_VERSION));
-        // TODO get latest version from github release
-        m_updater->setLatestVersion(QStringLiteral(KIOT_VERSION));
-        m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
-        m_updater->setTitle("kiot flatpak");
-        m_updater->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
+
        
         connect(m_updater, &Update::installRequested, this, &FlatpakUpdater::update);
 
@@ -46,6 +42,14 @@ public:
         lastCheck = updaterGroup.readEntry("LastCheck", QDateTime());
 
         // TODO start timer to check for updates and run a manual check on startup
+        lastRepoData = fetchLatestRelease(repo_url);
+        if (lastRepoData.isValid()) {
+        // TODO get latest version from github release
+            m_updater->setLatestVersion(QStringLiteral(KIOT_VERSION));
+            m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
+            m_updater->setTitle("kiot flatpak");
+            m_updater->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
+        }
     }
 
 
@@ -144,7 +148,8 @@ private:
     KSharedConfig::Ptr config;
     KConfigGroup updaterGroup;
     QDateTime lastCheck;
-
+    QString repo_url = "";
+    QVariantMap lastRepoData;
     Update *m_updater;
 };
 
