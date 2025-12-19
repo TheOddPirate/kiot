@@ -43,13 +43,11 @@ public:
 
         // TODO start timer to check for updates and run a manual check on startup
         lastRepoData = fetchLatestRelease(repo_url);
-        if (lastRepoData.isValid()) {
         // TODO get latest version from github release
-            m_updater->setLatestVersion(QStringLiteral(KIOT_VERSION));
-            m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
-            m_updater->setTitle("kiot flatpak");
-            m_updater->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
-        }
+        m_updater->setLatestVersion(QStringLiteral(KIOT_VERSION));
+        m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
+        m_updater->setTitle("kiot flatpak");
+        m_updater->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
     }
 
 
