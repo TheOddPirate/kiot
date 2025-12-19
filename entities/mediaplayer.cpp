@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "core.h"
 #include "mediaplayer.h"
 #include <QJsonObject>
@@ -34,6 +37,13 @@ void MediaPlayer::init()
     setDiscoveryConfig("command_volume_topic", baseTopic() + "/set_volume");
     setDiscoveryConfig("command_playmedia_topic", baseTopic() + "/playmedia");
     setDiscoveryConfig("command_seek_position_topic", baseTopic() + "/setposition");
+    setDiscoveryConfig("device", QVariantMap({
+                       {"name", hostname() },
+                       {"identifiers", "linux_ha_bridge_" + hostname() },
+                       {"sw_version", QStringLiteral(KIOT_VERSION)},
+                       {"manufacturer", "Linux HA Bridge"},
+                       {"model", "Linux"}
+                    }));
     sendRegistration();
     //subscriptions
     auto mqtt = HaControl::mqttClient();

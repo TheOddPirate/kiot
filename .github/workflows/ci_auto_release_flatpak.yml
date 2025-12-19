@@ -69,10 +69,17 @@ jobs:
           rm -rf repo
           flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
           flatpak build-bundle repo kiot-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot testing_updated
+      
+      - name: Build Changelog
+        uses: mikepenz/release-changelog-builder-action@v5
+        id: build_changelog
+        with:
+          mode: "COMMIT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.cmake_version.outputs.version }}
-          name: ${{ steps.cmake_version.outputs.version }}
+          body: ${{ steps.build_changelog.outputs.changelog }}
+          name: kiot V ${{ steps.cmake_version.outputs.version }}
           files: kiot-${{ steps.cmake_version.outputs.version }}.flatpak

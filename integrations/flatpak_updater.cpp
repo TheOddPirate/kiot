@@ -12,10 +12,13 @@
 #include <QUrl>
 #include <QRegularExpression>
 #include <QEventLoop>
-#include <KSandbox>
+#include <QFile>
+#include <QDir>
 
 #include <KSharedConfig>
 #include <KConfigGroup>
+#include <KProcess>
+#include <KSandbox>
 
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(auf)
@@ -32,6 +35,7 @@ public:
         m_updater->setName("KIOT Flatpak Updater");
         m_updater->setId("flatpak_updates");
         m_updater->setInstalledVersion(QStringLiteral(KIOT_VERSION));
+        m_updater->setUpdatePercentage(-1);
 
        
         connect(m_updater, &Update::installRequested, this, &FlatpakUpdater::update);
@@ -46,7 +50,7 @@ public:
         qCDebug(auf) << "Latest release" << lastRepoData;
         // TODO get latest version from github release
         m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
-        m_updater->setReleaseSummary("TODO figure out where to get this automatically"); 
+        m_updater->setReleaseSummary(lastRepoData.value("body","No release summary found").toString()); 
         m_updater->setTitle(lastRepoData.value("name","kiot").toString());
         m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
     }
@@ -59,9 +63,85 @@ public:
 
     void update()
     {
-        //TODO download latest release and install it before we do a restart 
-        qCDebug(auf) << "Update requested " << lastRepoData.value("assets").toMap().value("browser_download_url","failed");
+        QString download_path = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        QDir().mkpath(download_path); // Sørg for at mappen eksisterer
+
+        // Hent download URL fra GitHub API
+        QVariantList assets = lastRepoData.value("assets").toList();
+        QString downloadUrl = "failed";
+        QString filename;
+
+        if (!assets.isEmpty()) {
+            QVariantMap firstAsset = assets.first().toMap();
+            downloadUrl = firstAsset.value("browser_download_url", "failed").toString();
+            filename = firstAsset.value("name", "kiot-update.flatpak").toString();
+        }
+
+        if (downloadUrl == "failed") {
+            qCWarning(auf) << "Failed to get download URL from GitHub release";
+            return;
+        }
+        m_updater->setInProgress(true);
+        QString fullFilePath = QDir(download_path).filePath(filename);
+        qCDebug(auf) << "Downloading update to:" << fullFilePath;
+
+        // Download file
+        QNetworkAccessManager mgr;
+        QEventLoop loop;
+        QNetworkReply *reply = mgr.get(QNetworkRequest(QUrl(downloadUrl)));
+        QObject::connect(reply, &QNetworkReply::downloadProgress, [this](qint64 bytesReceived, qint64 bytesTotal){
+            if (bytesTotal > 0) {
+                int percent = static_cast<int>((bytesReceived * 100) / bytesTotal);
+                m_updater->setUpdatePercentage(percent);
+            }
+        });
+        QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            qCWarning(auf) << "Download failed:" << reply->errorString();
+            reply->deleteLater();
+            return;
+        }
+
+        QFile file(fullFilePath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            qCWarning(auf) << "Failed to open file for writing:" << fullFilePath;
+            reply->deleteLater();
+            return;
+        }
+        file.write(reply->readAll());
+        file.close();
+        reply->deleteLater();
+
+        // Installer Flatpak på host
+        QStringList installArgs = QProcess::splitCommand(QString("flatpak install -y --user \"%1\"").arg(fullFilePath));
+        QString installProgram = installArgs.takeFirst();
+        KProcess *installProc = new KProcess();
+        installProc->setProgram(installProgram);
+        installProc->setArguments(installArgs);
+        KSandbox::ProcessContext ctxInstall = KSandbox::makeHostContext(*installProc);
+        installProc->setProgram(ctxInstall.program);
+        installProc->setArguments(ctxInstall.arguments);
+        installProc->execute();
+        delete installProc;
+        m_updater->setUpdatePercentage(-1);
+        m_updater->setInProgress(false);
+       // Start appen på nytt med flatpak run
+        QStringList runArgs = QProcess::splitCommand(QString("flatpak run org.davidedmundson.kiot"));
+        QString runProgram = runArgs.takeFirst();
+        KProcess *runProc = new KProcess();
+        runProc->setProgram(runProgram);
+        runProc->setArguments(runArgs);
+        KSandbox::ProcessContext ctxRun = KSandbox::makeHostContext(*runProc);
+        runProc->setProgram(ctxRun.program);
+        runProc->setArguments(ctxRun.arguments);
+        runProc->startDetached();
+        delete runProc;
+
+        qCDebug(auf) << "Update complete and Kiot restarted";
     }
+
 
     void checkForUpdates(){
         lastCheck = updaterGroup.readEntry("LastCheck", QDateTime());

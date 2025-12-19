@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 // Based on Home Assistant's MQTT update integration documentation:
@@ -97,6 +97,8 @@ void Update::setEntityPicture(const QString &url)
 void Update::setInProgress(bool inProgress)
 {
     if (m_inProgress != inProgress) {
+        if(!inProgress)
+            m_updatePercentage = -1;
         m_inProgress = inProgress;
         publishState();
     }
@@ -151,12 +153,13 @@ void Update::publishState()
     }
     
     // Progress fields
-    if (m_inProgress) {
-        payload["in_progress"] = m_inProgress;
-    }
+    payload["in_progress"]  = m_inProgress ? "true" : "false";
     
+    // Only include update_percentage if >= 0
     if (m_updatePercentage >= 0) {
         payload["update_percentage"] = m_updatePercentage;
+    } else {
+        payload["update_percentage"] = QJsonValue(); // clear it in HA
     }
     
     // Convert to JSON and publish
