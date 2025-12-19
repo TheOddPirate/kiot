@@ -43,11 +43,12 @@ public:
 
         // TODO start timer to check for updates and run a manual check on startup
         lastRepoData = fetchLatestRelease(repo_url);
+        qCDebug(auf) << "Latest release" << lastRepoData;
         // TODO get latest version from github release
-        m_updater->setLatestVersion(QStringLiteral(KIOT_VERSION));
+        m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
         m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
-        m_updater->setTitle("kiot flatpak");
-        m_updater->setReleaseUrl("https://github.com/davidedmundson/kiot/releases");
+        m_updater->setTitle(lastRepoData.value("name","kiot").toString());
+        m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
     }
 
 
@@ -146,7 +147,7 @@ private:
     KSharedConfig::Ptr config;
     KConfigGroup updaterGroup;
     QDateTime lastCheck;
-    QString repo_url = "";
+    QString repo_url = "https://github.com/TheOddPirate/kiot/";
     QVariantMap lastRepoData;
     Update *m_updater;
 };
