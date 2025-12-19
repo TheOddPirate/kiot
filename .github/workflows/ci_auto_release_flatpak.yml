@@ -16,7 +16,7 @@ jobs:
 
       - name: Read version from CMakeLists.txt
         id: cmake_version
-        uses: lukka/get-cmake-project-version@v3
+        uses: DarwinInnovation/cmake-project-version-action@v1.0
 
       - name: Get latest release version
         id: latest_release
