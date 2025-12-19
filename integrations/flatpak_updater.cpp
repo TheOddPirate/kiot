@@ -46,7 +46,7 @@ public:
         qCDebug(auf) << "Latest release" << lastRepoData;
         // TODO get latest version from github release
         m_updater->setLatestVersion(lastRepoData.value("tag_name",QStringLiteral(KIOT_VERSION)).toString());
-        m_updater->setReleaseSummary("Flatpak updates for kiot comming soon"); 
+        m_updater->setReleaseSummary("TODO figure out where to get this automatically"); 
         m_updater->setTitle(lastRepoData.value("name","kiot").toString());
         m_updater->setReleaseUrl(lastRepoData.value("html_url",repo_url).toString());
     }
@@ -60,6 +60,7 @@ public:
     void update()
     {
         //TODO download latest release and install it before we do a restart 
+        qCDebug(auf) << "Update requested " << lastRepoData.value("assets").toMap().value("browser_download_url","failed");
     }
 
     void checkForUpdates(){
