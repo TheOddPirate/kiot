@@ -14,7 +14,3 @@ X-GNOME-Autostart-enabled=true
 X-KDE-autostart-phase=2
 X-KDE-autostart-after=panel
 OnlyShowIn=KDE;
-
-# For KDE Plasma
-X-Plasma-NotificationArea=true
-X-Plasma-DBusActivatable=true
