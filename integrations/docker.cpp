@@ -28,6 +28,9 @@
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(docker)
 Q_LOGGING_CATEGORY(docker, "integration.Docker")
+
+static int SOCKET_TIMEOUT_MS = 5000;
+static const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
 /**
  * Manages Docker container events by listening to Docker socket
  * 
@@ -133,11 +136,6 @@ public:
     explicit DockerSwitch(QObject *parent = nullptr)
         : QObject(parent) 
     {
-        if (!isDockerAvailable()) {
-            qCWarning(docker) << "Docker socket not available at: " << DOCKER_SOCKET_PATH << " stopping integration";
-            return;
-        }
-
         if (!ensureConfigDefaults()) {
             qCWarning(docker) << "Failed to initialize configuration";
             return;
@@ -161,25 +159,7 @@ private:
     QList<ContainerInfo> m_containers;
     DockerEventListener *m_listener = nullptr;
     
-    static constexpr int SOCKET_TIMEOUT_MS = 5000;
-    static constexpr const char* DOCKER_SOCKET_PATH = "/var/run/docker.sock";
-    
-    /**
-     * Checks if Docker socket is accessible
-     * 
-     * @return bool True if Docker socket can be connected, false otherwise
-     * @brief Verifies Docker daemon connectivity
-     */
-    bool isDockerAvailable() const {
-        QLocalSocket testSocket;
-        testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
-        const bool available = testSocket.waitForConnected(1000);
-        if (available) {
-            testSocket.disconnectFromServer();
-        }
-        return available;
-    }
-    
+     
     /**
      * Initializes switches for Docker containers based on configuration
      * 
@@ -515,12 +495,34 @@ private slots:
         }
     }
 };
+
+/**
+ * Checks if Docker socket is accessible
+ * 
+ * @return bool True if Docker socket can be connected, false otherwise
+ * @brief Verifies Docker daemon connectivity
+ */
+bool isDockerAvailable() {
+    QLocalSocket testSocket;
+    testSocket.connectToServer(DOCKER_SOCKET_PATH, QIODevice::ReadWrite);
+    const bool available = testSocket.waitForConnected(1000);
+    if (available) {
+        testSocket.disconnectFromServer();
+    }
+    return available;
+}
+
 /**
  * Initializes Docker integration for Home Assistant
  * 
  * @brief Creates DockerSwitch instance to manage Docker container switches
  */
 void setupDockerSwitch() {
+    if (!isDockerAvailable())
+    {
+        qCWarning(docker) << "Docker socket not available. Docker integration will not be enabled."; //
+        return;
+    }
     new DockerSwitch(qApp);
 }
 

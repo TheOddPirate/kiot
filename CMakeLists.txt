@@ -16,6 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
+#Used for building flatpak
+option(BUILD_FLATPAK "Build for Flatpak environment" OFF)
+
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -105,7 +108,7 @@ target_compile_definitions(kiot PRIVATE
 
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-if(NOTBUILD_FLATPAK)
+if(NOT BUILD_FLATPAK)
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
 endif()

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
-// TODO rewrite ensureconfig to follow docker integrations layout
+
 #include "core.h"
 #include "entities/entities.h"
 
@@ -54,8 +54,8 @@ namespace {
 SystemDWatcher::SystemDWatcher(QObject *parent)
     : QObject(parent)
 {
-    cfg = KSharedConfig::openConfig("kiotrc");
-    
+    cfg = KSharedConfig::openConfig();
+
     m_systemdUser = new QDBusInterface(
         "org.freedesktop.systemd1",
         "/org/freedesktop/systemd1",
@@ -68,13 +68,17 @@ SystemDWatcher::SystemDWatcher(QObject *parent)
         qCWarning(SystemD) << "Failed to connect to systemd user D-Bus";
         return;
     }
-
+    if (!ensureConfig())
+    {
+        qCWarning(SystemD) << "Failed to ensure config";
+        return;
+    }
     // Use single-shot timer to delay initialization
     //QTimer::singleShot(1000, this, &SystemDWatcher::delayedInit);
     performInit();
 }
 
-// Ensure SystemD integration is enabled and create config entries
+// Ensure SystemD integration is enabled and keep config in sync
 bool SystemDWatcher::ensureConfig()
 {
     KConfigGroup intgrp(cfg, "Integrations");
@@ -82,16 +86,41 @@ bool SystemDWatcher::ensureConfig()
         qCWarning(SystemD) << "Aborting: integration disabled";
         return false;
     }
-    
-    // Don't list services here - do it in delayed initialization
     KConfigGroup grp(cfg, "systemd");
-    if (!grp.exists()) {
-        // Create empty config group, will be populated later
-        grp.writeEntry("initialized", false);
-        cfg->sync();
+
+    const QStringList currentServices = listUserServices();
+    if (currentServices.isEmpty()) {
+        qCDebug(SystemD) << "No systemd services found";
+        return false;
     }
+ 
+    bool configChanged = false;
+    // Add new services not yet in config
+    for (const QString &svc : currentServices) {
+        if (!grp.hasKey(svc)) {
+            grp.writeEntry(svc, false); // default disabled
+            configChanged = true;
+            qCDebug(SystemD) << "Added new service to config:" << svc;
+        }
+    }
+   const QStringList configServices = grp.keyList();
+    // Remove services no longer available
+    for (const QString &cfgSvc : configServices) {
+        if (!currentServices.contains(cfgSvc) && cfgSvc != QLatin1String("initialized")) {
+            grp.deleteEntry(cfgSvc);
+            configChanged = true;
+            qCDebug(SystemD) << "Removed unavailable service from config:" << cfgSvc;
+        }
+    }
+
+    if (configChanged) {
+        cfg->sync();
+        qCDebug(SystemD) << "SystemD configuration synchronized";
+    }
+
     return true;
 }
+
 
 
 void SystemDWatcher::performInit()
@@ -99,26 +128,9 @@ void SystemDWatcher::performInit()
     if (m_initialized) {
         return;
     }
-    
     KConfigGroup grp(cfg, "systemd");
-    
-    // Get services list
-    QStringList services = listUserServices();
-    
-    // Update config with current services if needed
-    bool configUpdated = false;
-    for (const QString &svc : services) {
-        if (!grp.hasKey(svc)) {
-            grp.writeEntry(svc, false); // default: disabled
-            configUpdated = true;
-        }
-    }
-    if (configUpdated) {
-        cfg->sync();
-    }
-    
     // Initialize switches for enabled services
-    for (const QString &svc : services) {
+    for (const QString &svc : listUserServices()) {
         if (!grp.hasKey(svc) || !grp.readEntry(svc, false))
             continue; // skip disabled
 

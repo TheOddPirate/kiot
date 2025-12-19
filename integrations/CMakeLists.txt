@@ -5,6 +5,7 @@ pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
 
+#Always included in every build
 set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
@@ -24,8 +25,14 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     mpris.cpp
-    flatpak_updater.cpp
+
 )
+# Only included in flatpak builds
+if(BUILD_FLATPAK)
+    list(APPEND KIOT_INTEGRATIONS_SRC
+        flatpak_updater.cpp
+    )
+endif()
 
 # Include gamepad.cpp only when libudev library is found
 if(LIBUDEV_FOUND)
@@ -52,7 +59,6 @@ target_link_libraries(KIOTIntegrations
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus
-
 )
 
 
