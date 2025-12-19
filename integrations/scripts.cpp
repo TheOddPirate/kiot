@@ -53,6 +53,10 @@ void registerScripts()
             }
             qCInfo(Scripts) << "Running script " << scriptId << " with command " << ex;
             QStringList args = QProcess::splitCommand(ex);  
+            if (exec.isEmpty()) {
+               qCWarning(scripts) << "Could not find script Exec entry for" << scriptId;
+                return;
+            }
             QString program = args.takeFirst();           
 
             KProcess *p = new KProcess();
