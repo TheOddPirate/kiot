@@ -130,6 +130,7 @@ port=1883
 user=mqtt_user
 password=secure_password
 useSSL=false
+discoveryPrefix=homeassistant #This defaults to home assistant if not set for autodiscovery there
 ```
 
 ### Scripts Configuration

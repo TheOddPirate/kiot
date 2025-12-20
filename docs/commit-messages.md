@@ -256,32 +256,6 @@ update  # What was updated?
 WIP: adding new feature  # Don't commit WIP
 ```
 
-## Tooling Support
-
-### Commitizen (Interactive commit helper):
-```bash
-npm install -g commitizen
-cz init
-```
-
-### Commitlint (Validation):
-```bash
-# .commitlintrc.json
-{
-  "extends": ["@commitlint/config-conventional"]
-}
-```
-
-### Git hooks with Husky:
-```bash
-# .husky/commit-msg
-npx --no -- commitlint --edit "$1"
-```
-
-### Automatic changelog generation:
-```bash
-npx conventional-changelog -p angular -i CHANGELOG.md -s
-```
 
 ## Why This Matters
 
