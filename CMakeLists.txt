@@ -60,7 +60,7 @@ include(KDEClangFormat)
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
-# Kodekilder
+
 set(SOURCES
     main.cpp
     core.cpp
@@ -83,13 +83,15 @@ set(SOURCES
     dbus/policyagentinterface.cpp  # <- DBus proxy C++-fil
 )
 
-# Legg til include path for DBus proxy
-add_subdirectory(dbus)
+# Add the path for dbus proxy
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dbus)
 
-# Bygg integrasjoner og UI
+# Integrations
 add_subdirectory(integrations)
+# UI
 add_subdirectory(ui)
 
+# And flatpak if we are building for flatpak
 if(BUILD_FLATPAK)
     add_subdirectory(flatpak)
 endif()
@@ -108,15 +110,15 @@ target_link_libraries(
     KF6::DBusAddons
 )
 
-# Definisjoner for release build
+# Turn of debug output if build as Release
 target_compile_definitions(kiot PRIVATE
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
-# Installer target
+# Install bin
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
-# Installer desktop-filer hvis ikke Flatpak
+# Installer .desktop file if not flatpak (that is maintained in the flatpak folder)
 if(NOT BUILD_FLATPAK)
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
