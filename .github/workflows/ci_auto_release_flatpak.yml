@@ -48,12 +48,17 @@ jobs:
             echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Stop if version not bumped
-        if: steps.version_check.outputs.publish != 'true'
-        run: |
-          echo "Version not increased. Skipping release."
-          exit 0
 
+      - name: Cancel workflow if no changes
+        if: steps.version_check.outputs.publish != 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.actions.cancelWorkflowRun({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            run_id: context.runId
+            });
       - name: Install Flatpak tooling
         run: |
           sudo apt-get update
