@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(kiot VERSION 0.0.2)
 set(PROJECT_VERSION "0.0.2")
 set(PROJECT_VERSION_MAJOR 0)
-#For automatic firmware updates in connected node
+# For automatic firmware updates in connected node
 add_definitions(-DKIOT_VERSION="${PROJECT_VERSION}")
 
 set(QT_MIN_VERSION "6.6.0")
@@ -16,9 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-#Used for building flatpak
+# Used for building flatpak
 option(BUILD_FLATPAK "Build for Flatpak environment" OFF)
-
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -30,7 +29,6 @@ include(ECMSetupVersion)
 include(ECMQtDeclareLoggingCategory)
 include(ECMQmlModule)
 include(ECMConfiguredInstall)
-
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
@@ -55,12 +53,14 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 find_package(KF6 "1.7.0" REQUIRED COMPONENTS
     PulseAudioQt
 )
+
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 include(KDEClangFormat)
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
+# Kodekilder
 set(SOURCES
     main.cpp
     core.cpp
@@ -80,18 +80,24 @@ set(SOURCES
     entities/notify.cpp
     entities/camera.cpp
     entities/update.cpp
+    dbus/policyagentinterface.cpp  # <- DBus proxy C++-fil
 )
 
+# Legg til include path for DBus proxy
+add_subdirectory(dbus)
+
+# Bygg integrasjoner og UI
 add_subdirectory(integrations)
 add_subdirectory(ui)
-option(BUILD_FLATPAK "Build and install Flatpak metadata" OFF)
 
 if(BUILD_FLATPAK)
     add_subdirectory(flatpak)
 endif()
 
+# Hovedexecutabel
 add_executable(kiot ${SOURCES})
 
+# Link mot nødvendige biblioteker
 target_link_libraries(
     kiot
     Qt6::Gui
@@ -102,14 +108,18 @@ target_link_libraries(
     KF6::DBusAddons
 )
 
+# Definisjoner for release build
 target_compile_definitions(kiot PRIVATE
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
+# Installer target
 install(TARGETS kiot ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
 
+# Installer desktop-filer hvis ikke Flatpak
 if(NOT BUILD_FLATPAK)
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
     ecm_install_configured_files(INPUT org.davidedmundson.kiot.desktop.in @ONLY DESTINATION ${KDE_INSTALL_APPDIR})
 endif()
+
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

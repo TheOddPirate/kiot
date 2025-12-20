@@ -1,0 +1,76 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.kde.Solid.PowerManagement.PolicyAgent">
+    <property access="read" type="a(ssssu)" name="RequestedInhibitions">
+      <annotation value="QList&lt;PolicyAgentInhibition&gt;" name="org.qtproject.QtDBus.QtTypeName"/>
+    </property>
+    <property access="read" type="a(ssssu)" name="ActiveInhibitions">
+      <annotation value="QList&lt;PolicyAgentInhibition&gt;" name="org.qtproject.QtDBus.QtTypeName"/>
+    </property>
+    <method name="AddInhibition">
+      <arg direction="in" type="u" name="types"/>
+      <arg direction="in" type="s" name="app_name"/>
+      <arg direction="in" type="s" name="reason"/>
+      <arg direction="out" type="u" name="cookie"/>
+    </method>
+    <method name="ReleaseInhibition">
+      <arg direction="in" type="u" name="cookie"/>
+    </method>
+    <method name="HasInhibition">
+      <arg direction="in" type="u" name="types"/>
+      <arg direction="out" type="b" name="has_inhibition"/>
+    </method>
+    <method name="SetInhibitionAllowed">
+      <arg direction="in" type="s" name="who"/>
+      <arg direction="in" type="s" name="why"/>
+      <arg direction="in" type="b" name="allowed"/>
+    </method>
+    <method name="ListInhibitions">
+      <annotation value="true" name="org.freedesktop.DBus.Deprecated"/>
+      <annotation value="QList&lt;QStringList&gt;" name="org.qtproject.QtDBus.QtTypeName.Out0"/>
+      <arg direction="out" type="a{ss}" name="inhibited"/>
+    </method>
+    <signal name="InhibitionsChanged">
+      <annotation value="true" name="org.freedesktop.DBus.Deprecated"/>
+      <annotation value="QList&lt;QStringList&gt;" name="org.qtproject.QtDBus.QtTypeName.Out0"/>
+      <arg type="a{ss}" name="added"/>
+      <arg type="as" name="removed"/>
+    </signal>
+  </interface>
+  <interface name="org.freedesktop.DBus.Properties">
+    <method name="Get">
+      <arg name="interface_name" type="s" direction="in"/>
+      <arg name="property_name" type="s" direction="in"/>
+      <arg name="value" type="v" direction="out"/>
+    </method>
+    <method name="Set">
+      <arg name="interface_name" type="s" direction="in"/>
+      <arg name="property_name" type="s" direction="in"/>
+      <arg name="value" type="v" direction="in"/>
+    </method>
+    <method name="GetAll">
+      <arg name="interface_name" type="s" direction="in"/>
+      <arg name="values" type="a{sv}" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
+    </method>
+    <signal name="PropertiesChanged">
+      <arg name="interface_name" type="s" direction="out"/>
+      <arg name="changed_properties" type="a{sv}" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out1" value="QVariantMap"/>
+      <arg name="invalidated_properties" type="as" direction="out"/>
+    </signal>
+  </interface>
+  <interface name="org.freedesktop.DBus.Introspectable">
+    <method name="Introspect">
+      <arg name="xml_data" type="s" direction="out"/>
+    </method>
+  </interface>
+  <interface name="org.freedesktop.DBus.Peer">
+    <method name="Ping"/>
+    <method name="GetMachineId">
+      <arg name="machine_uuid" type="s" direction="out"/>
+    </method>
+  </interface>
+</node>
+
