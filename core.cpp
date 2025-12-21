@@ -166,10 +166,4 @@ void ConnectedNode::init()
     HaControl::mqttClient()->publish(baseTopic(), "on", 0, true);
 }
 
-
-
-
-
-
-
 #include "core.moc"

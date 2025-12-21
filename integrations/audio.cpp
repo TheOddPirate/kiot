@@ -192,9 +192,9 @@ void Audio::updateAttributes()
         auto state = m_source->state();
         QVariantMap attributes;
         if(state == PulseAudioQt::Device::State::RunningState)
-            attributes["in_use"] = QVariant(true).toString();
+            attributes["in_use"] = true;
         else
-            attributes["in_use"] = QVariant(false).toString();
+            attributes["in_use"] = false;
 
         attributes["muted"] = QVariant(m_source->isMuted()).toString();
         m_sourceVolume->setAttributes(attributes);
@@ -204,9 +204,9 @@ void Audio::updateAttributes()
         auto state = m_sink->state();
         QVariantMap attributes;
         if(state == PulseAudioQt::Device::State::RunningState)
-            attributes["in_use"] = QVariant(true).toString();
+            attributes["in_use"] = true;
         else
-            attributes["in_use"] = QVariant(false).toString();
+            attributes["in_use"] = false;
 
         attributes["muted"] = QVariant(m_sink->isMuted()).toString();
         m_sinkVolume->setAttributes(attributes);
@@ -250,6 +250,7 @@ void Audio::onSinkVolumeChanged()
 
     m_sinkVolume->setValue(percent);
     qCDebug(audio) << "Audio: Updated volume from system:" << percent << "%";
+    updateAttributes();
 }
 
 void Audio::onSourceVolumeChanged()
@@ -261,6 +262,7 @@ void Audio::onSourceVolumeChanged()
 
     m_sourceVolume->setValue(percent);
     qCDebug(audio) << "Microphone: Updated volume from system:" << percent << "%";
+    updateAttributes();
 }
 void Audio::setSinkVolume(int v)
 {

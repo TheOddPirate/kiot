@@ -57,7 +57,6 @@ Q_DECLARE_LOGGING_CATEGORY(mpris)
 Q_LOGGING_CATEGORY(mpris, "integration.MPRIS")
 
 // Include generated DBus interface headers
-// These are generated in the build directory by qt_add_dbus_interface
 #include "dbus/dbusproperties.h"
 #include "dbus/mprisplayer.h"
 #include "dbus/mprisroot.h"

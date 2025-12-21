@@ -9,15 +9,16 @@
  * and screen locking through the KDE Solid Power Management DBus interface.
  * It allows Home Assistant to control and monitor power management inhibitions.
  */
-
 #include "core.h"
 #include "entities/entities.h"
 #include "dbus/policyagentinterface.h"
 
 #include <QLoggingCategory>
+#include <QCoreApplication>
 
 Q_DECLARE_LOGGING_CATEGORY(pi)
 Q_LOGGING_CATEGORY(pi, "integration.PowerInhibitor")
+
 
 /**
  * @class PowerInhibitor
@@ -48,17 +49,19 @@ public:
     explicit PowerInhibitor(QObject *parent = nullptr)
         : QObject(parent)
     {
-        // Create switch entity
         m_switch = new Switch(this);
         m_switch->setId("inhibit");
         m_switch->setName("Sleep and screen lock inhibitor");
         m_switch->setState(false);
         m_switch->setAttributes(QVariantMap());
 
-        // Connect switch toggle signal to handler
-        connect(m_switch, &Switch::stateChangeRequested, this, &PowerInhibitor::onSwitchToggled);
+        connect(
+            m_switch,
+            &Switch::stateChangeRequested,
+            this,
+            &PowerInhibitor::onSwitchToggled
+        );
 
-        // Initialize DBus interface to KDE Solid Power Management
         m_policyAgent = new PolicyAgentInterface(
             "org.kde.Solid.PowerManagement",
             "/org/kde/Solid/PowerManagement/PolicyAgent",
@@ -66,11 +69,21 @@ public:
             this
         );
 
-        // Connect to DBus signal for inhibition changes
-        connect(m_policyAgent, &PolicyAgentInterface::InhibitionsChanged,
-                this, &PowerInhibitor::itChanged);
+        connect(
+            m_policyAgent,
+            &PolicyAgentInterface::InhibitionsChanged,
+            this,
+            &PowerInhibitor::onInhibitionsChanged
+        );
 
-        // Perform initial sync with current inhibition state
+        // Ensure cleanup on clean shutdown
+        connect(
+            qApp,
+            &QCoreApplication::aboutToQuit,
+            this,
+            &PowerInhibitor::releaseOwnInhibition
+        );
+
         updateStateFromDBus();
     }
 
@@ -85,13 +98,10 @@ private slots:
      * It updates the switch state and attributes to reflect the current
      * inhibition status.
      */
-    void itChanged(const QList<QStringList> &added, const QStringList &removed)
+    void onInhibitionsChanged(const QList<QStringList>&, const QStringList&)
     {
-        Q_UNUSED(added)
-        Q_UNUSED(removed)
         updateStateFromDBus();
     }
-
     /**
      * @brief Slot called when the switch is toggled
      * @param enabled True if switch is being enabled, false if being disabled
@@ -104,57 +114,108 @@ private slots:
     {
         qCDebug(pi) << "Switch toggled to" << enabled;
 
-        if (enabled) 
-        {
-            // Don't create duplicate inhibition
-            if (m_ownCookie != 0)
-                return;
-
-            // Add new inhibition through DBus
-            uint cookie = m_policyAgent->AddInhibition(
-                InhibitTypes,
-                "Kiot",
-                "Manual block from Home Assistant"
-            );
-            m_ownCookie = cookie;
-        } 
-        else 
-        {
-            // Don't release if no active inhibition
-            if (m_ownCookie == 0)
-                return;
-
-            // Release the inhibition through DBus
-            m_policyAgent->ReleaseInhibition(m_ownCookie);
-            m_ownCookie = 0;
+        if (enabled) {
+            addInhibition();
+        } else {
+            releaseOwnInhibition();
         }
     }
 
 private:
     /**
+     * @brief Adds a new power inhibition through DBus
+     * 
+     * @details
+     * Requests the DBus power management service to add a new inhibition
+     * preventing system sleep and screen locking. The inhibition is registered
+     * under the name "Kiot" with a descriptive reason. Prevents duplicate
+     * inhibitions by checking if an inhibition is already active.
+     * 
+     * @note The inhibition cookie is stored in m_ownCookie for later release.
+     */
+    void addInhibition()
+    {
+        if (m_ownCookie != 0) {
+            return;
+        }
+
+        auto reply = m_policyAgent->AddInhibition(
+            InhibitTypes,
+            "Kiot",
+            "Manual block from Home Assistant"
+        );
+
+        reply.waitForFinished();
+
+        if (reply.isError()) {
+            qCWarning(pi) << "AddInhibition failed:" << reply.error().message();
+            return;
+        }
+
+        m_ownCookie = reply.value();
+        qCDebug(pi) << "Inhibition added with cookie" << m_ownCookie;
+    }
+
+    /**
+     * @brief Releases the power inhibition created by this instance
+     * 
+     * @details
+     * Releases the inhibition previously created by addInhibition() using
+     * the stored cookie. Ensures proper cleanup of DBus resources and
+     * resets the internal cookie tracking.
+     */
+    void releaseOwnInhibition()
+    {
+        if (m_ownCookie == 0) {
+            return;
+        }
+
+        auto reply = m_policyAgent->ReleaseInhibition(m_ownCookie);
+        reply.waitForFinished();
+
+        if (reply.isError()) {
+            qCWarning(pi) << "ReleaseInhibition failed:" << reply.error().message();
+            return;
+        }
+
+        qCDebug(pi) << "Inhibition released:" << m_ownCookie;
+        m_ownCookie = 0;
+    }
+
+    /**
      * @brief Updates the switch state and attributes from DBus
      * 
      * @details
-     * Queries the current inhibition status from the DBus service and
-     * updates the switch state accordingly. Also collects information
-     * about all active inhibitions and sets them as switch attributes.
+     * Queries the DBus power management service for current inhibition status
+     * and updates the switch entity accordingly. Sets the switch state based
+     * on whether any inhibitions are active, and populates attributes with
+     * information about all active inhibitors across the system.
      */
     void updateStateFromDBus()
     {
-        // Check if any inhibitions of our types are active
-        bool active = m_policyAgent->HasInhibition(InhibitTypes);
-        m_switch->setState(active);
+        // Switch state
+        auto hasReply = m_policyAgent->HasInhibition(InhibitTypes);
+        hasReply.waitForFinished();
 
-        // Collect information about all active inhibitions
-        QVariantList inhibitors;
-        QList<QStringList> list = m_policyAgent->ListInhibitions();
-        for (const QStringList &entry : list) {
-            QVariantMap map;
-            map["app"] = entry.value(0);     // Application name
-            map["reason"] = entry.value(1);  // Inhibition reason
-            inhibitors.append(map);
+        if (!hasReply.isError()) {
+            m_switch->setState(hasReply.value());
         }
 
+        // Attributes
+        QVariantList inhibitors;
+
+        auto listReply = m_policyAgent->ListInhibitions();
+        listReply.waitForFinished();
+
+        if (!listReply.isError()) {
+            const QList<QStringList> list = listReply.value();
+            for (const QStringList &entry : list) {
+                QVariantMap map;
+                map["app"] = entry.value(0);
+                map["reason"] = entry.value(1);
+                inhibitors.append(map);
+            }
+        }
 
         QVariantMap attributes;
         attributes["active_inhibitors"] = inhibitors;
@@ -164,16 +225,16 @@ private:
     }
 
 private:
-    Switch *m_switch = nullptr;                     ///< Switch entity for control
-    PolicyAgentInterface *m_policyAgent = nullptr;  ///< DBus interface to power management
-    uint m_ownCookie = 0;                           ///< Cookie for our own inhibition
+    Switch *m_switch = nullptr; /**< @brief Switch entity for controlling power inhibition */
+    PolicyAgentInterface *m_policyAgent = nullptr; /**< @brief DBus interface for power management */
+    uint m_ownCookie = 0; /**< @brief Cookie identifying our own inhibition for cleanup */
 
     /**
      * @brief Bitmask of inhibition types to apply
      * 
-     * Combines:
-     * - 1: PreventSleep - Inhibits system sleep/suspend
-     * - 2: PreventScreenLocking - Inhibits screen locking
+     * @details
+     * Combines PreventSleep (1) and PreventScreenLocking (2) flags to
+     * inhibit both system sleep and screen locking when active.
      */
     static constexpr uint InhibitTypes =
         1 | // PreventSleep
@@ -181,25 +242,18 @@ private:
 };
 
 /**
- * @brief Setup function for the PowerInhibitor integration
+ * @brief Sets up the PowerInhibitor integration
  * 
  * @details
- * Creates and initializes the PowerInhibitor instance.
- * This function is called by the integration registration system.
+ * Factory function called by the integration framework to create and
+ * initialize a PowerInhibitor instance. The instance is parented to
+ * the application object for automatic cleanup.
  */
 void setupPowerInhibitor()
 {
     new PowerInhibitor(qApp);
 }
 
-/**
- * @brief Registers the PowerInhibitor integration with Kiot
- * 
- * Parameters:
- * - "PowerInhibitor": Integration name
- * - setupPowerInhibitor: Setup function pointer
- * - true: Auto-start enabled
- */
 REGISTER_INTEGRATION("PowerInhibitor", setupPowerInhibitor, true)
 
 #include "powerinhibitor.moc"
