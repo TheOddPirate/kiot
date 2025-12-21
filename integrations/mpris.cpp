@@ -254,11 +254,9 @@ public:
         , m_playerIface(new OrgMprisMediaPlayer2PlayerInterface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))
         , m_rootIface(new OrgMprisMediaPlayer2Interface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))  
     {
-        Q_ASSERT(bus.startsWith(MPRIS2_PATH));
+        Q_ASSERT(bus.startsWith("org.mpris.MediaPlayer2"));
         initBindings();
-        // initial snapshot + start listening for changes
         refresh();
-        // subscribe to PropertiesChanged signals for this service
         if (QDBusReply<unsigned> pidReply = QDBusConnection::sessionBus().interface()->servicePid(bus); pidReply.isValid()) {
             m_instancePid = pidReply.value();
         }
