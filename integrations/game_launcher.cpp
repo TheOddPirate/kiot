@@ -7,6 +7,11 @@
 #include <KConfigGroup>
 #include <KSharedConfig>
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonValue>
+
 #include <QObject>
 #include <QString>
 #include <QDir>
@@ -25,9 +30,12 @@
 
 Q_DECLARE_LOGGING_CATEGORY(gl)
 Q_LOGGING_CATEGORY(gl, "integration.GameLauncher")
-
+Q_DECLARE_LOGGING_CATEGORY(steam)
+Q_LOGGING_CATEGORY(steam, "integration.GameLauncher.Steam")
+Q_DECLARE_LOGGING_CATEGORY(heroic)
+Q_LOGGING_CATEGORY(heroic, "integration.GameLauncher.Heroic")
 namespace {
-    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9]");
+    static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9_-]");
 }
 
 /**
@@ -40,7 +48,7 @@ namespace {
  * It parses Steam's libraryfolders.vdf and appmanifest files to
  * find all installed games and creates launch commands for them.
  */
-class GameLauncher : public QObject
+class Steam : public QObject
 {
     Q_OBJECT
 
@@ -54,47 +62,48 @@ public:
      * finding the library configuration, and creating button entities
      * for all discovered games.
      */
-    explicit GameLauncher(QObject *parent = nullptr)
+    explicit Steam(QObject *parent = nullptr)
         : QObject(parent)
     {
-        if (!isSteamInstalled()) {
-            qCWarning(gl) << "Steam is not installed or not found. GameLauncher integration disabled.";
-            return;
-        }
 
         QString libraryConfig = findLibraryConfig();
         if (libraryConfig.isEmpty()) {
-            qCWarning(gl) << "Could not find Steam library configuration. GameLauncher integration disabled.";
+            qCWarning(steam) << "Could not find Steam library configuration. GameLauncher integration disabled.";
             return;
         }
 
-        qCDebug(gl) << "Found Steam library config:" << libraryConfig;
+        qCDebug(steam) << "Found Steam library config:" << libraryConfig;
 
         QMap<QString, QString> games = getGamesDirect(libraryConfig);
         if (games.isEmpty()) {
-            qCWarning(gl) << "No games found. GameLauncher integration disabled.";
+            qCWarning(steam) << "No games found. GameLauncher integration disabled.";
             return;
         }
         ensureConfig(games);
 
-        qCDebug(gl) << "Found" << games.size() << "games";
-
+        qCDebug(steam) << "Found" << games.size() << "games";
+        m_select = new Select(this);
+        m_select->setId("steam_launcher");
+        m_select->setName("Steam Launcher");
+        connect(m_select, &Select::optionSelected, this, &Steam::onOptionSelected);
         createGameEntities(games);
     }
 
 private slots:
     /**
-     * @brief Slot called when a game button is pressed
-     * @param gameId The Steam App ID of the game to launch
+     * @brief Slot called when a option is selcted 
+     * @param option The Steam Game name to launch
      * 
      * @details
      * Launches the specified game using Steam's URI scheme.
      * The game is launched in the background without bringing
      * Steam client to the foreground.
      */
-    void onGameButtonPressed(const QString &gameId)
+    void onOptionSelected(const QString &option)
     {
-        qCDebug(gl) << "Launching game with App ID:" << gameId;
+        if(option == "Default") return;
+        QString gameId = m_gameList.value(option);
+        qCDebug(steam) << "Launching game with App ID:" << gameId;
         
         QString launchCommand = QString("steam://rungameid/%1").arg(gameId);
         
@@ -104,9 +113,9 @@ private slots:
         connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, [this, gameId, process](int exitCode, QProcess::ExitStatus exitStatus) {
                     if (exitStatus == QProcess::NormalExit && exitCode == 0) {
-                        qCDebug(gl) << "Successfully launched game:" << gameId;
+                        qCDebug(steam) << "Successfully launched game:" << gameId;
                     } else {
-                        qCWarning(gl) << "Failed to launch game" << gameId 
+                        qCWarning(steam) << "Failed to launch game" << gameId 
                                      << ": exit code" << exitCode;
                     }
                     process->deleteLater();
@@ -156,7 +165,7 @@ private:
                 // New game - add to config with default expose=false
                 grp.writeEntry(configKey, false);
                 configChanged = true;
-                qCDebug(gl) << "Added new steam game to config:" << configKey << "= false";
+                qCDebug(steam) << "Added new steam game to config:" << configKey << "= false";
             }
         }
     
@@ -179,57 +188,16 @@ private:
             if (!gameStillExists) {
                 grp.deleteEntry(configKey);
                 configChanged = true;
-                qCDebug(gl) << "Removed unavailable game from config:" << configKey;
+                qCDebug(steam) << "Removed unavailable game from config:" << configKey;
             }
         }
     
         if (configChanged) {
             cfg->sync();
-            qCDebug(gl) << "Configuration updated with current games";
+            qCDebug(steam) << "Configuration updated with current games";
         }
     }
 
-    /**
-     * @brief Checks if Steam is installed on the system
-     * @return True if Steam is found, false otherwise
-     * 
-     * @details
-     * Checks for Steam installation by looking for:
-     * 1. Steam executable in PATH
-     * 2. Steam desktop file
-     * 3. Steam installation directory
-     */
-    bool isSteamInstalled()
-    {
-        // Check if steam command is in PATH
-        QProcess process;
-        process.start("which", QStringList() << "steam");
-        process.waitForFinished();
-        if (process.exitCode() == 0) {
-            return true;
-        }
-
-        // Check for Steam desktop file
-        QStringList desktopPaths = {
-            QDir::homePath() + "/.local/share/applications/steam.desktop",
-            "/usr/share/applications/steam.desktop",
-            "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop",
-        };
-
-        for (const QString &desktopPath : desktopPaths) {
-            if (QFile::exists(desktopPath)) {
-                return true;
-            }
-        }
-
-        // Check for Steam installation directory
-        QString steamHome = QDir::homePath() + "/.local/share/Steam";
-        if (QDir(steamHome).exists()) {
-            return true;
-        }
-
-        return false;
-    }
 
     /**
      * @brief Finds Steam library configuration file
@@ -252,7 +220,7 @@ private:
         // Check standard paths first
         for (const QString &path : standardPaths) {
             if (QFile::exists(path)) {
-                qCDebug(gl) << "Found libraryfolders.vdf in standard location:" << path;
+                qCDebug(steam) << "Found libraryfolders.vdf in standard location:" << path;
                 return path;
             }
         }
@@ -262,13 +230,13 @@ private:
         if (QDir(steamHome).exists()) {
             QString foundPath = recursiveFind(QDir(steamHome), 0, 3);
             if (!foundPath.isEmpty()) {
-                qCDebug(gl) << "Found libraryfolders.vdf via recursive search:" << foundPath;
+                qCDebug(steam) << "Found libraryfolders.vdf via recursive search:" << foundPath;
                 return foundPath;
             }
         }
 
         // Last resort: recursive search from home directory (limited depth)
-        qCDebug(gl) << "Falling back to limited recursive search from home directory";
+        qCDebug(steam) << "Falling back to limited recursive search from home directory";
         return recursiveFind(QDir(QDir::homePath()), 0, 3);
     }
 
@@ -288,7 +256,7 @@ private:
         
         QFile file(steamConfigPath);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qCWarning(gl) << "Failed to open Steam config:" << steamConfigPath;
+            qCWarning(steam) << "Failed to open Steam config:" << steamConfigPath;
             return games;
         }
         
@@ -327,7 +295,7 @@ private:
                     int endPos = line.indexOf('\"', startPos + 1);
                     if (endPos != -1) {
                         currentLibraryPath = line.mid(startPos + 1, endPos - startPos - 1);
-                        qCDebug(gl) << "Found library path:" << currentLibraryPath;
+                        qCDebug(steam) << "Found library path:" << currentLibraryPath;
                     }
                 }
             }
@@ -381,12 +349,12 @@ private:
                                 
                                 if (!gameName.isEmpty()) {
                                     games[appId] = gameName;
-                                    qCDebug(gl) << "Found game:" << gameName << "(App ID:" << appId << ")";
+                                    qCDebug(steam) << "Found game:" << gameName << "(App ID:" << appId << ")";
                                 } else {
-                                    qCDebug(gl) << "Could not find name for App ID" << appId;
+                                    qCDebug(steam) << "Could not find name for App ID" << appId;
                                 }
                             } else {
-                                qCDebug(gl) << "Could not open appmanifest for App ID" << appId << "at" << acfPath;
+                                qCDebug(steam) << "Could not open appmanifest for App ID" << appId << "at" << acfPath;
                             }
                         }
                     }
@@ -395,7 +363,7 @@ private:
         }
 
         file.close();
-        qCDebug(gl) << "Total games found:" << games.size();
+        qCDebug(steam) << "Total games found:" << games.size();
         return games;
     }
 
@@ -409,26 +377,20 @@ private:
      */
     void createGameEntities(const QMap<QString, QString> &games)
     {
+        m_gameList = games;
         const auto cfg = KSharedConfig::openConfig();
         KConfigGroup grp = cfg->group("steam");
+        QStringList options;
+        options.append("Default");
         for (auto it = games.constBegin(); it != games.constEnd(); ++it) {
-            const QString &appId = it.key();
             const QString &gameName = it.value();
             if (!grp.readEntry(sanitizeGameName(gameName), false)) continue;
             // Create a button entity for this game
-            Button *gameButton = new Button(this);
-            gameButton->setId(QString("game_%1").arg(appId));
-            gameButton->setName(gameName);
-            gameButton->setDiscoveryConfig("icon","mdi:steam");
-            
-            // Connect the button press to launch the game
-            connect(gameButton, &Button::triggered,
-                    this, [this, appId]() { onGameButtonPressed(appId); });
-            
-            m_gameButtons[appId] = gameButton;
-            
-            qCDebug(gl) << "Created button for game:" << gameName << "(ID:" << appId << ")";
+            options.append(gameName);
+
         }
+        m_select->setOptions(options);
+        m_select->setState("Default");
     }
 
     /**
@@ -477,9 +439,493 @@ private:
     }
 
 private:
-    QMap<QString, Button*> m_gameButtons; /**< @brief Map of App ID to button entities */
+    QMap<QString, QString> m_gameList; /**< @brief Map of App ID to button entities */
+    Select *m_select;
 };
 
+
+class Heroic : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit Heroic(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+        // Find all Heroic game stores
+        QMap<QString, GameData> games = getAllHeroicGames();
+        if (games.isEmpty()) {
+            qCWarning(heroic) << "No Heroic games found. Heroic integration disabled.";
+            return;
+        }
+        
+        ensureConfig(games);
+        
+        qCDebug(heroic) << "Found" << games.size() << "Heroic games";
+        m_select = new Select(this);
+        m_select->setId("heroic_launcher");
+        m_select->setName("Heroic Launcher");
+        connect(m_select, &Select::optionSelected, this, &Heroic::onOptionSelected);
+        createGameEntities(games);
+    }
+
+private slots:
+    /**
+     * @brief Slot called when an option is selected
+     * @param option The Heroic game name to launch
+     * 
+     * @details
+     * Launches the specified game using Heroic's URI scheme.
+     */
+    void onOptionSelected(const QString &option)
+    {
+        if (option == "Default") return;
+        
+        if (!m_gameData.contains(option)) {
+            qCWarning(heroic) << "Game not found in data:" << option;
+            return;
+        }
+        
+        GameData data = m_gameData[option];
+        
+        qCDebug(heroic) << "Launching Heroic game:" << option 
+                       << "(appName:" << data.appName << ", runner:" << data.runner << ")";
+        
+        QString launchCommand = QString("heroic://launch?appName=%1&runner=%2")
+                               .arg(data.appName)
+                               .arg(data.runner);
+        
+        QProcess *process = new QProcess(this);
+        process->start("xdg-open", QStringList() << launchCommand);
+        
+        connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this, [this, option, process](int exitCode, QProcess::ExitStatus exitStatus) {
+                    if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+                        qCDebug(heroic) << "Successfully launched game:" << option;
+                    } else {
+                        qCWarning(heroic) << "Failed to launch game" << option 
+                                        << ": exit code" << exitCode;
+                    }
+                    process->deleteLater();
+                });
+    }
+
+private:
+    struct GameData {
+        QString appName;
+        QString runner;
+        QString title;
+    };
+
+    /**
+     * @brief Sanitizes a game name for use as a config key
+     * @param gameName The original game name
+     * @return Sanitized string safe for config keys
+     */
+    QString sanitizeGameName(const QString &gameName)
+    {
+        QString id = gameName.toLower();
+        id.replace(invalidCharRegex, QStringLiteral("_"));
+        if (!id.isEmpty() && id[0].isDigit()) {
+            id.prepend("game_");
+        }
+        return id;
+    }
+
+    /**
+     * @brief Ensures configuration has entries for all discovered games
+     * @param games Map of game title to GameData
+     */
+    void ensureConfig(const QMap<QString, GameData> &games)
+    {
+        auto cfg = KSharedConfig::openConfig();
+        KConfigGroup grp = cfg->group("heroic");
+    
+        bool configChanged = false;
+        
+        // For each discovered game
+        for (auto it = games.constBegin(); it != games.constEnd(); ++it) {
+            const QString &gameTitle = it.key();
+            QString configKey = sanitizeGameName(gameTitle);
+        
+            // Check if this game already has a config entry
+            if (!grp.hasKey(configKey)) {
+                // New game - add to config with default expose=false
+                grp.writeEntry(configKey, false);
+                configChanged = true;
+                qCDebug(heroic) << "Added new heroic game to config:" << configKey << "= false";
+            }
+        }
+    
+        // Get all current config keys
+        const QStringList currentKeys = grp.keyList();
+    
+        // Remove games from config that are no longer installed
+        for (const QString &configKey : currentKeys) {
+            bool gameStillExists = false;
+        
+            // Check if this config key corresponds to any current game
+            for (auto it = games.constBegin(); it != games.constEnd(); ++it) {
+                const QString &gameTitle = it.key();
+                if (sanitizeGameName(gameTitle) == configKey) {
+                    gameStillExists = true;
+                    break;
+                }
+            }
+        
+            if (!gameStillExists) {
+                grp.deleteEntry(configKey);
+                configChanged = true;
+                qCDebug(heroic) << "Removed unavailable game from config:" << configKey;
+            }
+        }
+    
+        if (configChanged) {
+            cfg->sync();
+            qCDebug(heroic) << "Heroic configuration updated with current games";
+        }
+    }
+
+    /**
+     * @brief Gets all installed games from all Heroic stores
+     * @return Map of game title to GameData
+     */
+    QMap<QString, GameData> getAllHeroicGames()
+    {
+        QMap<QString, GameData> games;
+        
+        // Epic Games Store (Legendary)
+        QString epicPath = QDir::homePath() + "/.config/heroic/legendaryConfig/legendary/installed.json";
+        games.insert(getEpicGames(epicPath));
+        
+        // GOG Store
+        QString gogPath = QDir::homePath() + "/.config/heroic/gog_store/installed.json";
+        games.insert(getGogGames(gogPath));
+        
+        // Prime Gaming (Nile)
+        QString primePath = QDir::homePath() + "/.config/heroic/nile_config/nile/installed.json";
+        games.insert(getPrimeGames(primePath));
+        
+        // Sideloaded apps
+        QString sideloadPath = QDir::homePath() + "/.config/heroic/sideload_apps/library.json";
+        games.insert(getSideloadGames(sideloadPath));
+        
+        return games;
+    }
+
+    /**
+     * @brief Gets Epic Games Store games
+     * @param filePath Path to installed.json
+     * @return Map of game title to GameData
+     */
+    QMap<QString, GameData> getEpicGames(const QString &filePath)
+    {
+        QMap<QString, GameData> games;
+        
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qCDebug(heroic) << "Could not open Epic games file:" << filePath;
+            return games;
+        }
+        
+        QByteArray data = file.readAll();
+        file.close();
+        
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull() || !doc.isObject()) {
+            qCWarning(heroic) << "Invalid JSON in Epic games file";
+            return games;
+        }
+        
+        QJsonObject root = doc.object();
+        
+        for (auto it = root.constBegin(); it != root.constEnd(); ++it) {
+            QString appName = it.key();
+            QJsonObject gameObj = it.value().toObject();
+            
+            // Skip DLCs
+            if (gameObj["is_dlc"].toBool()) {
+                continue;
+            }
+            
+            QString title = gameObj["title"].toString();
+            if (!title.isEmpty()) {
+                GameData data;
+                data.appName = appName;
+                data.runner = "legendary";
+                data.title = title;
+                
+                games[title] = data;
+                qCDebug(heroic) << "Found Epic game:" << title << "(appName:" << appName << ")";
+            }
+        }
+        
+        return games;
+    }
+
+    /**
+     * @brief Gets GOG games
+     * @param filePath Path to installed.json
+     * @return Map of game title to GameData
+     */
+    QMap<QString, GameData> getGogGames(const QString &filePath)
+    {
+        QMap<QString, GameData> games;
+        
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qCDebug(heroic) << "Could not open GOG games file:" << filePath;
+            return games;
+        }
+        
+        QByteArray data = file.readAll();
+        file.close();
+        
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull() || !doc.isObject()) {
+            qCWarning(heroic) << "Invalid JSON in GOG games file";
+            return games;
+        }
+        
+        QJsonObject root = doc.object();
+        QJsonArray installed = root["installed"].toArray();
+        
+        for (const QJsonValue &value : installed) {
+            QJsonObject gameObj = value.toObject();
+            
+            // Skip DLCs
+            if (gameObj["is_dlc"].toBool()) {
+                continue;
+            }
+            
+            QString appName = gameObj["appName"].toString();
+            // GOG JSON doesn't have title, we need to get it from somewhere else
+            // For now, use appName as title
+            QString title = appName;
+            
+            GameData data;
+            data.appName = appName;
+            data.runner = "gog";
+            data.title = title;
+            
+            games[title] = data;
+            qCDebug(heroic) << "Found GOG game:" << title << "(appName:" << appName << ")";
+        }
+        
+        return games;
+    }
+
+    /**
+     * @brief Gets Prime Gaming games
+     * @param filePath Path to installed.json
+     * @return Map of game title to GameData
+     */
+    QMap<QString, GameData> getPrimeGames(const QString &filePath)
+    {
+        QMap<QString, GameData> games;
+        
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qCDebug(heroic) << "Could not open Prime games file:" << filePath;
+            return games;
+        }
+        
+        QByteArray data = file.readAll();
+        file.close();
+        
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull() || !doc.isArray()) {
+            qCWarning(heroic) << "Invalid JSON in Prime games file";
+            return games;
+        }
+        
+        QJsonArray root = doc.array();
+        
+        for (const QJsonValue &value : root) {
+            QJsonObject gameObj = value.toObject();
+            
+            QString appName = gameObj["id"].toString();
+            // Prime JSON doesn't have title either
+            QString title = appName;
+            
+            GameData data;
+            data.appName = appName;
+            data.runner = "nile";
+            data.title = title;
+            
+            games[title] = data;
+            qCDebug(heroic) << "Found Prime game:" << title << "(appName:" << appName << ")";
+        }
+        
+        return games;
+    }
+
+    /**
+     * @brief Gets sideloaded games
+     * @param filePath Path to library.json
+     * @return Map of game title to GameData
+     */
+    QMap<QString, GameData> getSideloadGames(const QString &filePath)
+    {
+        QMap<QString, GameData> games;
+        
+        QFile file(filePath);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qCDebug(heroic) << "Could not open sideload games file:" << filePath;
+            return games;
+        }
+        
+        QByteArray data = file.readAll();
+        file.close();
+        
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        if (doc.isNull() || !doc.isObject()) {
+            qCWarning(heroic) << "Invalid JSON in sideload games file";
+            return games;
+        }
+        
+        QJsonObject root = doc.object();
+        QJsonArray gamesArray = root["games"].toArray();
+        
+        for (const QJsonValue &value : gamesArray) {
+            QJsonObject gameObj = value.toObject();
+            
+            // Skip if not installed
+            if (!gameObj["is_installed"].toBool()) {
+                continue;
+            }
+            
+            // Skip DLCs
+            QJsonObject installObj = gameObj["install"].toObject();
+            if (installObj["is_dlc"].toBool()) {
+                continue;
+            }
+            
+            QString appName = gameObj["app_name"].toString();
+            QString title = gameObj["title"].toString();
+            QString runner = gameObj["runner"].toString();
+            
+            if (!title.isEmpty()) {
+                GameData data;
+                data.appName = appName;
+                data.runner = runner;
+                data.title = title;
+                
+                games[title] = data;
+                qCDebug(heroic) << "Found sideload game:" << title 
+                               << "(appName:" << appName << ", runner:" << runner << ")";
+            }
+        }
+        
+        return games;
+    }
+
+    /**
+     * @brief Creates select entities for all discovered games
+     * @param games Map of game title to GameData
+     */
+    void createGameEntities(const QMap<QString, GameData> &games)
+    {
+        m_gameData = games;
+        const auto cfg = KSharedConfig::openConfig();
+        KConfigGroup grp = cfg->group("heroic");
+        QStringList options;
+        options.append("Default");
+        
+        for (auto it = games.constBegin(); it != games.constEnd(); ++it) {
+            const QString &gameTitle = it.key();
+            if (!grp.readEntry(sanitizeGameName(gameTitle), false)) continue;
+            options.append(gameTitle);
+        }
+        
+        m_select->setOptions(options);
+        m_select->setState("Default");
+    }
+
+private:
+    QMap<QString, GameData> m_gameData; /**< @brief Map of game title to GameData */
+    Select *m_select;
+};
+
+/**
+ * @brief Checks if Steam is installed on the system
+ * @return True if Steam is found, false otherwise
+ * 
+ * @details
+ * Checks for Steam installation by looking for:
+ * 1. Steam executable in PATH
+ * 2. Steam desktop file
+ * 3. Steam installation directory
+ */
+bool isSteamInstalled()
+{
+    // Check if steam command is in PATH
+    QProcess process;
+    process.start("which", QStringList() << "steam");
+    process.waitForFinished();
+    if (process.exitCode() == 0) {
+        return true;
+    }
+
+    // Check for Steam desktop file
+    QStringList desktopPaths = {
+        QDir::homePath() + "/.local/share/applications/steam.desktop",
+        "/usr/share/applications/steam.desktop",
+        "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop",
+    };
+
+    for (const QString &desktopPath : desktopPaths) {
+        if (QFile::exists(desktopPath)) {
+            return true;
+        }
+    }
+
+    // Check for Steam installation directory
+    QString steamHome = QDir::homePath() + "/.local/share/Steam";
+    if (QDir(steamHome).exists()) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @brief Checks if Heroic is installed on the system
+ * @return True if Heroic is found, false otherwise
+ * 
+ * @details
+ * Checks for Heroic installation by looking for:
+ * 1. Heroic executable in PATH
+ * 2. Heroic desktop file
+ * 3. Heroic installation directory
+ */
+bool isHeroicInstalled()
+{
+    // Check if steam command is in PATH
+    QProcess process;
+    process.start("which", QStringList() << "heroic");
+    process.waitForFinished();
+    if (process.exitCode() == 0) {
+        return true;
+    }
+
+    // Check for Steam desktop file
+    QStringList desktopPaths = {
+        QDir::homePath() + "/.local/share/applications/heroic.desktop",
+    };
+
+    for (const QString &desktopPath : desktopPaths) {
+        if (QFile::exists(desktopPath)) {
+            return true;
+        }
+    }
+
+    // Check for Steam installation directory
+    QString heroicHome = QDir::homePath() + "/.config/heroic/";
+    if (QDir(heroicHome).exists()) {
+        return true;
+    }
+    return false;
+}
 /**
  * @brief Sets up the GameLauncher integration
  * 
@@ -489,9 +935,25 @@ private:
  */
 void setupGameLauncher()
 {
-    new GameLauncher(qApp);
-}
+    bool foundlauncer = false;
+    if(isSteamInstalled())
+    {
+        qCDebug(gl) << "Found Steam";
+        foundlauncer = true;
+        new Steam(qApp);
+    }
+    if(isHeroicInstalled())
+    {
+        qCDebug(gl) << "Found Heroic";
+        foundlauncer = true;
+        new Heroic(qApp);
+    }
 
+    if(!foundlauncer)
+    {
+        qCDebug(gl) << "No Game Launcher found";
+    }
+}
 REGISTER_INTEGRATION("GameLauncher", setupGameLauncher, true)
 
 #include "game_launcher.moc"
