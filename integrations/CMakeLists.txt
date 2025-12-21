@@ -26,6 +26,7 @@ set(KIOT_INTEGRATIONS_SRC
     systemd.cpp
     mpris.cpp
     powerinhibitor.cpp
+    game_launcher.cpp
 
 )
 # Only included in flatpak builds
