@@ -17,7 +17,7 @@
  * on the system and exposes the currently active player to Home Assistant
  * for control and monitoring.
  */
-
+#include "mpris.h"
 #include "core.h"
 #include "entities/entities.h"
 
@@ -40,14 +40,193 @@
 #include <QDBusVariant>
 #include <QDBusArgument>
 
+#include <QDBusObjectPath>
+
+
 // Qt Network includes
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
+
+
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(mpris)
 Q_LOGGING_CATEGORY(mpris, "integration.MPRIS")
+
+// Include generated DBus interface headers
+// These are generated in the build directory by qt_add_dbus_interface
+#include "dbus/dbusproperties.h"
+#include "dbus/mprisplayer.h"
+#include "dbus/mprisroot.h"
+
+
+AbstractPlayerContainer::AbstractPlayerContainer(QObject *parent)
+    : QObject(parent)
+{
+}
+
+AbstractPlayerContainer::~AbstractPlayerContainer() = default;
+
+bool AbstractPlayerContainer::canControl() const
+{
+    return m_canControl.value();
+}
+
+bool AbstractPlayerContainer::canGoNext() const
+{
+    return m_effectiveCanGoNext.value();
+}
+
+bool AbstractPlayerContainer::canGoPrevious() const
+{
+    return m_effectiveCanGoPrevious.value();
+}
+
+bool AbstractPlayerContainer::canPause() const
+{
+    return m_effectiveCanPause.value();
+}
+
+bool AbstractPlayerContainer::canPlay() const
+{
+    return m_effectiveCanPlay.value();
+}
+
+bool AbstractPlayerContainer::canStop() const
+{
+    return m_effectiveCanStop.value();
+}
+
+bool AbstractPlayerContainer::canSeek() const
+{
+    return m_effectiveCanSeek.value();
+}
+
+LoopStatus::Status AbstractPlayerContainer::loopStatus() const
+{
+    return m_loopStatus.value();
+}
+
+double AbstractPlayerContainer::maximumRate() const
+{
+    return m_maximumRate.value();
+}
+
+double AbstractPlayerContainer::minimumRate() const
+{
+    return m_minimumRate.value();
+}
+
+PlaybackStatus::Status AbstractPlayerContainer::playbackStatus() const
+{
+    return m_playbackStatus.value();
+}
+
+qlonglong AbstractPlayerContainer::position() const
+{
+    return m_position.value();
+}
+
+double AbstractPlayerContainer::rate() const
+{
+    return m_rate.value();
+}
+
+ShuffleStatus::Status AbstractPlayerContainer::shuffle() const
+{
+    return m_shuffle.value();
+}
+
+double AbstractPlayerContainer::volume() const
+{
+    return m_volume.value();
+}
+
+QString AbstractPlayerContainer::track() const
+{
+    return m_track.value();
+}
+
+QString AbstractPlayerContainer::artist() const
+{
+    return m_artist.value();
+}
+
+QString AbstractPlayerContainer::artUrl() const
+{
+    return m_artUrl.value();
+}
+
+QString AbstractPlayerContainer::album() const
+{
+    return m_album.value();
+}
+
+double AbstractPlayerContainer::length() const
+{
+    return m_length;
+}
+
+unsigned AbstractPlayerContainer::instancePid() const
+{
+    return m_instancePid;
+}
+
+unsigned AbstractPlayerContainer::kdePid() const
+{
+    return m_kdePid.value();
+}
+
+bool AbstractPlayerContainer::canQuit() const
+{
+    return m_canQuit.value();
+}
+
+bool AbstractPlayerContainer::canRaise() const
+{
+    return m_canRaise.value();
+}
+
+bool AbstractPlayerContainer::canSetFullscreen() const
+{
+    return m_canSetFullscreen.value();
+}
+
+QString AbstractPlayerContainer::desktopEntry() const
+{
+    return m_desktopEntry;
+}
+
+bool AbstractPlayerContainer::fullscreen() const
+{
+    return m_fullscreen.value();
+}
+bool AbstractPlayerContainer::hasTrackList() const
+{
+    return m_hasTrackList;
+}
+
+QString AbstractPlayerContainer::identity() const
+{
+    return m_identity;
+}
+
+QStringList AbstractPlayerContainer::supportedMimeTypes() const
+{
+    return m_supportedMimeTypes;
+}
+
+QStringList AbstractPlayerContainer::supportedUriSchemes() const
+{
+    return m_supportedUriSchemes;
+}
+
+QString AbstractPlayerContainer::iconName() const
+{
+    return m_iconName;
+}
+
 
 /**
  * @class PlayerContainer
@@ -57,7 +236,7 @@ Q_LOGGING_CATEGORY(mpris, "integration.MPRIS")
  * its state, properties, and signal handling. It provides methods to
  * control the player and monitor its state changes.
  */
-class PlayerContainer : public QObject
+class PlayerContainer : public AbstractPlayerContainer
 {
     Q_OBJECT
 public:
@@ -67,9 +246,13 @@ public:
      * @param parent Parent QObject
      */
     explicit PlayerContainer(const QString &bus, QObject *parent = nullptr)
-        : QObject(parent)
+        : AbstractPlayerContainer(parent)  // FIKSET: Kaller riktig baseklassekonstruktør
         , m_busName(bus)
+        , m_propsIface(new OrgFreedesktopDBusPropertiesInterface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))
+        , m_playerIface(new OrgMprisMediaPlayer2PlayerInterface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))
+        , m_rootIface(new OrgMprisMediaPlayer2Interface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))  
     {
+        Q_ASSERT(bus.startsWith("org.mpris.MediaPlayer2"));
         // initial snapshot + start listening for changes
         refresh();
         // subscribe to PropertiesChanged signals for this service
@@ -141,7 +324,6 @@ public:
      * @see stateChanged() signal emitted after position update
      */
     void setPosition(qint64 pos) { 
-
         QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
         qint64 delta = pos - position();
         
@@ -149,24 +331,12 @@ public:
         iface.call("Seek", QVariant::fromValue(delta));
         Play();
         
-        m_state["Position"] = pos;
+        m_position = pos;
         emit stateChanged();
     }
 
-    /// @return Current player state as a variant map
-    QVariantMap state() const { return m_state; }
-    
     /// @return D-Bus service name (alias for busName())
     QString dbusname() const { return m_busName; }
-    
-    /// @return Current playback position in microseconds
-    qint64 position()
-    {
-        QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        auto value = iface.property("Position");
-
-        return value.toLongLong();
-    } 
     
 signals:
     /// Emitted when player state changes
@@ -184,19 +354,88 @@ private slots:
         Q_UNUSED(interfaceName)
         Q_UNUSED(invalidatedProperties)
 
-        // Merge changedProperties into m_state
         bool changed = false;
         for (auto it = changedProperties.cbegin(); it != changedProperties.cend(); ++it) {
-            // For Metadata, it's a QDBusArgument; store raw QVariant so caller can decode
-            if (it.key() == "Metadata") {
-                m_state["Metadata"] = it.value();
+            const QString &key = it.key();
+            const QVariant &value = it.value();
+            
+            if (key == "CanControl") {
+                m_canControl = value.toBool();
                 changed = true;
-            } else if (!m_state.contains(it.key()) || m_state[it.key()] != it.value()) {
-                m_state[it.key()] = it.value();
+            } else if (key == "CanGoNext") {
+                m_canGoNext = value.toBool();
+                m_effectiveCanGoNext = value.toBool();
+                changed = true;
+            } else if (key == "CanGoPrevious") {
+                m_canGoPrevious = value.toBool();
+                m_effectiveCanGoPrevious = value.toBool();
+                changed = true;
+            } else if (key == "CanPlay") {
+                m_canPlay = value.toBool();
+                m_effectiveCanPlay = value.toBool();
+                changed = true;
+            } else if (key == "CanPause") {
+                m_canPause = value.toBool();
+                m_effectiveCanPause = value.toBool();
+                changed = true;
+            } else if (key == "CanStop") {
+                m_canStop = value.toBool();
+                m_effectiveCanStop = value.toBool();
+                changed = true;
+            } else if (key == "CanSeek") {
+                m_canSeek = value.toBool();
+                m_effectiveCanSeek = value.toBool();
+                changed = true;
+            } else if (key == "LoopStatus") {
+                QString status = value.toString();
+                if (status == "None") m_loopStatus = LoopStatus::None;
+                else if (status == "Playlist") m_loopStatus = LoopStatus::Playlist;
+                else if (status == "Track") m_loopStatus = LoopStatus::Track;
+                else m_loopStatus = LoopStatus::Unknown;
+                changed = true;
+            } else if (key == "MaximumRate") {
+                m_maximumRate = value.toDouble();
+                changed = true;
+            } else if (key == "MinimumRate") {
+                m_minimumRate = value.toDouble();
+                changed = true;
+            } else if (key == "PlaybackStatus") {
+                QString status = value.toString();
+                if (status == "Playing") m_playbackStatus = PlaybackStatus::Playing;
+                else if (status == "Paused") m_playbackStatus = PlaybackStatus::Paused;
+                else if (status == "Stopped") m_playbackStatus = PlaybackStatus::Stopped;
+                else m_playbackStatus = PlaybackStatus::Unknown;
+                changed = true;
+            } else if (key == "Position") {
+                m_position = value.toLongLong();
+                changed = true;
+            } else if (key == "Rate") {
+                m_rate = value.toDouble();
+                changed = true;
+            } else if (key == "Shuffle") {
+                bool shuffle = value.toBool();
+                m_shuffle = shuffle ? ShuffleStatus::On : ShuffleStatus::Off;
+                changed = true;
+            } else if (key == "Volume") {
+                m_volume = value.toDouble();
+                changed = true;
+            } else if (key == "Metadata") {
+                // Parse metadata
+                QDBusArgument arg = value.value<QDBusArgument>();
+                QVariantMap metadata;
+                arg >> metadata;
+                
+                m_track = metadata.value("xesam:title").toString();
+                QVariant artistVal = metadata.value("xesam:artist");
+                m_artist = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
+                m_album = metadata.value("xesam:album").toString();
+                m_artUrl = metadata.value("mpris:artUrl").toString();
+                m_length = metadata.value("mpris:length").toLongLong() / 1000000.0; // Convert to seconds
+                
                 changed = true;
             }
-            
         }
+        
         if (changed) {
             emit stateChanged();
         }
@@ -215,10 +454,73 @@ private:
             QDBusPendingReply<QVariantMap> reply = *watcher;
             watcher->deleteLater();
             if (reply.isValid()) {
-                // store full state snapshot
-                QVariantMap replyMap = reply.value();
-                // Ensure Metadata stays as QDBusArgument
-                m_state = replyMap;
+                QVariantMap properties = reply.value();
+                
+                // Oppdater alle egenskaper fra DBus-svaret
+                for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
+                    const QString &key = it.key();
+                    const QVariant &value = it.value();
+                    
+                    if (key == "CanControl") {
+                        m_canControl = value.toBool();
+                    } else if (key == "CanGoNext") {
+                        m_canGoNext = value.toBool();
+                        m_effectiveCanGoNext = value.toBool();
+                    } else if (key == "CanGoPrevious") {
+                        m_canGoPrevious = value.toBool();
+                        m_effectiveCanGoPrevious = value.toBool();
+                    } else if (key == "CanPlay") {
+                        m_canPlay = value.toBool();
+                        m_effectiveCanPlay = value.toBool();
+                    } else if (key == "CanPause") {
+                        m_canPause = value.toBool();
+                        m_effectiveCanPause = value.toBool();
+                    } else if (key == "CanStop") {
+                        m_canStop = value.toBool();
+                        m_effectiveCanStop = value.toBool();
+                    } else if (key == "CanSeek") {
+                        m_canSeek = value.toBool();
+                        m_effectiveCanSeek = value.toBool();
+                    } else if (key == "LoopStatus") {
+                        QString status = value.toString();
+                        if (status == "None") m_loopStatus = LoopStatus::None;
+                        else if (status == "Playlist") m_loopStatus = LoopStatus::Playlist;
+                        else if (status == "Track") m_loopStatus = LoopStatus::Track;
+                        else m_loopStatus = LoopStatus::Unknown;
+                    } else if (key == "MaximumRate") {
+                        m_maximumRate = value.toDouble();
+                    } else if (key == "MinimumRate") {
+                        m_minimumRate = value.toDouble();
+                    } else if (key == "PlaybackStatus") {
+                        QString status = value.toString();
+                        if (status == "Playing") m_playbackStatus = PlaybackStatus::Playing;
+                        else if (status == "Paused") m_playbackStatus = PlaybackStatus::Paused;
+                        else if (status == "Stopped") m_playbackStatus = PlaybackStatus::Stopped;
+                        else m_playbackStatus = PlaybackStatus::Unknown;
+                    } else if (key == "Position") {
+                        m_position = value.toLongLong();
+                    } else if (key == "Rate") {
+                        m_rate = value.toDouble();
+                    } else if (key == "Shuffle") {
+                        bool shuffle = value.toBool();
+                        m_shuffle = shuffle ? ShuffleStatus::On : ShuffleStatus::Off;
+                    } else if (key == "Volume") {
+                        m_volume = value.toDouble();
+                    } else if (key == "Metadata") {
+                        // Parse metadata
+                        QDBusArgument arg = value.value<QDBusArgument>();
+                        QVariantMap metadata;
+                        arg >> metadata;
+                        
+                        m_track = metadata.value("xesam:title").toString();
+                        QVariant artistVal = metadata.value("xesam:artist");
+                        m_artist = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
+                        m_album = metadata.value("xesam:album").toString();
+                        m_artUrl = metadata.value("mpris:artUrl").toString();
+                        m_length = metadata.value("mpris:length").toLongLong() / 1000000.0; // Convert to seconds
+                    }
+                }
+                
                 emit stateChanged();
             }
         });
@@ -251,8 +553,9 @@ private:
     }
 
     QString m_busName;        ///< D-Bus service name
-    QVariantMap m_state;      ///< Current player state
-
+    OrgFreedesktopDBusPropertiesInterface *m_propsIface = nullptr;
+    OrgMprisMediaPlayer2PlayerInterface *m_playerIface = nullptr;
+    OrgMprisMediaPlayer2Interface *m_rootIface = nullptr;
 };
 
 
@@ -429,9 +732,9 @@ private:
      */
     void handleActivePlayer(PlayerContainer *container)
     {
-        const QString status = container->state().value("PlaybackStatus").toString();
+        PlaybackStatus::Status status = container->playbackStatus();
         
-        if (status == "Playing") {
+        if (status == PlaybackStatus::Playing) {
             // This player is playing, make it active
             if (m_activePlayer != container) {
                 m_activePlayer = container;
@@ -448,7 +751,7 @@ private:
             // Look for another playing player
             PlayerContainer *playingPlayer = nullptr;
             for (PlayerContainer *c : m_containers) {
-                if (c->state().value("PlaybackStatus").toString() == "Playing") {
+                if (c->playbackStatus() == PlaybackStatus::Playing) {
                     playingPlayer = c;
                     break;
                 }
@@ -463,7 +766,7 @@ private:
                 // No player is playing, keep current as active but show paused/stopped
                 updateMediaPlayerEntity(container);
             }
-        } else if (!m_activePlayer && container->state().contains("PlaybackStatus")) {
+        } else if (!m_activePlayer && status != PlaybackStatus::Unknown) {
             // No active player yet, use this one
             m_activePlayer = container;
             qCDebug(mpris) << "Set initial active player:" << container->busName();
@@ -524,30 +827,26 @@ private:
             return;
         }
         
-        const auto &cState = container->state();
         QVariantMap state;
-        state["state"] = cState.value("PlaybackStatus","Stopped").toString();
-        state["volume"] = cState.value("Volume",1.0).toDouble();
-        state["name"] = container->dbusname().replace("org.mpris.MediaPlayer2.","");
-        qint64 pos = container->position()/1000000;
-        qint64 dur = 0;
-        if(cState.contains("Metadata")){
-            QVariantMap metadata;
-            QDBusArgument arg = cState.value("Metadata").value<QDBusArgument>();
-            arg >> metadata;
-
-            state["title"] = metadata.value("xesam:title").toString();
-            QVariant artistVal = metadata.value("xesam:artist");
-            state["artist"] = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
-            QVariant albumVal = metadata.value("xesam:album");
-            state["album"] = albumVal.canConvert<QStringList>() ? albumVal.toStringList().join(", ") : albumVal.toString();
-            QVariant artVal = metadata.value("mpris:artUrl");
-            state["art"] = artVal.toString();
-            if(metadata.contains("mpris:length")) dur = metadata.value("mpris:length").toLongLong()/1000000;
+        
+        // Convert PlaybackStatus enum to string
+        QString playbackStatusStr;
+        switch (container->playbackStatus()) {
+            case PlaybackStatus::Playing: playbackStatusStr = "Playing"; break;
+            case PlaybackStatus::Paused: playbackStatusStr = "Paused"; break;
+            case PlaybackStatus::Stopped: playbackStatusStr = "Stopped"; break;
+            default: playbackStatusStr = "Unknown"; break;
         }
         
-        state["position"] = pos;
-        state["duration"] = dur;
+        state["state"] = playbackStatusStr;
+        state["volume"] = container->volume();
+        state["name"] = container->dbusname().replace("org.mpris.MediaPlayer2.","");
+        state["title"] = container->track();
+        state["artist"] = container->artist();
+        state["album"] = container->album();
+        state["art"] = container->artUrl();
+        state["position"] = container->position() / 1000000; // Convert to seconds
+        state["duration"] = static_cast<qint64>(container->length()); // Already in seconds
 
         // Artwork -> Base64
         QString artUrl = state.value("art").toString();

@@ -60,7 +60,15 @@ include(KDEClangFormat)
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
+# Generate DBus interfaces
+set_source_files_properties(
+   dbus/org.freedesktop.DBus.Properties.xml
+   dbus/org.mpris.MediaPlayer2.Player.xml
+   dbus/org.mpris.MediaPlayer2.xml
+   PROPERTIES
+   NO_NAMESPACE ON)
 
+# First define SOURCES variable
 set(SOURCES
     main.cpp
     core.cpp
@@ -80,11 +88,16 @@ set(SOURCES
     entities/notify.cpp
     entities/camera.cpp
     entities/update.cpp
-    dbus/policyagentinterface.cpp  # <- DBus proxy C++-fil
+    dbus/policyagentinterface.cpp  # <- DBus proxy C++-files from here
+    dbus/dbusproperties.cpp
+    dbus/mprisplayer.cpp
+    dbus/mprisroot.cpp
 )
+
 
 # Add the path for dbus proxy
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dbus)
+
 
 # Integrations
 add_subdirectory(integrations)

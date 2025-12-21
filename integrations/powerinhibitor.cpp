@@ -12,7 +12,7 @@
 
 #include "core.h"
 #include "entities/entities.h"
-#include "dbus/policyagentinterface.h" // <- DBus proxy
+#include "dbus/policyagentinterface.h"
 
 #include <QLoggingCategory>
 
