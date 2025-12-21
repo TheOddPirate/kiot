@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kiot VERSION 0.0.4)
-set(PROJECT_VERSION "0.0.4")
+project(kiot VERSION 0.0.5)
+set(PROJECT_VERSION "0.0.5")
 set(PROJECT_VERSION_MAJOR 0)
 # For automatic firmware updates in connected node
 add_definitions(-DKIOT_VERSION="${PROJECT_VERSION}")
@@ -64,6 +64,7 @@ kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 set_source_files_properties(
    dbus/org.freedesktop.DBus.Properties.xml
    dbus/org.mpris.MediaPlayer2.Player.xml
+   dbus/org.kde.Solid.PowerManagement.PolicyAgent.xml
    dbus/org.mpris.MediaPlayer2.xml
    PROPERTIES
    NO_NAMESPACE ON)

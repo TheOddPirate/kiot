@@ -5,7 +5,9 @@
 
     SPDX-License-Identifier: LGPL-2.1-or-later
 */
-// TODO figure out if this is okay as i copied code from https://invent.kde.org/plasma/plasma-workspace/-/tree/master/libkmpris?ref_type=heads
+// TODO figure out if its okay to add my own name here under license as 
+// i copied most of the code from here
+//  https://invent.kde.org/plasma/plasma-workspace/-/tree/master/libkmpris?ref_type=heads
 // and stripped it to fit my needs
 
 /**
@@ -49,7 +51,7 @@
 #include <QNetworkRequest>
 
 
-
+#include <KDesktopFile>
 #include <QLoggingCategory>
 Q_DECLARE_LOGGING_CATEGORY(mpris)
 Q_LOGGING_CATEGORY(mpris, "integration.MPRIS")
@@ -252,65 +254,92 @@ public:
         , m_playerIface(new OrgMprisMediaPlayer2PlayerInterface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))
         , m_rootIface(new OrgMprisMediaPlayer2Interface(bus, MPRIS2_PATH, QDBusConnection::sessionBus(), this))  
     {
-        Q_ASSERT(bus.startsWith("org.mpris.MediaPlayer2"));
+        Q_ASSERT(bus.startsWith(MPRIS2_PATH));
+        initBindings();
         // initial snapshot + start listening for changes
         refresh();
         // subscribe to PropertiesChanged signals for this service
-        QDBusConnection::sessionBus().connect(
-            m_busName,
-            "/org/mpris/MediaPlayer2",
-            "org.freedesktop.DBus.Properties",
-            "PropertiesChanged",
-            this,
-            SLOT(onPropertiesChanged(QString,QVariantMap,QStringList))
-        );
+        if (QDBusReply<unsigned> pidReply = QDBusConnection::sessionBus().interface()->servicePid(bus); pidReply.isValid()) {
+            m_instancePid = pidReply.value();
+        }
     }
 
     /**
-     * @brief Destructor - cleans up D-Bus connections
+     * @brief Destructor
      */
-    ~PlayerContainer() override
-    {
-        // unsubscribe signal for cleanliness (optional)
-        QDBusConnection::sessionBus().disconnect(
-            m_busName,
-            "/org/mpris/MediaPlayer2",
-            "org.freedesktop.DBus.Properties",
-            "PropertiesChanged",
-            this,
-            SLOT(onPropertiesChanged(QString,QVariantMap,QStringList))
-        );
-    }
-    
+    ~PlayerContainer() = default;
+
     /// @return The D-Bus service name of this player
     QString busName() const { return m_busName; }
     
     /// Start playback
-    void Play() { callMethod("Play"); }
+    void Play() { 
+        Q_ASSERT_X(m_canPlay.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canPlay.value()) {
+            return;
+        }
+        m_playerIface->Play();
+    }
     
     /// Pause playback
-    void Pause() { callMethod("Pause"); }
+    void Pause() { 
+        Q_ASSERT_X(m_canPause.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canPause.value()) {
+            return;
+        }
+        m_playerIface->Pause();
+    }
     
     /// Stop playback
-    void Stop() { callMethod("Stop"); }
+    void Stop() { 
+        Q_ASSERT_X(m_canStop.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canStop.value()) {
+            return;
+        }
+        m_playerIface->Stop();
+    }
+
+    
     
     /// Skip to next track
-    void Next() { callMethod("Next"); }
+    void Next() {
+        Q_ASSERT_X(m_canGoNext.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canGoNext.value()) {
+            return;
+        }
+        m_playerIface->Next();
+    }
     
     /// Go to previous track
-    void Previous() { callMethod("Previous"); }
+    void Previous() {
+        Q_ASSERT_X(m_canGoPrevious.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canGoPrevious.value()) {
+            return;
+        }
+        m_playerIface->Previous();
+    }
     
     /**
      * @brief Set player volume
-     * @param v Volume level (0.0 to 1.0)
+     * @param value Volume level (0.0 to 1.0)
      */
-    void setVolume(double v) { setProperty("Volume", v); }
+    void setVolume(double value) { 
+        if (m_volume == value) {
+            return;
+        }
+
+        m_propsIface->Set(QStringLiteral("org.mpris.MediaPlayer2.Player"), QStringLiteral("Volume"), QDBusVariant(QVariant(value)));
+    }
+
+    
     
     /**
      * @brief Open a media URI for playback
      * @param uri Media URI to play
      */
-    void OpenUri(const QString &uri){ callMethod("OpenUri",uri);   }
+    void OpenUri(const QString &Uri){ 
+        m_playerIface->OpenUri(Uri);
+    }
    
     /**
      * @brief Set the playback position to a specific time.
@@ -321,28 +350,82 @@ public:
      * Without this workaround, the position will not be correctly updated in HA after seeking.
      * 
      * @see position() for getting the current playback position
-     * @see stateChanged() signal emitted after position update
+     * @see stateChanged() signal Q_EMITted after position update
      */
-    void setPosition(qint64 pos) { 
-        QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        qint64 delta = pos - position();
+    void seek(qlonglong pos) { 
+        qlonglong delta = pos - position();
         
-        Pause();
-        iface.call("Seek", QVariant::fromValue(delta));
-        Play();
-        
+        Q_ASSERT_X(m_canSeek.value(), Q_FUNC_INFO, qUtf8Printable(identity()));
+        if (!m_canSeek.value()) {
+            return;
+        }
+        m_playerIface->Seek(delta);
         m_position = pos;
-        emit stateChanged();
+        updatePosition();
     }
+    void setPosition(qlonglong value)
+    {
+        if (m_position == value) {
+            return;
+        }
 
+        m_playerIface->SetPosition(QDBusObjectPath(m_trackId.value()), value);
+        m_position = value;
+        updatePosition();
+    }
     /// @return D-Bus service name (alias for busName())
     QString dbusname() const { return m_busName; }
     
-signals:
-    /// Emitted when player state changes
+Q_SIGNALS:
+    /// Q_EMITted when player state changes
     void stateChanged();
+    void initialFetchFinished(PlayerContainer *container);
+    void initialFetchFailed(PlayerContainer *container);
 
-private slots:
+private Q_SLOTS:
+    void onSeeked(qlonglong position)
+    {
+        m_position = position;
+        Q_EMIT stateChanged();
+    }
+    
+    void onGetPropsFinished(QDBusPendingCallWatcher *watcher)
+    {
+        QDBusPendingReply<QVariantMap> propsReply = *watcher;
+        watcher->deleteLater();
+
+        if (m_fetchesPending < 1) {
+            // we already failed
+            qCWarning(mpris) << "Got a reply for a fetch that was already failed";
+            Q_EMIT initialFetchFailed(this);
+            return;
+        }
+
+        if (propsReply.isError()) {
+            qCDebug(mpris) << m_busName << "does not implement" << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName() << "correctly"
+                            << "Error message was" << propsReply.error().name() << propsReply.error().message();
+            m_fetchesPending = 0;
+            Q_EMIT initialFetchFailed(this);
+            return;
+        }
+
+        updateFromMap(propsReply.value());
+
+        if (--m_fetchesPending == 0) {
+            // Check if the player follows the specification dutifully.
+            if (m_identity.isEmpty()) {
+                qCDebug(mpris) << "MPRIS2 service" << objectName() << "isn't standard-compliant, ignoring";
+                Q_EMIT initialFetchFailed(this);
+                return;
+            }
+
+            Q_EMIT initialFetchFinished(this);
+            Q_EMIT stateChanged();
+            connect(m_propsIface, &OrgFreedesktopDBusPropertiesInterface::PropertiesChanged, this, &PlayerContainer::onPropertiesChanged);
+            connect(m_playerIface, &OrgMprisMediaPlayer2PlayerInterface::Seeked, this, &PlayerContainer::onSeeked);
+        }
+    }
+
     /**
      * @brief Handle PropertiesChanged signals from D-Bus
      * @param interfaceName The interface that changed (unused)
@@ -351,211 +434,272 @@ private slots:
      */
     void onPropertiesChanged(const QString &interfaceName, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
     {
-        Q_UNUSED(interfaceName)
-        Q_UNUSED(invalidatedProperties)
-
-        bool changed = false;
-        for (auto it = changedProperties.cbegin(); it != changedProperties.cend(); ++it) {
-            const QString &key = it.key();
-            const QVariant &value = it.value();
-            
-            if (key == "CanControl") {
-                m_canControl = value.toBool();
-                changed = true;
-            } else if (key == "CanGoNext") {
-                m_canGoNext = value.toBool();
-                m_effectiveCanGoNext = value.toBool();
-                changed = true;
-            } else if (key == "CanGoPrevious") {
-                m_canGoPrevious = value.toBool();
-                m_effectiveCanGoPrevious = value.toBool();
-                changed = true;
-            } else if (key == "CanPlay") {
-                m_canPlay = value.toBool();
-                m_effectiveCanPlay = value.toBool();
-                changed = true;
-            } else if (key == "CanPause") {
-                m_canPause = value.toBool();
-                m_effectiveCanPause = value.toBool();
-                changed = true;
-            } else if (key == "CanStop") {
-                m_canStop = value.toBool();
-                m_effectiveCanStop = value.toBool();
-                changed = true;
-            } else if (key == "CanSeek") {
-                m_canSeek = value.toBool();
-                m_effectiveCanSeek = value.toBool();
-                changed = true;
-            } else if (key == "LoopStatus") {
-                QString status = value.toString();
-                if (status == "None") m_loopStatus = LoopStatus::None;
-                else if (status == "Playlist") m_loopStatus = LoopStatus::Playlist;
-                else if (status == "Track") m_loopStatus = LoopStatus::Track;
-                else m_loopStatus = LoopStatus::Unknown;
-                changed = true;
-            } else if (key == "MaximumRate") {
-                m_maximumRate = value.toDouble();
-                changed = true;
-            } else if (key == "MinimumRate") {
-                m_minimumRate = value.toDouble();
-                changed = true;
-            } else if (key == "PlaybackStatus") {
-                QString status = value.toString();
-                if (status == "Playing") m_playbackStatus = PlaybackStatus::Playing;
-                else if (status == "Paused") m_playbackStatus = PlaybackStatus::Paused;
-                else if (status == "Stopped") m_playbackStatus = PlaybackStatus::Stopped;
-                else m_playbackStatus = PlaybackStatus::Unknown;
-                changed = true;
-            } else if (key == "Position") {
-                m_position = value.toLongLong();
-                changed = true;
-            } else if (key == "Rate") {
-                m_rate = value.toDouble();
-                changed = true;
-            } else if (key == "Shuffle") {
-                bool shuffle = value.toBool();
-                m_shuffle = shuffle ? ShuffleStatus::On : ShuffleStatus::Off;
-                changed = true;
-            } else if (key == "Volume") {
-                m_volume = value.toDouble();
-                changed = true;
-            } else if (key == "Metadata") {
-                // Parse metadata
-                QDBusArgument arg = value.value<QDBusArgument>();
-                QVariantMap metadata;
-                arg >> metadata;
-                
-                m_track = metadata.value("xesam:title").toString();
-                QVariant artistVal = metadata.value("xesam:artist");
-                m_artist = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
-                m_album = metadata.value("xesam:album").toString();
-                m_artUrl = metadata.value("mpris:artUrl").toString();
-                m_length = metadata.value("mpris:length").toLongLong() / 1000000.0; // Convert to seconds
-                
-                changed = true;
-            }
-        }
-        
-        if (changed) {
-            emit stateChanged();
+        if (!invalidatedProperties.empty() || interfaceName == u"org.mpris.MediaPlayer2.TrackList") {
+            disconnect(m_propsIface, &OrgFreedesktopDBusPropertiesInterface::PropertiesChanged, this, &PlayerContainer::onPropertiesChanged);
+            disconnect(m_playerIface, &OrgMprisMediaPlayer2PlayerInterface::Seeked, this, &PlayerContainer::onSeeked);
+            refresh();
+        } else if (interfaceName == u"org.mpris.MediaPlayer2.Player" || interfaceName == u"org.mpris.MediaPlayer2") [[likely]] {
+            updateFromMap(changedProperties);
         }
     }
 
 private:
+
+    void updateFromMap(const QVariantMap &map)
+    {
+        auto updateSingleProperty = [this]<typename T>(T &property, const QVariant &value, QMetaType::Type expectedType, void (PlayerContainer::*signal)()) {
+            if (value.metaType().id() != expectedType) {
+                qCWarning(mpris) << m_busName << "exports" << value.metaType() << "but it should be" << QMetaType(expectedType);
+            }
+            if (T newProperty = value.value<T>(); property != newProperty) {
+                property = newProperty;
+                Q_EMIT(this->*signal)();
+                Q_EMIT stateChanged();
+            }
+        };
+
+        QString oldTrackId;
+
+        for (auto it = map.cbegin(); it != map.cend(); it = std::next(it)) {
+            const QString &propName = it.key();
+
+            if (propName == QLatin1String("Identity")) {
+                updateSingleProperty(m_identity, it.value(), QMetaType::QString, &PlayerContainer::identityChanged);
+            } else if (propName == QLatin1String("DesktopEntry")) {
+                if (QString iconName = KDesktopFile(it.value().toString() + QLatin1String(".desktop")).readIcon(); !iconName.isEmpty()) {
+                    m_iconName = std::move(iconName);
+                }   
+                updateSingleProperty(m_desktopEntry, it.value(), QMetaType::QString, &PlayerContainer::desktopEntryChanged);
+            } else if (propName == QLatin1String("SupportedUriSchemes")) {
+                updateSingleProperty(m_supportedUriSchemes, it.value(), QMetaType::QStringList, &PlayerContainer::supportedUriSchemesChanged);
+            } else if (propName == QLatin1String("SupportedMimeTypes")) {
+                updateSingleProperty(m_supportedMimeTypes, it.value(), QMetaType::QStringList, &PlayerContainer::supportedMimeTypesChanged);
+            } else if (propName == QLatin1String("Fullscreen")) {
+                m_fullscreen = it->toBool();
+            } else if (propName == QLatin1String("HasTrackList")) {
+                m_hasTrackList = it->toBool();
+            } else if (propName == QLatin1String("PlaybackStatus")) {
+                if (const QString newValue = it->toString(); newValue == QLatin1String("Stopped")) {
+                    m_playbackStatus = PlaybackStatus::Stopped;
+                } else if (newValue == QLatin1String("Paused")) {
+                    m_playbackStatus = PlaybackStatus::Paused;
+                } else if (newValue == QLatin1String("Playing")) {
+                    m_playbackStatus = PlaybackStatus::Playing;
+                } else {
+                    m_playbackStatus = PlaybackStatus::Unknown;
+                }
+            } else if (propName == QLatin1String("LoopStatus")) {
+                if (const QString newValue = it.value().toString(); newValue == QLatin1String("Playlist")) {
+                    m_loopStatus = LoopStatus::Playlist;
+                } else if (newValue == QLatin1String("Track")) {
+                    m_loopStatus = LoopStatus::Track;
+                } else {
+                    m_loopStatus = LoopStatus::None;
+                }
+            } else if (propName == QLatin1String("Shuffle")) {
+                m_shuffle = it->toBool() ? ShuffleStatus::On : ShuffleStatus::Off;
+            } else if (propName == QLatin1String("Rate")) {
+                m_rate = it->toDouble();
+            } else if (propName == QLatin1String("MinimumRate")) {
+                m_minimumRate = it->toDouble();
+            } else if (propName == QLatin1String("MaximumRate")) {
+                m_maximumRate = it->toDouble();
+            } else if (propName == QLatin1String("Volume")) {
+                m_volume = it->toDouble();
+            } else if (propName == QLatin1String("Position")) {
+                m_position = it->toLongLong();
+            } else if (propName == QLatin1String("Metadata")) {
+                oldTrackId = m_trackId.value();
+                auto arg = it->value<QDBusArgument>();
+                if (arg.currentType() != QDBusArgument::MapType || arg.currentSignature() != QLatin1String("a{sv}")) {
+                    continue;
+                }
+
+                QVariantMap map;
+                arg >> map;
+
+                if (auto metaDataIt = map.constFind(QStringLiteral("mpris:trackid")); metaDataIt != map.cend()) [[likely]] {
+                    if (metaDataIt->metaType() == QMetaType::fromType<QDBusObjectPath>()) {
+                        m_trackId = get<QDBusObjectPath>(*metaDataIt).path();
+                    } else {
+                        // BUG 482603: work around nonstandard players like Spotify
+                        qCDebug(mpris) << "mpris:trackid from" << m_identity
+                                        << "does not conform to the MPRIS2 standard. Please report the "
+                                           "issue to the developer.";
+                        m_trackId = metaDataIt->toString();
+                    }
+                } else {
+                    m_trackId = QString();
+                }
+                m_xesamTitle = map[QStringLiteral("xesam:title")].toString();
+                m_xesamUrl = map[QStringLiteral("xesam:url")].toString();
+                m_xesamArtist = map[QStringLiteral("xesam:artist")].toStringList();
+                m_xesamAlbumArtist = map[QStringLiteral("xesam:albumArtist")].toStringList();
+                m_xesamAlbum = map[QStringLiteral("xesam:album")].toString();
+                m_artUrl = map[QStringLiteral("mpris:artUrl")].toString();
+                m_length = map[QStringLiteral("mpris:length")].toDouble();
+                m_kdePid = map[QStringLiteral("kde:pid")].toUInt();
+            }
+            // we give out CanControl, as this may completely
+            // change the UI of the widget
+            else if (propName == QLatin1String("CanControl")) {
+                m_canControl = it->toBool();
+            } else if (propName == QLatin1String("CanSeek")) {
+                m_canSeek = it->toBool();
+            } else if (propName == QLatin1String("CanGoNext")) {
+                m_canGoNext = it->toBool();
+            } else if (propName == QLatin1String("CanGoPrevious")) {
+                m_canGoPrevious = it->toBool();
+            } else if (propName == QLatin1String("CanRaise")) {
+                m_canRaise = it->toBool();
+            } else if (propName == QLatin1String("CanSetFullscreen")) {
+                m_canSetFullscreen = it->toBool();
+            } else if (propName == QLatin1String("CanQuit")) {
+                m_canQuit = it->toBool();
+            } else if (propName == QLatin1String("CanPlay")) {
+                m_canPlay = it->toBool();
+            } else if (propName == QLatin1String("CanPause")) {
+                m_canPause = it->toBool();
+            }
+        }
+
+        if (map.contains(QStringLiteral("Position"))) {
+            return;
+        }
+
+        if (m_position > 0 && (m_playbackStatus == PlaybackStatus::Stopped || (!oldTrackId.isEmpty() && m_trackId.value() != oldTrackId))) {
+            // assume the position has reset to 0, since this is really the
+            // only sensible value for a stopped track
+            updatePosition();
+        }
+        Q_EMIT stateChanged();
+        
+    }
+    void initBindings()
+    {
+        // Since the bindings are already used in QML, move them to C++ for better efficiency and consistency
+        m_effectiveCanGoNext.setBinding([this] {
+            return m_canControl.value() && m_canGoNext.value();
+        });
+        m_effectiveCanGoPrevious.setBinding([this] {
+            return m_canControl.value() && m_canGoPrevious.value();
+        });
+        m_effectiveCanPlay.setBinding([this] {
+            return m_canControl.value() && m_canPlay.value();
+        });
+        m_effectiveCanPause.setBinding([this] {
+            return m_canControl.value() && m_canPause.value();
+        });
+        m_effectiveCanStop.setBinding([this] {
+            return m_canControl.value() && m_canStop.value();
+        });
+        m_effectiveCanSeek.setBinding([this] {
+            return m_canControl.value() && m_canSeek.value();
+        });
+
+        // Fake canStop property
+        m_canStop.setBinding([this] {
+            return m_canControl.value() && m_playbackStatus.value() > PlaybackStatus::Stopped;
+        });
+
+        // Metadata
+        m_track.setBinding([this] {
+            if (!m_xesamTitle.value().isEmpty()) {
+                return m_xesamTitle.value();
+            }
+            const QStringView xesamUrl{m_xesamUrl.value()};
+            if (xesamUrl.isEmpty()) {
+                return QString();
+            }
+            if (int lastSlashPos = xesamUrl.lastIndexOf(QLatin1Char('/')); lastSlashPos < 0 || lastSlashPos == xesamUrl.size() - 1) {
+                return QString();
+            } else {
+                const QStringView lastUrlPart = xesamUrl.sliced(lastSlashPos + 1);
+                return QUrl::fromPercentEncoding(lastUrlPart.toLatin1());
+            }
+        });
+        m_artist.setBinding([this] {
+            if (!m_xesamArtist.value().empty()) {
+            return m_xesamArtist.value().join(QLatin1String(", "));
+            }
+            if (!m_xesamAlbumArtist.value().empty()) {
+                return m_xesamAlbumArtist.value().join(QLatin1String(", "));
+            }
+            return QString();
+        });
+        m_album.setBinding([this] {
+            if (!m_xesamAlbum.value().isEmpty()) {
+                return m_xesamAlbum.value();
+            }
+            const QStringView xesamUrl{m_xesamUrl.value()};
+            if (!xesamUrl.startsWith(QLatin1String("file:///"))) {
+                return QString();
+            }
+            const QList<QStringView> urlParts = xesamUrl.split(QLatin1Char('/'));
+            if (urlParts.size() < 3) {
+                return QString();
+            }
+            // if we play a local file without title and artist, show its containing folder instead
+            if (auto lastFolderPathIt = std::next(urlParts.crbegin()); !lastFolderPathIt->isEmpty()) {
+                return QUrl::fromPercentEncoding(lastFolderPathIt->toLatin1());
+            }
+            return QString();
+        });
+
+        auto callback = [this] {
+            updatePosition();
+        };
+        m_rateNotifier = m_rate.addNotifier(callback);
+        m_playbackStatusNotifier = m_playbackStatus.addNotifier(callback);
+    }
+
     /**
      * @brief Refresh player state by fetching all properties
      */
     void refresh()
     {
-        QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus());
-        QDBusPendingCall call = iface.asyncCall("GetAll", "org.mpris.MediaPlayer2.Player");
+        // despite these calls being async, we should never update values in the
+        // wrong order (eg: a stale GetAll response overwriting a more recent value
+        // from a PropertiesChanged signal) due to D-Bus message ordering guarantees.
+        QDBusPendingCall async = m_propsIface->GetAll(QStringLiteral("org.mpris.MediaPlayer2"));
+        auto watcher = new QDBusPendingCallWatcher(async, this);
+        connect(watcher, &QDBusPendingCallWatcher::finished, this, &PlayerContainer::onGetPropsFinished);
+        ++m_fetchesPending;
+
+        async = m_propsIface->GetAll(QStringLiteral("org.mpris.MediaPlayer2.Player"));
+        watcher = new QDBusPendingCallWatcher(async, this);
+        connect(watcher, &QDBusPendingCallWatcher::finished, this, &PlayerContainer::onGetPropsFinished);
+        ++m_fetchesPending;
+        Q_EMIT stateChanged();
+    }
+
+    void updatePosition()
+    {
+        QDBusPendingCall call = m_propsIface->Get(QStringLiteral("org.mpris.MediaPlayer2.Player"), QStringLiteral("Position"));
         auto watcher = new QDBusPendingCallWatcher(call, this);
-        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, watcher]() {
-            QDBusPendingReply<QVariantMap> reply = *watcher;
+        connect(watcher, &QDBusPendingCallWatcher::finished, this, [this](QDBusPendingCallWatcher *watcher) {
+            QDBusPendingReply<QVariant> propsReply = *watcher;
             watcher->deleteLater();
-            if (reply.isValid()) {
-                QVariantMap properties = reply.value();
-                
-                // Oppdater alle egenskaper fra DBus-svaret
-                for (auto it = properties.cbegin(); it != properties.cend(); ++it) {
-                    const QString &key = it.key();
-                    const QVariant &value = it.value();
-                    
-                    if (key == "CanControl") {
-                        m_canControl = value.toBool();
-                    } else if (key == "CanGoNext") {
-                        m_canGoNext = value.toBool();
-                        m_effectiveCanGoNext = value.toBool();
-                    } else if (key == "CanGoPrevious") {
-                        m_canGoPrevious = value.toBool();
-                        m_effectiveCanGoPrevious = value.toBool();
-                    } else if (key == "CanPlay") {
-                        m_canPlay = value.toBool();
-                        m_effectiveCanPlay = value.toBool();
-                    } else if (key == "CanPause") {
-                        m_canPause = value.toBool();
-                        m_effectiveCanPause = value.toBool();
-                    } else if (key == "CanStop") {
-                        m_canStop = value.toBool();
-                        m_effectiveCanStop = value.toBool();
-                    } else if (key == "CanSeek") {
-                        m_canSeek = value.toBool();
-                        m_effectiveCanSeek = value.toBool();
-                    } else if (key == "LoopStatus") {
-                        QString status = value.toString();
-                        if (status == "None") m_loopStatus = LoopStatus::None;
-                        else if (status == "Playlist") m_loopStatus = LoopStatus::Playlist;
-                        else if (status == "Track") m_loopStatus = LoopStatus::Track;
-                        else m_loopStatus = LoopStatus::Unknown;
-                    } else if (key == "MaximumRate") {
-                        m_maximumRate = value.toDouble();
-                    } else if (key == "MinimumRate") {
-                        m_minimumRate = value.toDouble();
-                    } else if (key == "PlaybackStatus") {
-                        QString status = value.toString();
-                        if (status == "Playing") m_playbackStatus = PlaybackStatus::Playing;
-                        else if (status == "Paused") m_playbackStatus = PlaybackStatus::Paused;
-                        else if (status == "Stopped") m_playbackStatus = PlaybackStatus::Stopped;
-                        else m_playbackStatus = PlaybackStatus::Unknown;
-                    } else if (key == "Position") {
-                        m_position = value.toLongLong();
-                    } else if (key == "Rate") {
-                        m_rate = value.toDouble();
-                    } else if (key == "Shuffle") {
-                        bool shuffle = value.toBool();
-                        m_shuffle = shuffle ? ShuffleStatus::On : ShuffleStatus::Off;
-                    } else if (key == "Volume") {
-                        m_volume = value.toDouble();
-                    } else if (key == "Metadata") {
-                        // Parse metadata
-                        QDBusArgument arg = value.value<QDBusArgument>();
-                        QVariantMap metadata;
-                        arg >> metadata;
-                        
-                        m_track = metadata.value("xesam:title").toString();
-                        QVariant artistVal = metadata.value("xesam:artist");
-                        m_artist = artistVal.canConvert<QStringList>() ? artistVal.toStringList().join(", ") : artistVal.toString();
-                        m_album = metadata.value("xesam:album").toString();
-                        m_artUrl = metadata.value("mpris:artUrl").toString();
-                        m_length = metadata.value("mpris:length").toLongLong() / 1000000.0; // Convert to seconds
-                    }
-                }
-                
-                emit stateChanged();
+            if (!propsReply.isValid() && propsReply.error().type() != QDBusError::NotSupported) {
+                qCDebug(mpris) << m_busName << "does not implement" << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
+                                << "correctly. Error message was" << propsReply.error().name() << propsReply.error().message();
+                return;
             }
+
+            m_position = propsReply.value().toLongLong();
+            Q_EMIT stateChanged();
         });
     }
 
-    
-    /**
-     * @brief Call a method on the MPRIS player
-     * @param method Method name to call
-     * @param args Optional arguments for the method
-     */
-    void callMethod(const QString &method,const QString &args=QString())
-    {
-        QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-        if(!args.isEmpty()) //The args was just a workaround for OpenUrl and as it worked i kept it
-            iface.call(method,args);
-        else
-            iface.call(method);
-    }
-
-    /**
-     * @brief Set a property on the MPRIS player
-     * @param prop Property name to set
-     * @param val New property value
-     */
-    void setProperty(const QString &prop, const QVariant &val)
-    {
-        QDBusInterface iface(m_busName, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", QDBusConnection::sessionBus());
-        iface.call("Set", "org.mpris.MediaPlayer2.Player", prop, QVariant::fromValue(QDBusVariant(val)));
-    }
-
+    int m_fetchesPending = 0;
     QString m_busName;        ///< D-Bus service name
     OrgFreedesktopDBusPropertiesInterface *m_propsIface = nullptr;
     OrgMprisMediaPlayer2PlayerInterface *m_playerIface = nullptr;
     OrgMprisMediaPlayer2Interface *m_rootIface = nullptr;
+
+
+    QPropertyNotifier m_rateNotifier;
+    QPropertyNotifier m_playbackStatusNotifier;
 };
 
 
@@ -630,7 +774,7 @@ private:
             if(m_activePlayer) m_activePlayer->setVolume(vol);
         });
         connect(m_playerEntity, &MediaPlayer::positionChanged, this, [this](qint64 pos){
-            if(m_activePlayer) m_activePlayer->setPosition(pos);
+            if(m_activePlayer) m_activePlayer->seek(pos);
         });
         connect(m_playerEntity,&MediaPlayer::playMediaRequested, this, [this](QString payload){
             if(!m_activePlayer) return;
@@ -845,8 +989,8 @@ private:
         state["artist"] = container->artist();
         state["album"] = container->album();
         state["art"] = container->artUrl();
-        state["position"] = container->position() / 1000000; // Convert to seconds
-        state["duration"] = static_cast<qint64>(container->length()); // Already in seconds
+        state["position"] = static_cast<qint64>(container->position()/1000000); // Convert to seconds
+        state["duration"] = static_cast<qint64>(container->length()/1000000.0); // Already in seconds
 
         // Artwork -> Base64
         QString artUrl = state.value("art").toString();
@@ -872,7 +1016,7 @@ private:
     PlayerContainer *m_activePlayer = nullptr;    ///< Currently active player (playing or selected)
     MediaPlayer *m_playerEntity;            ///< Home Assistant media player entity
     
-private slots:
+private Q_SLOTS:
     /**
      * @brief Handle D-Bus NameOwnerChanged signals for MPRIS player discovery/removal
      * @param name D-Bus service name that changed ownership
