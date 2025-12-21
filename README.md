@@ -119,6 +119,7 @@ Compared to similar projects, Kiot focuses on practical desktop integration rath
 | SystemD | Switch | Start/stop user services (per-service configuration) |
 | Scripts | Button + Text Input | Execute custom scripts with argument support and custom icons |
 | PowerInhibitor | Switch | To control power management inhibition with attributes for reason and type |
+| Game Launcher | Select | Game launcher that auto detect games on steam/heroic |
 
 ## Configuration Examples
 

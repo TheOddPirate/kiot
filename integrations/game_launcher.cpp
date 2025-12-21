@@ -6,6 +6,7 @@
 
 #include <KConfigGroup>
 #include <KSharedConfig>
+#include <KSandbox>
 
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -21,11 +22,10 @@
 #include <QDirIterator>
 #include <QTextStream>
 #include <QRegularExpression>
-#include <QDebug>
+
 #include <QByteArray>
 #include <QApplication>
 #include <QProcess>
-#include <algorithm>
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(gl)
@@ -105,10 +105,20 @@ private slots:
         QString gameId = m_gameList.value(option);
         qCDebug(steam) << "Launching game with App ID:" << gameId;
         
-        QString launchCommand = QString("steam://rungameid/%1").arg(gameId);
-        
+        QString launchCommand = QString("xdg-open steam://rungameid/%1").arg(gameId);
+        QStringList args = QProcess::splitCommand(launchCommand);  
+           
+        QString program = args.takeFirst();           
         QProcess *process = new QProcess(this);
-        process->start("xdg-open", QStringList() << launchCommand);
+        
+        process->setProgram(program);
+        process->setArguments(args);
+        if (KSandbox::isFlatpak()) {
+            KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*process);
+            process->setProgram(ctx.program);
+            process->setArguments(ctx.arguments);
+        }
+        process->start();
         
         connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, [this, gameId, process](int exitCode, QProcess::ExitStatus exitStatus) {
@@ -491,13 +501,24 @@ private slots:
         qCDebug(heroic) << "Launching Heroic game:" << option 
                        << "(appName:" << data.appName << ", runner:" << data.runner << ")";
         
-        QString launchCommand = QString("heroic://launch?appName=%1&runner=%2")
+        QString launchCommand = QString("xdg-open heroic://launch?appName=%1&runner=%2")
                                .arg(data.appName)
                                .arg(data.runner);
-        
+        QStringList args = QProcess::splitCommand(launchCommand);  
+           
+        QString program = args.takeFirst();           
         QProcess *process = new QProcess(this);
-        process->start("xdg-open", QStringList() << launchCommand);
         
+        process->setProgram(program);
+        process->setArguments(args);
+        if (KSandbox::isFlatpak()) {
+            KSandbox::ProcessContext ctx = KSandbox::makeHostContext(*process);
+            process->setProgram(ctx.program);
+            process->setArguments(ctx.arguments);
+        }
+        process->start();      
+
+  
         connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, [this, option, process](int exitCode, QProcess::ExitStatus exitStatus) {
                     if (exitStatus == QProcess::NormalExit && exitCode == 0) {
@@ -722,6 +743,7 @@ private:
      */
     QMap<QString, GameData> getPrimeGames(const QString &filePath)
     {
+        // TODO parse game name from library.json as its missing in installed.json
         QMap<QString, GameData> games;
         
         QFile file(filePath);
