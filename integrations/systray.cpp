@@ -148,6 +148,13 @@ private slots:
             if (mqttClient->state() == QMqttClient::Disconnected) {
                 mqttClient->connectToHost();
             }
+            else if (mqttClient->state() == QMqttClient::Connected) {
+                mqttClient->disconnectFromHost();
+                QTimer::singleShot(3000, this, [this,mqttClient]() { 
+                    mqttClient->connectToHost();
+                });
+                
+            }
         }
     }
 
@@ -236,6 +243,7 @@ private:
      */
     void updateIcon(bool connected)
     {
+        // TODO add yellow icon or remove it again
         if (connected) {
             m_trayIcon->setIcon(m_connectedIcon);
             if (m_statusAction) {
@@ -256,18 +264,10 @@ private:
     {
         qCDebug(st) << "Opening settings";
         
-        // Try to open KCM (KDE Configuration Module) if available
-        QStringList kcmPaths = {
-            "kcm_kiot",
-            "kcm_kiot",
-            "kiot-config"
-        };
-        
-        for (const QString &kcm : kcmPaths) {
-            if (QProcess::startDetached("kcmshell6", QStringList() << kcm)) {
-                qCDebug(st) << "Opened KCM:" << kcm;
-                return;
-            }
+        if (QProcess::startDetached("kcmshell6", {"kcm_kiot"})) 
+        {
+            qCDebug(st) << "Opened KCM:";
+            return;
         }
         
         // Fallback: open config file in text editor
@@ -282,6 +282,7 @@ private:
     
     /**
      * @brief Shows a status notification
+     * @note should i remove this or keep it?
      */
     void showStatusNotification()
     {
