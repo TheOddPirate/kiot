@@ -7,6 +7,103 @@ import org.kde.kcmutils as KCM
 KCM.SimpleKCM {
     id: root
     
+    // New Script Dialog
+    Kirigami.Dialog {
+        id: newScriptDialog
+        title: "Create New Script"
+        standardButtons: Kirigami.Dialog.Ok | Kirigami.Dialog.Cancel
+        
+        ColumnLayout {
+            Kirigami.FormLayout {
+                QQC2.TextField {
+                    id: newScriptNameField
+                    Kirigami.FormData.label: "Script ID:"
+                    placeholderText: "e.g., browser, steam, custom"
+                }
+                QQC2.TextField {
+                    id: newScriptDisplayNameField
+                    Kirigami.FormData.label: "Display Name:"
+                    placeholderText: "e.g., Launch Browser, Open Steam"
+                }
+                QQC2.TextField {
+                    id: newScriptCommandField
+                    Kirigami.FormData.label: "Command:"
+                    placeholderText: "e.g., /usr/bin/brave, steam steam://..."
+                }
+                QQC2.TextField {
+                    id: newScriptIconField
+                    Kirigami.FormData.label: "Icon:"
+                    placeholderText: "e.g., mdi:web, mdi:steam"
+                    text: "mdi:script-text"
+                }
+            }
+        }
+        
+        onAccepted: {
+            if (newScriptNameField.text.trim() !== "") {
+                var scriptId = newScriptNameField.text.trim()
+                var displayName = newScriptDisplayNameField.text.trim() || scriptId
+                var command = newScriptCommandField.text.trim()
+                var icon = newScriptIconField.text.trim() || "mdi:script-text"
+                
+                kcm.saveNestedConfigValue("Scripts", scriptId, "Name", displayName)
+                kcm.saveNestedConfigValue("Scripts", scriptId, "Exec", command)
+                kcm.saveNestedConfigValue("Scripts", scriptId, "icon", icon)
+                
+                // Reset fields
+                newScriptNameField.text = ""
+                newScriptDisplayNameField.text = ""
+                newScriptCommandField.text = ""
+                newScriptIconField.text = "mdi:script-text"
+            }
+        }
+        onRejected: {
+            newScriptNameField.text = ""
+            newScriptDisplayNameField.text = ""
+            newScriptCommandField.text = ""
+            newScriptIconField.text = "mdi:script-text"
+        }
+    }
+    
+    // New Shortcut Dialog  
+    Kirigami.Dialog {
+        id: newShortcutDialog
+        title: "Create New Shortcut"
+        standardButtons: Kirigami.Dialog.Ok | Kirigami.Dialog.Cancel
+        
+        ColumnLayout {
+            Kirigami.FormLayout {
+                QQC2.TextField {
+                    id: newShortcutNameField
+                    Kirigami.FormData.label: "Shortcut ID:"
+                    placeholderText: "e.g., myShortcut, customAction"
+                }
+                QQC2.TextField {
+                    id: newShortcutDisplayNameField
+                    Kirigami.FormData.label: "Display Name:"
+                    placeholderText: "e.g., Do a thing, Custom Action"
+                }
+            }
+        }
+        
+        onAccepted: {
+            if (newShortcutNameField.text.trim() !== "") {
+                var shortcutId = newShortcutNameField.text.trim()
+                var displayName = newShortcutDisplayNameField.text.trim() || shortcutId
+                
+                kcm.saveNestedConfigValue("Shortcuts", shortcutId, "Name", displayName)
+                
+                // Reset fields
+                newShortcutNameField.text = ""
+                newShortcutDisplayNameField.text = ""
+            }
+        }
+        onRejected: {
+            newShortcutNameField.text = ""
+            newShortcutDisplayNameField.text = ""
+        }
+    }
+    
     ColumnLayout {
         anchors.fill: parent
         spacing: Kirigami.Units.largeSpacing
@@ -261,6 +358,23 @@ KCM.SimpleKCM {
                 width: parent.width
                 spacing: Kirigami.Units.largeSpacing
                 
+                Kirigami.Heading {
+                    level: 2
+                    text: "Scripts"
+                    Layout.fillWidth: true
+                }
+                
+                Kirigami.ActionToolBar {
+                    Layout.fillWidth: true
+                    actions: [
+                        Kirigami.Action {
+                            text: "Create New Script"
+                            icon.name: "list-add"
+                            onTriggered: newScriptDialog.open()
+                        }
+                    ]
+                }
+                
                 // Use a property binding that updates when configSections changes
                 property var scriptKeys: {
                     var sectionData = kcm.configSections[section]
@@ -378,6 +492,23 @@ KCM.SimpleKCM {
                 id: contentColumn
                 width: parent.width
                 spacing: Kirigami.Units.largeSpacing
+                
+                Kirigami.Heading {
+                    level: 2
+                    text: "Shortcuts"
+                    Layout.fillWidth: true
+                }
+                
+                Kirigami.ActionToolBar {
+                    Layout.fillWidth: true
+                    actions: [
+                        Kirigami.Action {
+                            text: "Create New Shortcut"
+                            icon.name: "list-add"
+                            onTriggered: newShortcutDialog.open()
+                        }
+                    ]
+                }
                 
                 // Use a property binding that updates when configSections changes
                 property var shortcutKeys: {

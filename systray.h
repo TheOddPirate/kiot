@@ -19,6 +19,7 @@ private slots:
     void onMqttStateChanged(QMqttClient::ClientState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     void onOpenSettings();
+    void onOpenConfig();
     void onReconnect();
     void onQuit();
 
@@ -27,6 +28,7 @@ private:
     void setupMenu();
     void updateIcon(QMqttClient::ClientState state);
     void openSettings();
+    void openConfig();
 
 
 private:

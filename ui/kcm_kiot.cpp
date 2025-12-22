@@ -17,7 +17,7 @@
 #include <QRegularExpression>
 #include <QDebug>
 Q_DECLARE_LOGGING_CATEGORY(ui)
-Q_LOGGING_CATEGORY(ui, "ui.kcm")
+Q_LOGGING_CATEGORY(ui, "kiot.UI.kcm")
 
 class KCMKiot : public KQuickManagedConfigModule
 {
@@ -41,11 +41,9 @@ public:
     KiotSettings *settings() const { return m_settings; }
     
     QVariantMap configSections() const { 
-     //   qCDebug(ui) << "Returning configSections with" << m_configSections.size() << "sections";
         return m_configSections; 
     }
     QVariantList sectionOrder() const { 
-       // qCDebug(ui) << "Returning sectionOrder with" << m_sectionOrder.size() << "sections";
         return m_sectionOrder; 
     }
     
@@ -68,7 +66,6 @@ public:
             group.sync();
         }
         
-        // Update in-memory structure
         if (m_configSections.contains(section)) {
             QVariantMap sectionMap = m_configSections[section].toMap();
             sectionMap[key] = value;
@@ -87,7 +84,6 @@ public:
         writeEntry(subGroup, key, value);
         subGroup.sync();
         
-        // Update in-memory structure
         QString fullSection = QString("%1][%2").arg(mainSection).arg(subSection);
         if (m_configSections.contains(fullSection)) {
             QVariantMap sectionMap = m_configSections[fullSection].toMap();
@@ -149,8 +145,6 @@ private:
         
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             qCWarning(ui) << "Could not open config file:" << configPath;
-            
-            // Load from KConfig as fallback
             loadFromKConfig();
             return;
         }
@@ -165,7 +159,6 @@ private:
         
         while (!in.atEnd()) {
             QString line = in.readLine().trimmed();
-            qCDebug(ui) << "RAW LINE from file:" << line;
             if (line.isEmpty() || line.startsWith("#") || line.startsWith(";")) {
                 continue;
             }
@@ -210,15 +203,11 @@ private:
             if (kvMatch.hasMatch() && !currentSection.isEmpty()) {
                 QString key = kvMatch.captured(1).trimmed();
                 QString value = kvMatch.captured(2).trimmed();
-                qCDebug(ui) << "Reading key:" << key << "value:" << value << "type before parsing:" << value;
-                // Try to parse as boolean - only if value is exactly "true" or "false" (case-insensitive)
-                // Parse as boolean - ONLY if value is exactly "true" or "false" (case-sensitive)
                 if (value == "true") {
                     currentSectionData[key] = true;
                 } else if (value == "false") {
                     currentSectionData[key] = false;
                 } else {
-                    // Keep as string - ALL other values remain as strings
                     currentSectionData[key] = value;
                 }
             qCDebug(ui) << "After parsing - key:" << key << "value:" << currentSectionData[key] << "type:" << currentSectionData[key].typeName();
@@ -226,7 +215,6 @@ private:
             }
         }
         
-        // Save the last section
         if (!currentSection.isEmpty()) {
             QString fullSectionName = currentSubSection.isEmpty() 
                 ? currentSection 
@@ -235,17 +223,13 @@ private:
             m_sectionOrder.append(fullSectionName);
         }
         
-        // Always ensure general is first
         if (m_sectionOrder.contains("general")) {
             m_sectionOrder.removeAll("general");
             m_sectionOrder.prepend("general");
         }
         
-        // Group nested sections under their main sections for display
         groupNestedSections();
         
-        // Debug output
-        qCDebug(ui) << "Loaded" << m_sectionOrder.size() << "sections from config";
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString sectionStr = sectionVar.toString();
             QVariant sectionData = m_configSections.value(sectionStr);
@@ -266,28 +250,22 @@ private:
             newOrder.append("general");
         }
         
-        // Add ALL other sections that are not Scripts or Shortcuts
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
             
-            // Skip general (already added), Scripts, and Shortcuts
             if (section == "general" || 
                 section.startsWith("Scripts][") || 
                 section.startsWith("Shortcuts][")) {
                 continue;
             }
-            
-            // Add the section to the new order
             newOrder.append(section);
         }
         
-        // Group Scripts sections
         QVariantMap scriptsData;
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
             if (section.startsWith("Scripts][")) {
                 scriptsData[section] = m_configSections[section];
-                // Remove from main sections
                 newSections.remove(section);
             }
         }
@@ -297,7 +275,6 @@ private:
             newSections["Scripts"] = scriptsData;
         }
         
-        // Group Shortcuts sections
         QVariantMap shortcutsData;
         for (const QVariant &sectionVar : m_sectionOrder) {
             QString section = sectionVar.toString();
@@ -320,28 +297,24 @@ private:
     void loadFromKConfig() {
         auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
         
-        // Get all group names
         const auto groupList = config->groupList();
         
         for (const QString &groupName : groupList) {
             KConfigGroup group(config, groupName);
             QVariantMap sectionData;
             
-            // Get all keys in this group - read as strings and parse conservatively
             const auto keyList = group.keyList();
             for (const QString &key : keyList) {
-                // Read as string first
                 QString valueStr = group.readEntry(key, QString());
                 
-                // Parse as boolean - ONLY if value is exactly "true" or "false" (case-sensitive)
-if (valueStr == "true") {
-    sectionData[key] = true;
-} else if (valueStr == "false") {
-    sectionData[key] = false;
-} else {
-    // Keep as string
-    sectionData[key] = valueStr;
-}
+                if (valueStr == "true") {
+                    sectionData[key] = true;
+                } else if (valueStr == "false") {
+                    sectionData[key] = false;
+                } else {
+                    // Keep as string
+                    sectionData[key] = valueStr;
+                }
             }
             
             // Check for nested groups (like Scripts][browser)
@@ -353,15 +326,12 @@ if (valueStr == "true") {
                 
                 const auto subKeyList = subGroup.keyList();
                 for (const QString &key : subKeyList) {
-                    // Read as string first
                     QString valueStr = subGroup.readEntry(key, QString());
                     
-                    // Parse conservatively
                     QString lowerValue = valueStr.toLower();
                     if (lowerValue == "true" || lowerValue == "false") {
                         subSectionData[key] = (lowerValue == "true");
                     } else {
-                        // Keep as string
                         subSectionData[key] = valueStr;
                     }
                 }

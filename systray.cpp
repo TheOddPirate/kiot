@@ -63,6 +63,10 @@ void SystemTray::onOpenSettings()
 {
     openSettings();
 }
+void SystemTray::onOpenConfig()
+{
+    openConfig();
+}
 
 /**
  * @brief Slot called when "Reconnect" is clicked
@@ -152,6 +156,12 @@ void SystemTray::setupMenu()
     connect(settingsAction, &QAction::triggered,
             this, &SystemTray::onOpenSettings);
 
+    QAction *configAction =
+        m_menu->addAction(QIcon::fromTheme("configure"), "Open Config file");
+    connect(configAction, &QAction::triggered,
+            this, &SystemTray::onOpenConfig);
+
+
     QAction *reconnectAction =
         m_menu->addAction(QIcon::fromTheme("view-refresh"), "Reconnect");
     connect(reconnectAction, &QAction::triggered,
@@ -213,6 +223,27 @@ void SystemTray::openSettings()
         qCDebug(st) << "Opened config file:" << configPath;
     } else {
         qCWarning(st) << "Could not open settings";
+    }
+}
+
+/**
+ * @brief Opens Kiot config file
+ * @details Tries to open the configuration file directly
+ * 
+ */
+void SystemTray::openConfig()
+{
+    qCDebug(st) << "Opening config file";
+
+    const QString configPath =
+        QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
+        + "/kiotrc";
+
+    if (QFile::exists(configPath)) {
+        QProcess::startDetached("xdg-open", {configPath});
+        qCDebug(st) << "Opened config file:" << configPath;
+    } else {
+        qCWarning(st) << "Could not open config file";
     }
 }
 
