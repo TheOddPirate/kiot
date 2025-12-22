@@ -27,6 +27,7 @@ set(KIOT_INTEGRATIONS_SRC
     mpris.cpp
     powerinhibitor.cpp
     game_launcher.cpp
+    systray.cpp
 
 )
 # Only included in flatpak builds
@@ -57,6 +58,7 @@ target_link_libraries(KIOTIntegrations
     KF6::PulseAudioQt
     KF6::BluezQt
     KF6::Solid
+    KF6::I18n
     Qt6::Gui
     Qt6::Widgets
     Qt6::Mqtt

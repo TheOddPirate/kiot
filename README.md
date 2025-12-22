@@ -120,6 +120,7 @@ Compared to similar projects, Kiot focuses on practical desktop integration rath
 | Scripts | Button + Text Input | Execute custom scripts with argument support and custom icons |
 | PowerInhibitor | Switch | To control power management inhibition with attributes for reason and type |
 | Game Launcher | Select | Game launcher that auto detect games on steam/heroic |
+| Systray Icon | NA | Just a basic dynamic systray icon, green for connected, red for disconnect, yellow for connecting |
 
 ## Configuration Examples
 
