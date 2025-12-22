@@ -27,7 +27,6 @@ set(KIOT_INTEGRATIONS_SRC
     mpris.cpp
     powerinhibitor.cpp
     game_launcher.cpp
-    systray.cpp
 
 )
 # Only included in flatpak builds

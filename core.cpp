@@ -45,6 +45,18 @@ HaControl::HaControl() {
         
     }
 
+    // TODO add to readme in general config group example
+    // Auto add systray if not in config
+    if(!group.hasKey("systray"))
+    {
+        group.writeEntry("systray", true);
+        config->sync();
+    }
+    // Launch systray icon
+    if (group.readEntry("systray", true))
+        m_trayicon = new SystemTray(this);
+
+
     m_connectedNode = new ConnectedNode(this);
     
     loadIntegrations(config);

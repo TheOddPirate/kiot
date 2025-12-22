@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
-
+# Used for building flatpak
+option(BUILD_FLATPAK "Build for Flatpak environment" OFF)
+# Moved version here to work with github actions and it looks like this auto generates PROJECT_VERSION and all that
 project(kiot VERSION 0.0.9)
-set(PROJECT_VERSION "0.0.9")
-set(PROJECT_VERSION_MAJOR 0)
+
 # For automatic firmware updates in connected node
 add_definitions(-DKIOT_VERSION="${PROJECT_VERSION}")
 
@@ -16,8 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-# Used for building flatpak
-option(BUILD_FLATPAK "Build for Flatpak environment" OFF)
+
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -73,6 +73,7 @@ set_source_files_properties(
 set(SOURCES
     main.cpp
     core.cpp
+    systray.cpp
     dbusproperty.cpp
     dbusproperty.h
     entities/entity.cpp
