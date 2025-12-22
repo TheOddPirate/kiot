@@ -1,39 +1,453 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC2
+import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.20 as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
     id: root
-
-    Kirigami.FormLayout {
-        id: form
-
-        QQC2.TextField {
-            Kirigami.FormData.label: i18n("Hostname:")
-            text: kcm.settings.host
-            onTextChanged: kcm.settings.host = text
+    
+    ColumnLayout {
+        anchors.fill: parent
+        spacing: Kirigami.Units.largeSpacing
+        
+        QQC2.TabBar {
+            id: tabBar
+            Layout.fillWidth: true
+            
+            Repeater {
+                model: kcm.sectionOrder
+                
+                QQC2.TabButton {
+                    text: {
+                        var section = modelData
+                        // Format section name for display
+                        if (section === "general") return "General"
+                        if (section === "Integrations") return "Integrations"
+                        if (section === "Scripts") return "Scripts"
+                        if (section === "Shortcuts") return "Shortcuts"
+                        if (section === "docker") return "Docker"
+                        if (section === "heroic") return "Heroic Games"
+                        if (section === "steam") return "Steam"
+                        if (section === "systemd") return "Systemd Services"
+                        // Capitalize first letter
+                        return section.charAt(0).toUpperCase() + section.slice(1)
+                    }
+                }
+            }
         }
-
-        QQC2.TextField {
-            Kirigami.FormData.label: i18n("Port:")
-            inputMask: "99999999"
-            text: kcm.settings.port
-            onTextChanged: kcm.settings.port = value
+        
+        StackLayout {
+            id: stackLayout
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            currentIndex: tabBar.currentIndex
+            
+            Repeater {
+                model: kcm.sectionOrder
+                
+                Loader {
+                    property string section: modelData
+                    
+                    sourceComponent: {
+                        if (section === "general") {
+                            return generalSettingsComponent
+                        } else if (section === "Scripts") {
+                            return scriptsGroupComponent
+                        } else if (section === "Shortcuts") {
+                            return shortcutsGroupComponent
+                        } else {
+                            return genericSettingsComponent
+                        }
+                    }
+                }
+            }
         }
+    }
+    
+    // General settings component
+    Component {
+        id: generalSettingsComponent
+        
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            
+            Kirigami.Heading {
+                level: 2
+                text: "MQTT Connection"
+                Layout.fillWidth: true
+            }
+            
+            GridLayout {
+                columns: 2
+                columnSpacing: Kirigami.Units.largeSpacing
+                rowSpacing: Kirigami.Units.largeSpacing
+                Layout.fillWidth: true
+                
+                QQC2.Label {
+                    text: "Hostname:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.TextField {
+                    id: hostField
+                    Layout.fillWidth: true
+                    text: kcm.settings && kcm.settings.host !== undefined ? kcm.settings.host : ""
+                    onEditingFinished: if (kcm.settings) kcm.settings.host = text
+                }
+                
+                QQC2.Label {
+                    text: "Port:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.TextField {
+                    id: portField
+                    Layout.fillWidth: true
+                    inputMask: "99999999"
+                    text: kcm.settings && kcm.settings.port !== undefined ? kcm.settings.port : 1883
+                    onEditingFinished: if (kcm.settings) kcm.settings.port = parseInt(text) || 1883
+                }
+                
+                QQC2.Label {
+                    text: "Username:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.TextField {
+                    id: userField
+                    Layout.fillWidth: true
+                    text: kcm.settings && kcm.settings.user !== undefined ? kcm.settings.user : ""
+                    onEditingFinished: if (kcm.settings) kcm.settings.user = text
+                }
+                
+                QQC2.Label {
+                    text: "Password:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.TextField {
+                    id: passwordField
+                    Layout.fillWidth: true
+                    echoMode: QQC2.TextInput.Password
+                    text: kcm.settings && kcm.settings.password !== undefined ? kcm.settings.password : ""
+                    onEditingFinished: if (kcm.settings) kcm.settings.password = text
+                }
+                
+                QQC2.Label {
+                    text: "Use SSL:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.CheckBox {
+                    id: sslCheckbox
+                    checked: kcm.getConfigValue("general", "useSSL", false)
+                    onCheckedChanged: kcm.saveConfigValue("general", "useSSL", checked)
+                }
 
-        QQC2.TextField {
-            Kirigami.FormData.label: i18n("Username:")
-            text: kcm.settings.user
-            onTextChanged: kcm.settings.user = text
+                QQC2.Label {
+                    text: "Show system tray:"
+                    Layout.alignment: Qt.AlignRight
+                }
+                QQC2.CheckBox {
+                    id: systrayCheckbox
+                    checked: kcm.getConfigValue("general", "systray", true)
+                    onCheckedChanged: kcm.saveConfigValue("general", "systray", checked)
+                }
+            }
         }
-
-        QQC2.TextField {
-            Kirigami.FormData.label: i18n("Password:")
-            echoMode: QQC2.TextInput.Password
-            text: kcm.settings.password
-            onTextChanged: kcm.settings.password = text
+    }
+    
+    // Generic settings component for boolean/value sections
+    Component {
+        id: genericSettingsComponent
+        
+        Flickable {
+            contentWidth: width
+            contentHeight: contentColumn.height
+            clip: true
+            
+            ColumnLayout {
+                id: contentColumn
+                width: parent.width
+                spacing: Kirigami.Units.largeSpacing
+                
+                // Use a property binding that updates when configSections changes
+                property var sectionKeys: {
+                    var sectionData = kcm.configSections[section]
+                    if (!sectionData) return []
+                    var keys = Object.keys(sectionData)
+                    return keys.sort()
+                }
+                
+                // Force update when configSections changes
+                Connections {
+                    target: kcm
+                    function onConfigSectionsChanged() {
+                        // This will trigger re-evaluation of sectionKeys
+                        contentColumn.sectionKeys = contentColumn.sectionKeys
+                    }
+                }
+                
+                Repeater {
+                    model: contentColumn.sectionKeys
+                    
+                    Item {
+                        Layout.fillWidth: true
+                        implicitHeight: childrenRect.height
+                        
+                        property string configKey: modelData
+                        property var configValue: {
+                            var sectionData = kcm.configSections[section]
+                            return sectionData ? sectionData[configKey] : undefined
+                        }
+                        
+                        // Boolean field
+                        QQC2.CheckBox {
+                            visible: typeof configValue === "boolean"
+                            width: parent.width
+                            
+                            text: {
+                                // Format key for display
+                                var displayKey = configKey
+                                // Replace underscores with spaces
+                                displayKey = displayKey.replace(/_/g, " ")
+                                // Capitalize first letter of each word
+                                displayKey = displayKey.replace(/\b\w/g, function(l) { return l.toUpperCase() })
+                                return displayKey
+                            }
+                            checked: typeof configValue === "boolean" ? configValue : false
+                            onCheckedChanged: kcm.saveConfigValue(section, configKey, checked)
+                        }
+                        
+                        // Text field - use GridLayout for label + field
+                        GridLayout {
+                            visible: typeof configValue !== "boolean"
+                            columns: 2
+                            columnSpacing: Kirigami.Units.largeSpacing
+                            width: parent.width
+                            
+                            QQC2.Label {
+                                text: {
+                                    // Format key for display
+                                    var displayKey = configKey
+                                    // Replace underscores with spaces
+                                    displayKey = displayKey.replace(/_/g, " ")
+                                    // Capitalize first letter of each word
+                                    displayKey = displayKey.replace(/\b\w/g, function(l) { return l.toUpperCase() })
+                                    return displayKey + ":"
+                                }
+                                Layout.alignment: Qt.AlignRight
+                            }
+                            
+                            QQC2.TextField {
+                                Layout.fillWidth: true
+                                text: configValue ? configValue.toString() : ""
+                                onEditingFinished: kcm.saveConfigValue(section, configKey, text)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Scripts group component
+    Component {
+        id: scriptsGroupComponent
+        
+        Flickable {
+            contentWidth: width
+            contentHeight: contentColumn.height
+            clip: true
+            
+            ColumnLayout {
+                id: contentColumn
+                width: parent.width
+                spacing: Kirigami.Units.largeSpacing
+                
+                // Use a property binding that updates when configSections changes
+                property var scriptKeys: {
+                    var sectionData = kcm.configSections[section]
+                    if (!sectionData) return []
+                    var keys = Object.keys(sectionData)
+                    return keys.sort()
+                }
+                
+                // Force update when configSections changes
+                Connections {
+                    target: kcm
+                    function onConfigSectionsChanged() {
+                        // This will trigger re-evaluation of scriptKeys
+                        contentColumn.scriptKeys = contentColumn.scriptKeys
+                    }
+                }
+                
+                Repeater {
+                    model: contentColumn.scriptKeys
+                    
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Kirigami.Units.smallSpacing
+                        
+                        property string scriptId: modelData
+                        property var scriptData: {
+                            var sectionData = kcm.configSections[section]
+                            return sectionData ? sectionData[scriptId] : {}
+                        }
+                        
+                        Kirigami.Separator {
+                            Layout.fillWidth: true
+                            visible: model.index > 0
+                        }
+                        
+                        Kirigami.Heading {
+                            level: 3
+                            text: {
+                                var parts = scriptId.split("][")
+                                return parts.length > 1 ? parts[1] : scriptId
+                            }
+                            Layout.fillWidth: true
+                        }
+                        
+                        GridLayout {
+                            columns: 2
+                            columnSpacing: Kirigami.Units.largeSpacing
+                            rowSpacing: Kirigami.Units.largeSpacing
+                            Layout.fillWidth: true
+                            
+                            QQC2.Label {
+                                text: "Name:"
+                                Layout.alignment: Qt.AlignRight
+                            }
+                            QQC2.TextField {
+                                id: scriptNameField
+                                Layout.fillWidth: true
+                                text: scriptData["Name"] || ""
+                                onEditingFinished: {
+                                    var parts = scriptId.split("][")
+                                    if (parts.length > 1) {
+                                        kcm.saveNestedConfigValue(parts[0], parts[1], "Name", text)
+                                    }
+                                }
+                            }
+                            
+                            QQC2.Label {
+                                text: "Command:"
+                                Layout.alignment: Qt.AlignRight
+                            }
+                            QQC2.TextField {
+                                id: scriptExecField
+                                Layout.fillWidth: true
+                                text: scriptData["Exec"] || ""
+                                onEditingFinished: {
+                                    var parts = scriptId.split("][")
+                                    if (parts.length > 1) {
+                                        kcm.saveNestedConfigValue(parts[0], parts[1], "Exec", text)
+                                    }
+                                }
+                            }
+                            
+                            QQC2.Label {
+                                text: "Icon:"
+                                Layout.alignment: Qt.AlignRight
+                            }
+                            QQC2.TextField {
+                                id: scriptIconField
+                                Layout.fillWidth: true
+                                text: scriptData["icon"] || ""
+                                onEditingFinished: {
+                                    var parts = scriptId.split("][")
+                                    if (parts.length > 1) {
+                                        kcm.saveNestedConfigValue(parts[0], parts[1], "icon", text)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Shortcuts group component
+    Component {
+        id: shortcutsGroupComponent
+        
+        Flickable {
+            contentWidth: width
+            contentHeight: contentColumn.height
+            clip: true
+            
+            ColumnLayout {
+                id: contentColumn
+                width: parent.width
+                spacing: Kirigami.Units.largeSpacing
+                
+                // Use a property binding that updates when configSections changes
+                property var shortcutKeys: {
+                    var sectionData = kcm.configSections[section]
+                    if (!sectionData) return []
+                    var keys = Object.keys(sectionData)
+                    return keys.sort()
+                }
+                
+                // Force update when configSections changes
+                Connections {
+                    target: kcm
+                    function onConfigSectionsChanged() {
+                        // This will trigger re-evaluation of shortcutKeys
+                        contentColumn.shortcutKeys = contentColumn.shortcutKeys
+                    }
+                }
+                
+                Repeater {
+                    model: contentColumn.shortcutKeys
+                    
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Kirigami.Units.smallSpacing
+                        
+                        property string shortcutId: modelData
+                        property var shortcutData: {
+                            var sectionData = kcm.configSections[section]
+                            return sectionData ? sectionData[shortcutId] : {}
+                        }
+                        
+                        Kirigami.Separator {
+                            Layout.fillWidth: true
+                            visible: model.index > 0
+                        }
+                        
+                        Kirigami.Heading {
+                            level: 3
+                            text: {
+                                var parts = shortcutId.split("][")
+                                return parts.length > 1 ? parts[1] : shortcutId
+                            }
+                            Layout.fillWidth: true
+                        }
+                        
+                        GridLayout {
+                            columns: 2
+                            columnSpacing: Kirigami.Units.largeSpacing
+                            rowSpacing: Kirigami.Units.largeSpacing
+                            Layout.fillWidth: true
+                            
+                            QQC2.Label {
+                                text: "Name:"
+                                Layout.alignment: Qt.AlignRight
+                            }
+                            QQC2.TextField {
+                                id: shortcutNameField
+                                Layout.fillWidth: true
+                                text: shortcutData["Name"] || ""
+                                onEditingFinished: {
+                                    var parts = shortcutId.split("][")
+                                    if (parts.length > 1) {
+                                        kcm.saveNestedConfigValue(parts[0], parts[1], "Name", text)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
