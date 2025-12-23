@@ -33,7 +33,7 @@
     </method>
     <signal name="InhibitionsChanged">
       <annotation value="true" name="org.freedesktop.DBus.Deprecated"/>
-      <annotation value="QList&lt;QStringList&gt;" name="org.qtproject.QtDBus.QtTypeName.Out0"/>
+      <annotation value="QMap&lt;QStringList&gt;" name="org.qtproject.QtDBus.QtTypeName.Out0"/>
       <arg type="a{ss}" name="added"/>
       <arg type="as" name="removed"/>
     </signal>

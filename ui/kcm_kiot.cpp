@@ -110,7 +110,23 @@ public:
         KConfigGroup group(config, section);
         return readEntry(group, key, defaultValue);
     }
+    
+    Q_INVOKABLE void deleteNestedConfig(const QString &mainSection, const QString &subSection) {
+        qCDebug(ui) << "Deleting nested config:" << mainSection << subSection;
+        auto config = KSharedConfig::openConfig("kiotrc", KSharedConfig::CascadeConfig);
+        KConfigGroup mainGroup(config, mainSection);
+    
+        mainGroup.deleteGroup(subSection);
+        mainGroup.sync();
+    
+        QString fullSection = QString("%1][%2").arg(mainSection).arg(subSection);
+        if (m_configSections.contains(fullSection)) {
+            m_configSections.remove(fullSection);
+            emit configSectionsChanged();
+        }
+    }
 
+    
 private:
     void writeEntry(KConfigGroup &group, const QString &key, const QVariant &value) {
         if (value.typeId() == QMetaType::Bool) {
@@ -270,10 +286,10 @@ private:
             }
         }
         
-        if (!scriptsData.isEmpty()) {
+       // if (!scriptsData.isEmpty()) {
             newOrder.append("Scripts");
             newSections["Scripts"] = scriptsData;
-        }
+       // }
         
         QVariantMap shortcutsData;
         for (const QVariant &sectionVar : m_sectionOrder) {
@@ -285,10 +301,10 @@ private:
             }
         }
         
-        if (!shortcutsData.isEmpty()) {
+     //   if (!shortcutsData.isEmpty()) {
             newOrder.append("Shortcuts");
             newSections["Shortcuts"] = shortcutsData;
-        }
+       // }
         
         m_sectionOrder = newOrder;
         m_configSections = newSections;

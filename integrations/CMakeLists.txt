@@ -25,7 +25,7 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     mpris.cpp
-    powerinhibitor.cpp
+   # powerinhibitor.cpp
     game_launcher.cpp
 
 )

@@ -64,7 +64,93 @@ KCM.SimpleKCM {
             newScriptIconField.text = "mdi:script-text"
         }
     }
+    // Delete Script Confirmation Dialog
+    Kirigami.Dialog {
+        id: deleteScriptDialog
+        title: "Delete Script"
+        standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
     
+        property string scriptId: ""
+    
+        ColumnLayout {
+            Kirigami.Heading {
+               level: 4
+                text: "Are you sure you want to delete this script?"
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+        
+            QQC2.Label {
+                text: {
+                    if (deleteScriptDialog.scriptId) {
+                        var parts = deleteScriptDialog.scriptId.split("][")
+                        return parts.length > 1 ? "Script: " + parts[1] : "Script: " + scriptId
+                    }
+                    return ""
+                }
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+        }
+    
+        onAccepted: {
+            if (deleteScriptDialog.scriptId) {
+                var parts = deleteScriptDialog.scriptId.split("][")
+                if (parts.length > 1) {
+                    kcm.deleteNestedConfig(parts[0], parts[1])
+                }
+            }
+            deleteScriptDialog.scriptId = ""
+        }
+    
+        onRejected: {
+            deleteScriptDialog.scriptId = ""
+        }
+    }
+
+    // Delete Shortcut Confirmation Dialog
+    Kirigami.Dialog {
+        id: deleteShortcutDialog
+        title: "Delete Shortcut"
+        standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
+    
+        property string shortcutId: ""
+    
+        ColumnLayout {
+            Kirigami.Heading {
+                level: 4
+                text: "Are you sure you want to delete this shortcut?"
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+        
+            QQC2.Label {
+                text: {
+                    if (deleteShortcutDialog.shortcutId) {
+                        var parts = deleteShortcutDialog.shortcutId.split("][")
+                        return parts.length > 1 ? "Shortcut: " + parts[1] : "Shortcut: " + shortcutId
+                    }
+                    return ""
+                }
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+        }
+    
+        onAccepted: {
+            if (deleteShortcutDialog.shortcutId) {
+                var parts = deleteShortcutDialog.shortcutId.split("][")
+                if (parts.length > 1) {
+                    kcm.deleteNestedConfig(parts[0], parts[1])
+                }
+            }
+            deleteShortcutDialog.shortcutId = ""
+        }
+    
+        onRejected: {
+            deleteShortcutDialog.shortcutId = ""
+        }
+    }
     // New Shortcut Dialog  
     Kirigami.Dialog {
         id: newShortcutDialog
@@ -264,7 +350,6 @@ KCM.SimpleKCM {
                 width: parent.width
                 spacing: Kirigami.Units.largeSpacing
                 
-                // Use a property binding that updates when configSections changes
                 property var sectionKeys: {
                     var sectionData = kcm.configSections[section]
                     if (!sectionData) return []
@@ -272,11 +357,9 @@ KCM.SimpleKCM {
                     return keys.sort()
                 }
                 
-                // Force update when configSections changes
                 Connections {
                     target: kcm
                     function onConfigSectionsChanged() {
-                        // This will trigger re-evaluation of sectionKeys
                         contentColumn.sectionKeys = contentColumn.sectionKeys
                     }
                 }
@@ -294,17 +377,13 @@ KCM.SimpleKCM {
                             return sectionData ? sectionData[configKey] : undefined
                         }
                         
-                        // Boolean field
                         QQC2.CheckBox {
                             visible: typeof configValue === "boolean"
                             width: parent.width
                             
                             text: {
-                                // Format key for display
                                 var displayKey = configKey
-                                // Replace underscores with spaces
                                 displayKey = displayKey.replace(/_/g, " ")
-                                // Capitalize first letter of each word
                                 displayKey = displayKey.replace(/\b\w/g, function(l) { return l.toUpperCase() })
                                 return displayKey
                             }
@@ -312,7 +391,6 @@ KCM.SimpleKCM {
                             onCheckedChanged: kcm.saveConfigValue(section, configKey, checked)
                         }
                         
-                        // Text field - use GridLayout for label + field
                         GridLayout {
                             visible: typeof configValue !== "boolean"
                             columns: 2
@@ -321,11 +399,8 @@ KCM.SimpleKCM {
                             
                             QQC2.Label {
                                 text: {
-                                    // Format key for display
                                     var displayKey = configKey
-                                    // Replace underscores with spaces
                                     displayKey = displayKey.replace(/_/g, " ")
-                                    // Capitalize first letter of each word
                                     displayKey = displayKey.replace(/\b\w/g, function(l) { return l.toUpperCase() })
                                     return displayKey + ":"
                                 }
@@ -363,7 +438,7 @@ KCM.SimpleKCM {
                     text: "Scripts"
                     Layout.fillWidth: true
                 }
-                
+                    
                 Kirigami.ActionToolBar {
                     Layout.fillWidth: true
                     actions: [
@@ -375,7 +450,6 @@ KCM.SimpleKCM {
                     ]
                 }
                 
-                // Use a property binding that updates when configSections changes
                 property var scriptKeys: {
                     var sectionData = kcm.configSections[section]
                     if (!sectionData) return []
@@ -383,11 +457,9 @@ KCM.SimpleKCM {
                     return keys.sort()
                 }
                 
-                // Force update when configSections changes
                 Connections {
                     target: kcm
                     function onConfigSectionsChanged() {
-                        // This will trigger re-evaluation of scriptKeys
                         contentColumn.scriptKeys = contentColumn.scriptKeys
                     }
                 }
@@ -417,6 +489,15 @@ KCM.SimpleKCM {
                                 return parts.length > 1 ? parts[1] : scriptId
                             }
                             Layout.fillWidth: true
+                        }
+                        // TODO make it show on same line as id but far right side?
+                        QQC2.Button {
+                            text: "Delete"
+                            icon.name: "edit-delete"
+                            onClicked: {
+                                deleteScriptDialog.scriptId = scriptId
+                                deleteScriptDialog.open()
+                            }
                         }
                         
                         GridLayout {
@@ -510,7 +591,6 @@ KCM.SimpleKCM {
                     ]
                 }
                 
-                // Use a property binding that updates when configSections changes
                 property var shortcutKeys: {
                     var sectionData = kcm.configSections[section]
                     if (!sectionData) return []
@@ -518,11 +598,9 @@ KCM.SimpleKCM {
                     return keys.sort()
                 }
                 
-                // Force update when configSections changes
                 Connections {
                     target: kcm
                     function onConfigSectionsChanged() {
-                        // This will trigger re-evaluation of shortcutKeys
                         contentColumn.shortcutKeys = contentColumn.shortcutKeys
                     }
                 }
@@ -553,7 +631,15 @@ KCM.SimpleKCM {
                             }
                             Layout.fillWidth: true
                         }
-                        
+                        // TODO make it show on same line as id but far right side?
+                        QQC2.Button {
+                            text: "Delete"
+                            icon.name: "edit-delete"
+                            onClicked: {
+                                deleteShortcutDialog.shortcutId = shortcutId
+                                deleteShortcutDialog.open()
+                            }
+                        }
                         GridLayout {
                             columns: 2
                             columnSpacing: Kirigami.Units.largeSpacing
