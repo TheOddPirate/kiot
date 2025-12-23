@@ -45,7 +45,7 @@ HaControl::HaControl() {
         
     }
 
-    // TODO add to readme in general config group example
+
     // Auto add systray if not in config
     if(!group.hasKey("systray"))
     {

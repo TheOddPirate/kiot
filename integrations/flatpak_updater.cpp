@@ -34,7 +34,6 @@ public:
     : QObject(parent)
      , m_updateTimer(new QTimer(this))
     {
-        // TODO add the update entity so its available from HA
         m_updater = new Update(this);
         m_updater->setName("KIOT Flatpak Updater");
         m_updater->setId("flatpak_updates");
