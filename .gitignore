@@ -4,3 +4,4 @@ CMakeLists.txt.user
 backups/
 kiot.code-workspace
 flatpak-repo/
+.continue/
