@@ -76,6 +76,7 @@ jobs:
             ~/.var/app
             ~/.local/share/flatpak
             ~/.cache/flatpak
+            /app/
           key: ${{ runner.os }}-flatpak-${{ hashFiles('.flatpak-manifest.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flatpak-
