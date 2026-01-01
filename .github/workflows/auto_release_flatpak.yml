@@ -1,9 +1,9 @@
 name: Release
 on:
   push:
-    branches: [ the_odd_experiments ]
+    branches: [ experimental ]
 env:
-  BRANCH: the_odd_experiments
+  BRANCH: experimental
 
 jobs:
   release:
@@ -85,7 +85,7 @@ jobs:
           flatpak-builder --user --install-deps-from=flathub --force-clean build-dir .flatpak-manifest.yaml
           rm -rf repo
           flatpak-builder --user --repo=repo --force-clean build-dir .flatpak-manifest.yaml
-          flatpak build-bundle repo kiot-${{ env.BRANCH }}-${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot master
+          flatpak build-bundle repo kiot-${{ env.BRANCH }}-V${{ steps.cmake_version.outputs.version }}.flatpak org.davidedmundson.kiot master
 
    #   - name: Build Changelog
    #     uses: mikepenz/release-changelog-builder-action@v5
@@ -99,4 +99,4 @@ jobs:
           tag_name: ${{ steps.cmake_version.outputs.version }}
          # body: ${{ steps.build_changelog.outputs.changelog }}
           name: kiot ${{ env.BRANCH }} V ${{ steps.cmake_version.outputs.version }}
-          files: kiot-${{ env.BRANCH }}-${{ steps.cmake_version.outputs.version }}.flatpak
+          files: kiot-${{ env.BRANCH }}-V${{ steps.cmake_version.outputs.version }}.flatpak
