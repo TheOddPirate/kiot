@@ -22,21 +22,22 @@
       <li>Control media players via MPRIS</li>
       <li>Manage Docker containers</li>
       <li>Control systemd services</li>
-      <li>Launch games from Steam/Heroic</li>
+      <li>Launch games from Steam/Heroic/Lutris</li>
       <li>Send notifications to your desktop</li>
       <li>Track active window and user activity</li>
+      <li>And so much more</li>
     </ul>
     <p>
       All data is exposed via MQTT to Home Assistant, where you can create powerful automations that integrate your desktop with your smart home.
     </p>
   </description>
   
-  <url type="homepage">https://github.com/davidedmundson/kiot</url>
-  <url type="bugtracker">https://github.com/davidedmundson/kiot/issues</url>
-  <url type="help">https://github.com/davidedmundson/kiot/blob/master/README.md</url>
+  <url type="homepage">https://github.com/TheOddPirate/kiot</url>
+  <url type="bugtracker">https://github.com/TheOddPirate/kiot/issues</url>
+  <url type="help">https://github.com/TheOddPirate/kiot/blob/master/README.md</url>
   <url type="donation">https://kde.org/community/donations</url>
-  <url type="translate">https://github.com/davidedmundson/kiot</url>
-  <url type="vcs-browser">https://github.com/davidedmundson/kiot</url>
+  <url type="translate">https://github.com/TheOddPirate/kiot</url>
+  <url type="vcs-browser">https://github.com/TheOddPirate/kiot</url>
   
   <developer_name>David Edmundson &amp; Odd Østlie</developer_name>
   <update_contact>davidedmundson@kde.org</update_contact>
@@ -44,23 +45,23 @@
   <screenshots>
     <screenshot type="default">
       <caption>System Settings Integration</caption>
-      <image>https://github.com/davidedmundson/kiot/blob/bf79f13bbb1094d67aff5e68b2cc339c762d8645/flatpak/images/settings.png?raw=true</image>
+      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/settings.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
       <caption>Systray icon and menu</caption>
-      <image>https://github.com/davidedmundson/kiot/blob/bf79f13bbb1094d67aff5e68b2cc339c762d8645/flatpak/images/systray.png?raw=true</image>
+      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/systray.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
       <caption>Device Sensors Overview</caption>
-      <image>https://github.com/davidedmundson/kiot/blob/bf79f13bbb1094d67aff5e68b2cc339c762d8645/flatpak/images/sensors.png?raw=true</image>
+      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/sensors.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
       <caption>Device Controls Panel</caption>
-      <image>https://github.com/davidedmundson/kiot/blob/bf79f13bbb1094d67aff5e68b2cc339c762d8645/flatpak/images/controls.png?raw=true</image>
+      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/controls.png?raw=true</image>
     </screenshot>
     <screenshot type="other">
       <caption>Media Player Integration</caption>
-      <image>https://github.com/davidedmundson/kiot/blob/bf79f13bbb1094d67aff5e68b2cc339c762d8645/flatpak/images/media_player.png?raw=true</image>
+      <image>https://github.com/TheOddPirate/kiot/blob/b870b1f23a9c03d8a9e27349bafc114a375d8a4e/flatpak/images/media_player.png?raw=true</image>
     </screenshot>
   </screenshots>
 
