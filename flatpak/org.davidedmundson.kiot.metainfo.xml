@@ -142,7 +142,8 @@
   <provides>
     <binary>kiot</binary>
   </provides>
-  
+
+
   <custom>
     <value key="Flathub::automerge">true</value>
     <value key="Flathub::runtime-version">6.10</value>

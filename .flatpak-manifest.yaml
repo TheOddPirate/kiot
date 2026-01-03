@@ -6,7 +6,7 @@ sdk: org.kde.Sdk
 command: kiot
 tags:
   - nightly
-desktop-file-name-suffix: " (Nightly)"
+desktop-file-name-suffix: " (Flatpak)"
 finish-args:
   - "--share=ipc"
   - "--share=network"

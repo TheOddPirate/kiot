@@ -34,7 +34,7 @@ void registerScripts()
         if (exec.contains("{arg}") && textb == nullptr) {
             textb = new Text(qApp);
             textb->setId("scripts_arguments");
-            textb->setName("arguments");
+            textb->setName("script arguments");
             textb->setDiscoveryConfig("icon", "mdi:console");
         }
         auto button = new Button(qApp);

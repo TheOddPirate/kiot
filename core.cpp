@@ -59,8 +59,9 @@ HaControl::HaControl()
     m_client->setPort(group.readEntry("port", 1883));
     m_client->setUsername(group.readEntry("user"));
     m_client->setPassword(group.readEntry("password"));
-    m_client->setKeepAlive(3); // set a low ping so we become unavailable on suspend quickly
-
+    m_client->setKeepAlive(10); // set a low ping so we become unavailable on suspend quickly
+    m_client->setAutoKeepAlive(true);
+    
     if (m_client->hostname().isEmpty()) {
         qCCritical(core) << "Server is not configured, please check " << config->name() << "is configured";
         qCCritical(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
