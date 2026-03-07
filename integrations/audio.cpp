@@ -39,6 +39,7 @@ private slots:
 
 private:
     bool checkIfRaiseMaxVolumeEnabled();
+    bool raiseMaximumVolumeEnabled = false;
     int paToPercent(qint64 v) const;
     qint64 percentToPa(int percent) const;
 
@@ -61,7 +62,8 @@ Audio::Audio(QObject *parent)
     m_sinkVolume->setId("output_volume");
     m_sinkVolume->setName("Output Volume");
     m_sinkVolume->setDiscoveryConfig("icon", "mdi:knob");
-    if(checkIfRaiseMaxVolumeEnabled())
+    raiseMaximumVolumeEnabled = checkIfRaiseMaxVolumeEnabled();
+    if (raiseMaximumVolumeEnabled)
         m_sinkVolume->setRange(0, 150, 1, "%");
     else
         m_sinkVolume->setRange(0, 100, 1, "%");
@@ -78,8 +80,8 @@ Audio::Audio(QObject *parent)
                 this->watcher->addPath(configPath);
             }
             if (QFile::exists(configPath)) {
-                bool enabled = checkIfRaiseMaxVolumeEnabled();
-                m_sinkVolume->setRange(0, enabled ? 150 : 100, 1, "%");
+                raiseMaximumVolumeEnabled = checkIfRaiseMaxVolumeEnabled();
+                m_sinkVolume->setRange(0, raiseMaximumVolumeEnabled ? 150 : 100, 1, "%");
                 m_sinkVolume->runtimeRegistration();
             }
         });
@@ -221,7 +223,22 @@ void Audio::onSinkVolumeChanged()
     int percent = paToPercent(m_sink->volume());
     if (percent == m_sinkVolume->value())
         return;
-
+    int currentMax = m_sinkVolume->max();
+    if(percent > 100 && currentMax == 100)
+    {
+        m_sinkVolume->setRange(0, 150, 1, "%");
+        m_sinkVolume->runtimeRegistration();
+    }
+    else if (percent <= 100 && currentMax == 150 && !raiseMaximumVolumeEnabled)
+    {
+        m_sinkVolume->setRange(0, 100, 1, "%");
+        m_sinkVolume->runtimeRegistration();       
+    }
+    if(percent > 150)
+    {
+        qCCritical(audio) << "Volume above 150% is not supported by kiot, you are trying to use" << percent << "%, if you want to blow the speaker, please change the source yourself";
+        return;
+    }
     m_sinkVolume->setValue(percent);
     qCDebug(audio) << "Updated volume from system:" << percent << "%";
 }
