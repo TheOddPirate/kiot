@@ -2,6 +2,5 @@ build/
 CMakeLists.txt.user
 backups/
 kiot.code-workspace
-*.sh
 flatpak-repo
 .directory
