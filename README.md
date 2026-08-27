@@ -11,7 +11,7 @@
   - [Configuration Examples](#configuration-examples)
 - [Supported Features](#supported-features)
 - [Flatpak Build](#flatpak-build)
-   - [Quick Install](#quick-Install)
+   - [Quick Install](#quick-build)
    - [Manual Install](#manual-build)
 - [Future Development](#future-development)
 - [Contributing](#contributing)
