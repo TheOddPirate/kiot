@@ -3,6 +3,7 @@
 ## Navigation
 - [About](#about)
 - [Setup](#setup)
+  - [Recommended Setup (Helper Script)](#recommended-setup-helper-script)
   - [Dependencies](#dependencies)
   - [Download and Install](#download-and-install)
 - [Configuration](#configuration)
@@ -10,6 +11,8 @@
   - [Configuration Examples](#configuration-examples)
 - [Supported Features](#supported-features)
 - [Flatpak Build](#flatpak-build)
+   - [Quick Install](#quick-Install)
+   - [Manual Install](#manual-build)
 - [Future Development](#future-development)
 - [Contributing](#contributing)
 - [Troubleshooting](#troubleshooting)
@@ -34,6 +37,15 @@ This is pre-alpha software suitable for users comfortable with:
 - Testing early-stage software
 
 ## Setup
+
+### Recommended Setup (Helper Script)
+
+The fastest way to install dependencies and build Kiot is using the interactive helper menu:
+
+```sh
+chmod +x helper.sh
+./helper.sh
+```
 
 ### Dependencies
 
@@ -203,6 +215,21 @@ Shortcuts=true
 ## Flatpak Build
 
 Flatpak installation is also supported:
+
+### Quick Build
+Run 
+```sh
+chmod +x helper.sh
+./helper.sh
+```
+Then select option `3` (Flatpak build and install menu). 
+In the next menu select option `1` (Build and Install as user)
+
+Or you can directly execute:
+```sh
+./scripts/flatpak.sh
+```
+### Manual build
 
 1. Clone this repository
 2. Run:
