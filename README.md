@@ -225,7 +225,7 @@ MPRISPlayer=true
 | Game Launcher | Select | Game launcher for steam/heroic/lutris games|
 | Notifications | Notify | Send notifications to KDE via MQTT |
 | SystemD | Switch | Systemd user service control|
-
+| ScreenController | Number, Select, Switch | Screen control and management |
 
 ## Flatpak Build
 
