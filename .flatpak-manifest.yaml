@@ -43,7 +43,7 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: git
-        url: https://invent.kde.org/frameworks/extra-cmake-modules
+        url: https://invent.kde.org/frameworks/extra-cmake-modules.git/
         tag: v6.30.0
         commit: 68483132b87f4d7b953aec94ef51d1234d41f937
 
@@ -59,7 +59,7 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: git
-        url: https://invent.kde.org/libraries/pulseaudio-qt
+        url: https://invent.kde.org/libraries/pulseaudio-qt.git
         tag: v1.8.1
         commit: 10786fe31e640858f4f5db5366aed9c56d77bfab
 
@@ -67,9 +67,18 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: git
-        url: https://invent.kde.org/frameworks/bluez-qt
+        url: https://invent.kde.org/frameworks/bluez-qt.git
+        
         tag: v6.30.0
         commit: 3f4f7ee54d560b6e46b84bc8467048d318f58afa
+
+  - name: libkscreen
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://invent.kde.org/plasma/libkscreen.git
+        tag: v6.7.90
+        commit: 3e390ebcffc67564c9b83e90f3a6fada264c1c0a
 
   - name: kiot
     buildsystem: cmake-ninja
