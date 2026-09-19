@@ -151,13 +151,7 @@ private slots:
         if (!m_activeoutput)
             return;
 
-        qCDebug(screen_controller) << "Selected screen:" << m_activeoutput->model();
-        
-        QObject::connect(m_activeoutput.data(), &KScreen::Output::isEnabledChanged, this, &ScreenController::updateState);
-        QObject::connect(m_activeoutput.data(), &KScreen::Output::brightnessChanged, this, &ScreenController::updateState);
-        QObject::connect(m_activeoutput.data(), &KScreen::Output::scaleChanged, this, &ScreenController::updateState);
-        QObject::connect(m_activeoutput.data(), &KScreen::Output::currentModeIdChanged, this, &ScreenController::updateState);
-        
+
         updateState();
     }
 
@@ -252,7 +246,6 @@ private:
         m_brightness->setValue(static_cast<int>(m_activeoutput->brightness() * 100));
         m_zoomScale->setValue(static_cast<int>(m_activeoutput->scale() * 100));
 
-        // Populer oppløsninger for aktiv skjerm
         m_resolutionMap.clear();
         QStringList modeOptions;
         auto modes = m_activeoutput->modes();
@@ -269,7 +262,6 @@ private:
         
         m_selectResolution->setOptions(modeOptions);
 
-        // Sett aktiv oppløsning i select-entiteten
         QString currentModeId = m_activeoutput->currentModeId();
         for (auto it = m_resolutionMap.begin(); it != m_resolutionMap.end(); ++it) {
             if (it.value() == currentModeId) {
@@ -340,7 +332,7 @@ private:
     KScreen::ConfigPtr m_config;
     QList<int> m_screenIds;
     QStringList m_screenNames;
-    QMap<QString, QString> m_resolutionMap; // Mapper oppløsningstekst -> modeId
+    QMap<QString, QString> m_resolutionMap; 
 };
 
 void setupScreenController()
