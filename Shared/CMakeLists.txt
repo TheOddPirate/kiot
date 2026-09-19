@@ -1,6 +1,6 @@
 
 find_package(PkgConfig REQUIRED)
-
+message(STATUS "[CMake] Building Shared lib for ${PROJECT_NAME}")
 include_directories(..)
 
 add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")

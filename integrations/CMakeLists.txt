@@ -1,5 +1,7 @@
 
 find_package(PkgConfig REQUIRED)
+message(STATUS "[CMake] Building Integrations for ${PROJECT_NAME}")
+
 pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
@@ -60,6 +62,8 @@ endif()
 
 
 add_library(KIOTIntegrations OBJECT ${KIOT_INTEGRATIONS_SRC})
+#Adds kwin script as resource
+qt_add_resources(INTEGRATIONS_RESOURCES resources.qrc)
 
 # Always link main dependencies
 target_link_libraries(KIOTIntegrations
@@ -90,6 +94,11 @@ if(LIBUDEV_FOUND)
     add_definitions(${LIBUDEV_CFLAGS_OTHER})
 endif()
 
+
+
+target_sources(KIOTIntegrations PRIVATE 
+    ${INTEGRATIONS_RESOURCES}
+)
 
 
 
