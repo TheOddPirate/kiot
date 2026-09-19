@@ -90,7 +90,7 @@ void MainWindow::setupQml()
     context->setContextProperty("settingsManager", settingsManager);
     
     // Load QML from resources
-    m_quickWidget->setSource(QUrl("qrc:/imports/main_qt/window/core/ui_qt/ui/main.qml"));
+    m_quickWidget->setSource(QUrl("qrc:/imports/main_qt/window/ui/main.qml"));
 }
 
 //============ Start of the slots of mainwindow ========================/

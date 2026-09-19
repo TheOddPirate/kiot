@@ -1,6 +1,8 @@
 # appdata specific installation
 # This CMakeLists.txt handles installation of appdata-specific files
 
+message(STATUS "[CMake] Generating AppData for ${PROJECT_NAME}")
+
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.svg")
     install(
         FILES ${CMAKE_CURRENT_SOURCE_DIR}/${APP_ID}.svg
