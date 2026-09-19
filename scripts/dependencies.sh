@@ -88,6 +88,7 @@ if [ "$PM" = "apt" ]; then
         libkf6pulseaudioqt-dev
         libkf6service-dev
         libkf6kio-dev
+        libkf6screen-dev
     )
     
     system_packages=(
@@ -117,6 +118,7 @@ elif [ "$PM" = "pacman" ]; then
         pulseaudio-qt
         kservice
         kio
+        libkscreen
     )
     
     system_packages=(
