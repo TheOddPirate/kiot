@@ -9,6 +9,10 @@
 This is a collection of example configs for different scripts that can be used with Kiot, along with helper scripts to generate them automatically on your own computer.
 
 ## Display
+
+> **⚠️ Note / New Integration Available:** 
+> Most of the features shown below (such as enabling/disabling displays, setting primary screen, controlling brightness, zoom, and switching resolutions) are now natively supported out-of-the-box via the built-in **`ScreenController`** integration! You generally do not need these manual scripts anymore unless you want custom command-line automation.
+
 **Note: Remember to read and understand the scripts before running them, it collects some hw info to generate you personal config.**
 Examples of scripts to control your display configuration. You can use the pre generated as a template to modify for you own needs [displays.conf](/examples/Scripts/displays.conf) or run the generator script [display_generator.sh](/examples/Scripts/display_generator.sh) locally to have it create correct scripts for your computer.
 
