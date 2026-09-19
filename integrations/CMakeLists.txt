@@ -4,6 +4,9 @@ pkg_check_modules(LIBUDEV libudev)
 
 include_directories(..)
 
+
+
+
 set(KIOT_INTEGRATIONS_SRC
     active.cpp
     notifications.cpp
@@ -26,7 +29,7 @@ set(KIOT_INTEGRATIONS_SRC
     docker.cpp
     systemd.cpp
     gamelauncher.cpp
-
+    screen_controller.cpp
 )
 
 
@@ -71,6 +74,7 @@ target_link_libraries(KIOTIntegrations
     KF6::Solid
     KF6::KIOGui
     KF6::Service
+    KF6::Screen
     Qt6::Gui
     Qt6::Widgets
     Qt6::Mqtt

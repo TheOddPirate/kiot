@@ -155,9 +155,7 @@ private:
     void setToDefault()
     {
         if (m_select) {
-            QTimer::singleShot(1000, this, [this]() {
-                m_select->setState("Default");
-            });
+            
         }
     }
 
