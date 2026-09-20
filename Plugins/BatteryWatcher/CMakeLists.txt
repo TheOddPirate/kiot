@@ -1,39 +1,49 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Audio VERSION 0.0.1 DESCRIPTION "Lets you control you system audio" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
+project(Battery VERSION 0.0.1 DESCRIPTION "Gives you batttery information of devices connected" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
 
 
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 
-add_library(Audio MODULE
-    audio.cpp
-    audio.h
+add_library(Battery MODULE
+    batteryPlugin.cpp
+    batteryPlugin.h
+    batterywatcher.cpp
+    batterywatcher.h
 )
 
-find_package(KF6 "1.7.0" REQUIRED COMPONENTS
-    PulseAudioQt
-)
+
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
 )
 
-target_include_directories(Audio PRIVATE ${CMAKE_SOURCE_DIR})
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    Config
+    CoreAddons
+    Solid
 
-target_link_libraries(Audio PRIVATE
+)
+
+
+target_include_directories(Battery PRIVATE ${CMAKE_SOURCE_DIR})
+
+target_link_libraries(Battery PRIVATE
     KIOTShared
-    KF6::PulseAudioQt
     Qt6::Core
+    KF6::ConfigCore
+    KF6::CoreAddons
+    KF6::Solid
 )
 
 # Plasser den ferdige .so-filen direkte i plugins-katalogen der Core forventer å finne den
-set_target_properties(Audio PROPERTIES
+set_target_properties(Battery PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/plugins"
 )
 
-target_compile_definitions(Audio PRIVATE
+target_compile_definitions(Battery PRIVATE
     PLUGIN_NAME=\"${PROJECT_NAME}\"
     PLUGIN_VERSION=\"${PROJECT_VERSION}\"
     PLUGIN_DESCRIPTION=\"${PROJECT_DESCRIPTION}\"

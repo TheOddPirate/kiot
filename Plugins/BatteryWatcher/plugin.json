@@ -1,0 +1,5 @@
+{
+    "name": "BatteryPlugin",
+    "version": "0.0.1",
+    "description": "Gives you batttery information of devices connected"
+}

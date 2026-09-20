@@ -1,0 +1,60 @@
+#include "batteryPlugin.h"
+
+
+
+using KIOTShared::Entities::Sensor;
+using KIOTShared::PlatformHelper;
+
+
+DEFINE_PLUGIN_LOGGER(plugin_loggerbatter,BatteryWatcher)
+BatteryPlugin::BatteryPlugin(QObject *parent)
+    : QObject(parent)
+{
+}
+
+QString BatteryPlugin::name() const
+{
+    return QString(PLUGIN_NAME).replace("\"", "");
+}
+
+QString BatteryPlugin::description() const
+{
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+}
+QUrl BatteryPlugin::url() const
+{
+    return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
+}
+QVersionNumber BatteryPlugin::version() const
+{
+    QString version = QString(PLUGIN_VERSION).replace("\"", "");
+    return QVersionNumber::fromString(version);
+}
+
+bool BatteryPlugin::checkCompatibility()
+{
+    return true;
+}
+
+bool BatteryPlugin::startPlugin()
+{
+    if(m_batteryWatcher)
+        stopPlugin();
+    m_batteryWatcher = new BatteryWatcher(this);
+
+    qCInfo(plugin_loggerbatter) << name() << " plugin started successfully";
+    return true;
+}
+
+bool BatteryPlugin::stopPlugin()
+{
+    if(m_batteryWatcher)
+    {
+        m_batteryWatcher->deleteLater();
+        m_batteryWatcher = nullptr;
+    }
+    qCInfo(plugin_loggerbatter) << name() << " plugin stopped";
+    return true;
+}
+
+#include "batteryPlugin.moc"
