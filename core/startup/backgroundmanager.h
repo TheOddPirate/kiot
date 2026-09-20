@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QString>
 #include "backgroundportal.h" 
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
 
 class BackgroundManager : public QObject {
     Q_OBJECT

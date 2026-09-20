@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2025
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core/core.h"
-#include "Shared/Transport/transportmanager.h"
 #include "mainwindow.h"
 #include "settingsmanager.h"
 #include <KConfigGroup>
@@ -16,6 +15,11 @@
 #include <QPainter>
 #include <QQmlContext>
 #include <QQmlEngine>
+
+
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::Transport::TransportManager;
+
 
 
 DEFINE_LOGGER(mw,  UI.Main)

@@ -4,6 +4,8 @@
 #include <KIOTShared/kiotshared.h>
 #include "core/core.h"
 using KIOTShared::Entities::BinarySensor;
+using KIOTShared::Entities::Entity;
+
 using KIOTShared::PlatformHelper;
 
 #include <QCoreApplication>

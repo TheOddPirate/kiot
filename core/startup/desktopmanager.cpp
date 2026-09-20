@@ -1,5 +1,4 @@
 #include "desktopmanager.h"
-#include "Shared/platformhelper.h"
 #include "core/core.h"
 
 #include <QObject>
@@ -9,6 +8,8 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
 
 
 DEFINE_LOGGER(dm, Core.Startup.DesktopManager)

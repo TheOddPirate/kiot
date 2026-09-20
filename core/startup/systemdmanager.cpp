@@ -1,5 +1,4 @@
 #include "systemdmanager.h"
-#include "Shared/platformhelper.h"
 #include "core/core.h"
 
 #include <QObject>
@@ -12,6 +11,9 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QGuiApplication>
+
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
 
 DEFINE_LOGGER(sm, Core.Startup.SystemdManager)
 

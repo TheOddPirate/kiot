@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #pragma once
-#include "Shared/platformhelper.h"
+#include <KIOTShared/kiotshared.h>
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>
+
+// Trekk inn PlatformHelper i globalt scope (eller bruk KIOTShared::PlatformHelper i koden)
+using KIOTShared::PlatformHelper;
 
 class QMqttClient;
 class ConnectedNode;

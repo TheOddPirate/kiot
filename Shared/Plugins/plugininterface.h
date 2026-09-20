@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 #include <QVersionNumber>
-#include "kiotshared_export.h"
+#include <KIOTShared/kiotshared_export.h>
 
 namespace KIOTShared {
 namespace Plugins {
@@ -22,8 +22,7 @@ public:
 } // namespace Plugins
 } // namespace KIOTShared
 
-// Bruker APP_ID-makroen kombinert med en unik suffiks for interfacet
-#define KIOTPluginInterface_iid (APP_ID ".KIOTPluginInterface")
+#define KIOTPluginInterface_iid "org.kiot.PluginInterface/1.0" // Bruk gjerne en fast streng for testing, eller APP_ID hvis den er definert
 
-// Husk det fulle navnet i Q_DECLARE_INTERFACE siden klassen er i namespace
+// Pakk klassenavnet inn i ekstra parenteser for å unngå at MOC feiltolker navnerommet
 Q_DECLARE_INTERFACE(KIOTShared::Plugins::KIOTPluginInterface, KIOTPluginInterface_iid)

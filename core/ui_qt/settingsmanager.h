@@ -4,7 +4,6 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
-#include "Shared/platformhelper.h"
 
 #include <QObject>
 #include <QVariantMap>

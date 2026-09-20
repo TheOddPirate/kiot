@@ -28,4 +28,4 @@
 #include "entities/event.h"
 
 // Plugins Interface
-//#include "Plugins/plugininterface.h"
+#include "Plugins/plugininterface.h"
