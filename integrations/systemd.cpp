@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "Transport/transportmanager.h"
-#include "entities/switch.h"
-#include "platformhelper.h"
+using KIOTShared::Entities::Switch;
+using KIOTShared::PlatformHelper;
+
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusMessage>

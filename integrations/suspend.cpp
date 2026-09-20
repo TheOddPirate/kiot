@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "Transport/transportmanager.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "entities/entities.h"
+using KIOTShared::Entities::Button;
+using KIOTShared::PlatformHelper;
+
 #include "login1_manager_interface.h"
 #include <QCoreApplication>
 #include <QDBusConnection>

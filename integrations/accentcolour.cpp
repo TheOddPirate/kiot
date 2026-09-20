@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "Transport/transportmanager.h"
-#include "entities/entities.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
 #include <QCoreApplication>
 
 #include <KConfigGroup>
 #include <KConfigWatcher>
 #include <KSharedConfig>
+
+
+// Trekk klassene inn i globalt scope (eller behold KIOTShared:: foran hvis du foretrekker det)
+using KIOTShared::Entities::Sensor;
 
 class AccentColourWatcher : public QObject
 {

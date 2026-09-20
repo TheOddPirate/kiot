@@ -8,11 +8,10 @@
  * Provides real-time monitoring and control of Docker containers
  * through Home Assistant switches and event listening.
  */
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "Transport/transportmanager.h"
-#include "entities/switch.h"
-#include "platformhelper.h"
-#include "core/core.h"
+using KIOTShared::Entities::Switch;
+using KIOTShared::PlatformHelper;
 
 #include <KConfigGroup>
 #include <KSharedConfig>
