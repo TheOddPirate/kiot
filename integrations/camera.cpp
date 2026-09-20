@@ -4,10 +4,10 @@
 // SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
 //      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
 //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "Transport/transportmanager.h"
-#include "entities/entities.h"
-#include "platformhelper.h"
+using KIOTShared::Entities::BinarySensor;
+using KIOTShared::PlatformHelper;
 
 #include <KIdleTime>
 

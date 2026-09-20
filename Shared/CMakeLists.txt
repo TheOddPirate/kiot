@@ -4,8 +4,8 @@ message(STATUS "[CMake] Building Shared library (.so) for ${PROJECT_NAME}")
 
 set(KIOT_SHARED_SRC
     kiotshared_export.h
-    kiotshared.h
-    Plugins/plugininterface.h
+    KIOTShared/kiotshared.h
+  #  Plugins/plugininterface.h
 
     Transport/transportmanager.cpp
     Transport/transportmanager.h

@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#include "Transport/transportmanager.h"
-#include "entities/switch.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
+using KIOTShared::Entities::Switch;
+using KIOTShared::PlatformHelper;
+
+
 #include <BluezQt/Adapter>
 
 #include <BluezQt/Battery>
@@ -12,7 +15,6 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-#include "platformhelper.h"
 DEFINE_LOGGER(bt,Integrations.Bluetooth)
 
 // ==== Bluetooth devices code ==========

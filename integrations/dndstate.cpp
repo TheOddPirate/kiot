@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "Transport/transportmanager.h"
-#include "dbusproperty.h"
-#include "entities/entities.h"
+using KIOTShared::Entities::BinarySensor;
+using KIOTShared::DBusProperty;
+
 #include <QCoreApplication>
 
 void setupDndSensor()

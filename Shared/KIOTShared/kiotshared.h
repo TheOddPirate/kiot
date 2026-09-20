@@ -8,7 +8,7 @@
 // Hjelpere og Transport
 #include "platformhelper.h"
 #include "dbusproperty.h"
-#include "transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 
 // Entities
 #include "entities/entity.h"
@@ -25,6 +25,7 @@
 #include "entities/image.h"
 #include "entities/camera.h"
 #include "entities/update.h"
+#include "entities/event.h"
 
 // Plugins Interface
-#include "plugins/plugininterface.h"
+//#include "Plugins/plugininterface.h"

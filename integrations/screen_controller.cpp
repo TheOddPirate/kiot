@@ -4,12 +4,13 @@
 // All credits to david for this integration, without the work he put into Kgamma2 i would not have the blueprint on howto use KScreen
 // https://invent.kde.org/davidedmundson/kgamma2
 
-#include "Transport/transportmanager.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "entities/select.h"
-#include "entities/switch.h"
-#include "entities/number.h"
-#include "platformhelper.h"
+using KIOTShared::Entities::Switch;
+using KIOTShared::Entities::Select;
+using KIOTShared::Entities::Number;
+
+using KIOTShared::PlatformHelper;
 
 #include <QObject>
 #include <QTimer>

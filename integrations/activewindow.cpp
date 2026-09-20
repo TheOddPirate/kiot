@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "Transport/transportmanager.h"
-#include "entities/sensor.h"
-#include "platformhelper.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
+
+// Trekk klassene inn i globalt scope (eller behold KIOTShared:: foran hvis du foretrekker det)
+using KIOTShared::Entities::Sensor;
+using KIOTShared::PlatformHelper;
 
 #include <QApplication>
 #include <QDBusConnection>
@@ -14,7 +16,6 @@
 #include <QFile>
 #include <QStandardPaths>
 #include <QTimer>
-
 
 DEFINE_LOGGER(aw, Integrations.ActiveWindow)
 

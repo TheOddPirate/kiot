@@ -20,10 +20,10 @@
  * for control and monitoring.
  */
 #include "mpris.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
-#include "Transport/transportmanager.h"
-#include "entities/mediaplayer.h"
-#include "platformhelper.h"
+using KIOTShared::Entities::MediaPlayer;
+using KIOTShared::PlatformHelper;
 
 
 // Qt Core includes

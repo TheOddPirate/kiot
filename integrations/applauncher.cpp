@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2025-2026 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "Transport/transportmanager.h"
-#include "entities/select.h"
-#include "platformhelper.h"
+#include <KIOTShared/kiotshared.h>
 #include "core/core.h"
+using KIOTShared::Entities::Select;
+using KIOTShared::PlatformHelper;
+
+
 #include <KService>
 #include <KServiceGroup>
 #include <KProcess>
