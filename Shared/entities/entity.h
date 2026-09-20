@@ -27,7 +27,7 @@
 #include <QVariantMap>
 #include <KSharedConfig>
 #include <KConfigGroup>
-#include "Shared/platformhelper.h"
+#include "platformhelper.h"
  #include "kiotshared_export.h"
 
 using KIOTShared::PlatformHelper;

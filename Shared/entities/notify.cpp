@@ -23,7 +23,7 @@
  */
 
 #include "notify.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QMqttClient>
 
 

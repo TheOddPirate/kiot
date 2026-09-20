@@ -372,7 +372,7 @@ private:
 
 // myentity.cpp
 #include "myentity.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QMqttClient>
 
 MyEntity::MyEntity(QObject *parent)

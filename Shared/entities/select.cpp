@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "select.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMqttClient>

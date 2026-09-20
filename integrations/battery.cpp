@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "Shared/Transport/transportmanager.h"
-#include "Shared/entities/entities.h"
+#include "Transport/transportmanager.h"
+#include "entities/entities.h"
 #include "core/core.h"
 #include <Solid/Battery>
 #include <Solid/Device>
@@ -12,7 +12,7 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 
-#include "Shared/platformhelper.h"
+#include "platformhelper.h"
 DEFINE_LOGGER(batter,Integrations.Battery)
 
 

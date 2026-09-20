@@ -1,37 +1,39 @@
 cmake_minimum_required(VERSION 3.16)
 
-find_package(PkgConfig REQUIRED)
 message(STATUS "[CMake] Building Shared library (.so) for ${PROJECT_NAME}")
-include_directories(..)
-
-# Globale definisjoner arves fra roten, så disse kan evt. forenkles, 
-# men skader ikke å ha de her for sikkerhets skyld.
-add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")
-add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
-add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
-add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
-add_definitions(-DAPP_ID="${APP_ID}")
-add_definitions(-DPROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}")
 
 set(KIOT_SHARED_SRC
     kiotshared_export.h
+    kiotshared.h
     Plugins/plugininterface.h
 
     Transport/transportmanager.cpp
     Transport/transportmanager.h
     
     entities/entity.cpp
+    entities/entity.h
     entities/binarysensor.cpp
+    entities/binarysensor.h
     entities/button.cpp
+    entities/button.h
     entities/number.cpp
+    entities/number.h
     entities/switch.cpp
+    entities/switch.h
     entities/event.cpp
+    entities/event.h
     entities/select.cpp
+    entities/select.h
     entities/sensor.cpp
+    entities/sensor.h
     entities/text.cpp
+    entities/text.h
     entities/lock.cpp
+    entities/lock.h
     entities/notify.cpp
+    entities/notify.h
     entities/mediaplayer.cpp
+    entities/mediaplayer.h
     entities/image.cpp
     entities/image.h 
     entities/camera.cpp
@@ -45,7 +47,7 @@ set(KIOT_SHARED_SRC
     dbusproperty.h
 )
 
-# 1. Endret fra OBJECT til SHARED her!
+# Bygger som dynamisk bibliotek (.so)
 add_library(KIOTShared SHARED ${KIOT_SHARED_SRC})
 
 target_link_libraries(KIOTShared
@@ -57,7 +59,6 @@ target_link_libraries(KIOTShared
     Qt6::DBus
 )
 
-# Legg til denne linjen! Den forteller preprosessoren at vi bygger selve biblioteket akkurat nå:
 target_compile_definitions(KIOTShared PRIVATE
     PROJECT_NAME="${PROJECT_NAME}"
     PROJECT_VERSION="${PROJECT_VERSION}"
@@ -69,9 +70,11 @@ target_compile_definitions(KIOTShared PRIVATE
     KIOT_SHARED_LIBRARY=1
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
+
 target_include_directories(KIOTShared PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/kiotshared>
 )
 
-# 2. Viktig for SHARED biblioteker: Sørg for at den blir installert riktig
+# Sørg for installasjon av target og eventuelle public headers
 install(TARGETS KIOTShared ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

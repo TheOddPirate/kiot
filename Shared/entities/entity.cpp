@@ -17,7 +17,7 @@
  */
 
 #include "entity.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QHostInfo>
 #include <QSysInfo>
 #include <QJsonDocument>

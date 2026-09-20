@@ -18,7 +18,7 @@
  */
 
 #include "camera.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QMqttClient>
