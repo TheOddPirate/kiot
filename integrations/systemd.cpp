@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core/core.h"
-#include "Shared/Transport/transportmanager.h"
-#include "Shared/entities/switch.h"
-#include "Shared/platformhelper.h"
+#include "Transport/transportmanager.h"
+#include "entities/switch.h"
+#include "platformhelper.h"
 #include <QDBusConnection>
 #include <QDBusInterface>
 #include <QDBusMessage>

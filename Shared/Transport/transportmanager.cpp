@@ -1,5 +1,5 @@
 #include "transportmanager.h"
-#include "Shared/platformhelper.h"
+#include "platformhelper.h"
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include <QApplication>

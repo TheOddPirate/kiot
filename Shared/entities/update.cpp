@@ -4,7 +4,7 @@
 // Based on Home Assistant's MQTT update integration documentation:
 // https://www.home-assistant.io/integrations/update.mqtt/
 #include "update.h"
-#include "Shared/Transport/transportmanager.h"
+#include "Transport/transportmanager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>

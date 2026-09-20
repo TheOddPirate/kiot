@@ -14,8 +14,8 @@
  */
 
 #include "image.h"
-#include "Shared/platformhelper.h"
-#include "Shared/Transport/transportmanager.h"
+#include "platformhelper.h"
+#include "Transport/transportmanager.h"
 #include <QMqttClient>
 #include <QDateTime>
 

@@ -21,9 +21,9 @@
  */
 #include "mpris.h"
 #include "core/core.h"
-#include "Shared/Transport/transportmanager.h"
-#include "Shared/entities/mediaplayer.h"
-#include "Shared/platformhelper.h"
+#include "Transport/transportmanager.h"
+#include "entities/mediaplayer.h"
+#include "platformhelper.h"
 
 
 // Qt Core includes
@@ -52,7 +52,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-#include "Shared/platformhelper.h"
+#include "platformhelper.h"
 DEFINE_LOGGER(mpris, Integrations.Mpris)
 
 
