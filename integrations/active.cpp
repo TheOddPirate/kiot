@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "Shared/entities/entities.h"
+#include "core/core.h"
 #include <KIdleTime>
 #include <QCoreApplication>
 

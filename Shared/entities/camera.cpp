@@ -18,7 +18,7 @@
  */
 
 #include "camera.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QMqttClient>
@@ -42,7 +42,7 @@ void Camera::init()
 
     // This is not supported by default from Home Assistant's MQTT camera integration,
     // but lets you publish a command and use it from the signal to trigger a fresh image in a integration
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/command");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/command");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
         qCDebug(camentity) << name() << "Camera command received:" << QString::fromUtf8(message.payload());
         emit commandReceived(QString::fromUtf8(message.payload()));
@@ -51,10 +51,10 @@ void Camera::init()
 
 void Camera::publishImage(const QByteArray &imageDataBase64)
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
 
-    HaControl::mqttClient()->publish(baseTopic(), imageDataBase64, 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic(), imageDataBase64, 0, true);
 
     QVariantMap attrs;
     attrs["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "select.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMqttClient>
@@ -59,7 +59,7 @@ void Select::init()
     // Unsubscribe først for å unngå delte subscriptions
 
     // Opprett lokal subscription
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             const QString newValue = QString::fromUtf8(message.payload());
@@ -76,8 +76,8 @@ void Select::init()
 
 void Select::publishState()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
 
-    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic(), m_state.toUtf8(), 0, true);
 }

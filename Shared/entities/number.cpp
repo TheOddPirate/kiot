@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "number.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
 
 
@@ -34,7 +34,7 @@ void Number::init()
 
     setValue(m_value);
 
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             bool ok = false;
@@ -51,8 +51,8 @@ void Number::init()
 void Number::setValue(int value)
 {
     m_value = value;
-    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
-        HaControl::mqttClient()->publish(baseTopic(), QByteArray::number(value), 0, true);
+    if (TransportManager::mqttClient() ->state() == QMqttClient::Connected) {
+        TransportManager::mqttClient() ->publish(baseTopic(), QByteArray::number(value), 0, true);
     }
 }
 

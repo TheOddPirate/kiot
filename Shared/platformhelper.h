@@ -4,6 +4,7 @@
 #include <QString>
 #include <QStringList>
 #include <QLoggingCategory>
+#include <QSystemTrayIcon>
 #include <qloggingcategory.h>
 /**
  * @file platformhelper.h
@@ -226,6 +227,8 @@ public:
      * @param mode    whether to start synchronously or detached.
      */
     static void startHostProcess(QProcess &process, QProcess::OpenMode mode = QProcess::ReadWrite);
+
+
 
 private:
     /**

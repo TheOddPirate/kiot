@@ -25,21 +25,16 @@ public:
     HaControl();
     ~HaControl();
 
-    static QMqttClient *mqttClient()
-    {
-        return s_self->m_client;
-    }
 
     static bool registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault = true);
 
 private:
     void validateStartup(bool autostart);
     bool validateConfig();
-    void doConnect();
     void loadIntegrations(KSharedConfigPtr config);
     static QList<IntegrationFactory> s_integrations;
     static HaControl *s_self;
-    QMqttClient *m_client;
+
     ConnectedNode *m_connectedNode = nullptr;
     MainWindow *m_mainWindow = nullptr;
 };

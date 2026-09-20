@@ -4,8 +4,8 @@
 // SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
 //      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
 //          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
-
 #include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "Shared/entities/entities.h"
 #include "Shared/platformhelper.h"
 

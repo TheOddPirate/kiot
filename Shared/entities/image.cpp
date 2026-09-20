@@ -15,7 +15,7 @@
 
 #include "image.h"
 #include "Shared/platformhelper.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
 #include <QDateTime>
 
@@ -60,7 +60,7 @@ void Image::init()
 
 void Image::publishImage(const QByteArray &imageDataBase64)
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
     if(m_isUrlMode)
     {
@@ -68,7 +68,7 @@ void Image::publishImage(const QByteArray &imageDataBase64)
         return;
     }
     // Publiserer selve bildeinnholdet til image_topic
-    HaControl::mqttClient()->publish(baseTopic() + "/image", imageDataBase64, 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic() + "/image", imageDataBase64, 0, true);
 
     // Oppdater standard attributter via Entity-baseklassen
     QVariantMap attrs;
@@ -79,7 +79,7 @@ void Image::publishImage(const QByteArray &imageDataBase64)
 
 void Image::publishImageUrl(const QString &imageUrl)
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
     if(!m_isUrlMode)
     {
@@ -87,7 +87,7 @@ void Image::publishImageUrl(const QString &imageUrl)
         return;
     }
 
-    HaControl::mqttClient()->publish(baseTopic() + "/url", imageUrl.toUtf8(), 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic() + "/url", imageUrl.toUtf8(), 0, true);
 
     QVariantMap attrs;
     attrs["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);

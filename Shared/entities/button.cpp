@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "button.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
 #include <QMqttSubscription>
 
@@ -16,7 +16,7 @@ void Button::init()
     setDiscoveryConfig("command_topic", baseTopic());
     sendRegistration();
 
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic());
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic());
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &) {
             Q_EMIT triggered();

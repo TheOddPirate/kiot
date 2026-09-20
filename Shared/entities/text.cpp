@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "text.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
@@ -23,7 +23,7 @@ void Text::init()
     sendRegistration();
     setState(m_text);
 
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             QString newText = QString::fromUtf8(message.payload());
@@ -37,7 +37,7 @@ void Text::init()
 void Text::setState(const QString &text)
 {
     m_text = text;
-    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
-        HaControl::mqttClient()->publish(baseTopic(), text.toUtf8(), 0, true);
+    if (TransportManager::mqttClient() ->state() == QMqttClient::Connected) {
+        TransportManager::mqttClient() ->publish(baseTopic(), text.toUtf8(), 0, true);
     }
 }

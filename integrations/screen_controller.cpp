@@ -4,6 +4,7 @@
 // All credits to david for this integration, without the work he put into Kgamma2 i would not have the blueprint on howto use KScreen
 // https://invent.kde.org/davidedmundson/kgamma2
 
+#include "Shared/Transport/transportmanager.h"
 #include "core/core.h"
 #include "Shared/entities/select.h"
 #include "Shared/entities/switch.h"

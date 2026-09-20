@@ -5,6 +5,7 @@
 #include "core.h"
 #include "core/startup/startupmanager.h"
 #include "Shared/entities/entities.h"
+#include "Shared/Transport/transportmanager.h"
 #include <KConfigGroup>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -88,60 +89,42 @@ HaControl::HaControl()
 {
     s_self = this;
     m_mainWindow = MainWindow::instance();
-    if(!validateConfig())
-    {
-    QProcess::startDetached(QStringLiteral(PROJECT_NAME) );
-    QApplication::quit();
-
+    
+    if(!validateConfig()) {
+        QProcess::startDetached(QStringLiteral(PROJECT_NAME));
+        QApplication::quit();
+        return;
     }
     
-    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
+    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
     auto group = config->group("general");
     auto autostart = group.readEntry("autostart", false);
     validateStartup(autostart);
-    m_client = new QMqttClient(this);
-    m_client->setHostname(group.readEntry("host"));
-    m_client->setPort(group.readEntry("port", 1883));
-    m_client->setUsername(group.readEntry("user"));
-    m_client->setPassword(group.readEntry("password"));
-    m_client->setKeepAlive(3); // set a low ping so we become unavailable on suspend quickly
 
-    if (m_client->hostname().isEmpty()) {
-        qCCritical(core) << "Server is not configured, please check " << config->name() << "is configured";
-        qCCritical(core) << "kiotrc expected at " << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    // 1. Start opp TransportManager som tar over hele MQTT-ansvaret
+    auto transportManager = new TransportManager(this);
+
+    // 2. Koble UI-oppdatering til TransportManager sine tilstandsendringer
+    if (m_mainWindow) {
+        connect(transportManager, &TransportManager::connectionStateChanged, 
+                m_mainWindow, &MainWindow::updateIcon);
     }
 
-    m_connectedNode = new ConnectedNode(this);
-
-    loadIntegrations(config);
-    QTimer *reconnectTimer = new QTimer(this);
-    reconnectTimer->setInterval(1000);
-
-    connect(reconnectTimer, &QTimer::timeout, this, &HaControl::doConnect);
-    //
-    // connect(&m_networkConfigurationManager, &QNetworkConfigurationManager::configurationChanged, this, connectToHost);
-    //
-
-    connect(m_client, &QMqttClient::stateChanged, this, [reconnectTimer, this](QMqttClient::ClientState state) {
-        if (m_mainWindow)
-            m_mainWindow->updateIcon(state);
-        switch (state) {
-        case QMqttClient::Connected:
-            qCInfo(core) << "connected";
-            break;
-        case QMqttClient::Connecting:
-            qCInfo(core) << "connecting";
-            break;
-        case QMqttClient::Disconnected:
-            qCWarning(core) << m_client->error();
-            qCInfo(core) << "disconnected";
-            reconnectTimer->start();
-            // do I need to reconnect?
-            break;
+    // 3. Håndter hvis konfigurasjonen mangler via signal
+    connect(transportManager, &TransportManager::mqttConfigMissing, this, [this]() {
+        if (m_mainWindow) {
+            MainWindow::sendNotification(QString(PROJECT_NAME), "Please configure your MQTT settings");
+            m_mainWindow->show();
         }
     });
 
-    doConnect();
+    // 4. Opprett internt sensor-node (ConnectedNode henter nå klienten via HaControl::mqttClient())
+    m_connectedNode = new ConnectedNode(this);
+
+    // 5. Last inn integrasjoner
+    loadIntegrations(config);
+
+    transportManager->doConnect();
 }
 
 HaControl::~HaControl()
@@ -149,23 +132,6 @@ HaControl::~HaControl()
     if (m_connectedNode) {
         delete m_connectedNode;
         m_connectedNode = nullptr;
-    }
-    if(m_client){
-        qCInfo(core) << "disconnecting from mqtt host";
-        m_client->disconnectFromHost();
-
-    }
-}
-
-void HaControl::doConnect()
-{
-    auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-    auto group = config->group("general");
-    if (group.readEntry("tls", false)) {
-        QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
-        m_client->connectToHostEncrypted(sslConfig);
-    } else {
-        m_client->connectToHost();
     }
 }
 
@@ -219,7 +185,7 @@ ConnectedNode::ConnectedNode(QObject *parent)
                                     {"model", QStringLiteral(PROJECT_NAME) },
                                     {"hw_version",QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}}));
 
-    auto c = HaControl::mqttClient();
+    auto c = TransportManager::mqttClient();
     c->setWillTopic(baseTopic());
     c->setWillMessage("off");
     c->setWillRetain(true);
@@ -227,13 +193,13 @@ ConnectedNode::ConnectedNode(QObject *parent)
 
 ConnectedNode::~ConnectedNode()
 {
-    HaControl::mqttClient()->publish(baseTopic(), "off", 0, true);
+    TransportManager::mqttClient()->publish(baseTopic(), "off", 0, true);
 }
 
 void ConnectedNode::init()
 {
     sendRegistration();
-    HaControl::mqttClient()->publish(baseTopic(), "on", 0, true);
+    TransportManager::mqttClient()->publish(baseTopic(), "on", 0, true);
 }
 
 #include "core.moc"

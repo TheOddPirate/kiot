@@ -11,7 +11,9 @@ add_definitions(-DAPP_ID="${APP_ID}")
 add_definitions(-DPROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}")
 
 set(KIOT_SHARED_SRC
-
+    Transport/transportmanager.cpp
+    Transport/transportmanager.h
+    
     entities/entity.cpp
     entities/binarysensor.cpp
     entities/button.cpp

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "lock.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
@@ -30,7 +30,7 @@ void Lock::init()
     sendRegistration();
     setState(m_state);
 
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             if (message.payload() == "true") {
@@ -46,7 +46,7 @@ void Lock::init()
 void Lock::setState(bool state)
 {
     m_state = state;
-    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
-        HaControl::mqttClient()->publish(baseTopic(), state ? "true" : "false", 0, true);
+    if (TransportManager::mqttClient() ->state() == QMqttClient::Connected) {
+        TransportManager::mqttClient() ->publish(baseTopic(), state ? "true" : "false", 0, true);
     }
 }
