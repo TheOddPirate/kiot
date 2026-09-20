@@ -1,0 +1,5 @@
+{
+    "name": "KDEActiveWindowWatcher",
+    "version": "0.0.1",
+    "description": "Makes active window title and attributes available in home assistant"
+}

@@ -25,7 +25,6 @@ using KIOTShared::PlatformHelper;
 DEFINE_LOGGER(core, Core.HaControl)
 
 HaControl *HaControl::s_self = nullptr;
-QList<IntegrationFactory> HaControl::s_integrations;
 
 
 // core internal sensor
@@ -143,38 +142,123 @@ HaControl::~HaControl()
         delete m_connectedNode;
         m_connectedNode = nullptr;
     }
+
+    // Stopp og rydd opp i alle lastede plugins
+    for (const auto &plugin : std::as_const(m_loadedPlugins)) {
+        if (plugin.interface) {
+            plugin.interface->stopPlugin();
+        }
+        if (plugin.loader) {
+            plugin.loader->unload();
+        }
+    }
+    m_loadedPlugins.clear();
 }
 
-bool HaControl::registerIntegrationFactory(const QString &name, std::function<void()> plugin, bool onByDefault)
-{
-    s_integrations.append({name, plugin, onByDefault});
-    return true;
-}
 
-// Loads the integrations set to enabled in our config file
 void HaControl::loadIntegrations(KSharedConfigPtr config)
 {
-    auto integrationconfig = config->group("Integrations");
+      auto integrationconfig = config->group("Integrations");
 
     if (!integrationconfig.exists()) {
         qCWarning(core) << "Integration group not found in config, defaulting to onByDefault values";
     }
 
-    for (const auto &entry : s_integrations) {
-        // Uses the onByDefault value if the key doesn't exist
-        if (!integrationconfig.hasKey(entry.name)) {
-            integrationconfig.writeEntry(entry.name, entry.onByDefault);
+        QDir pluginsDir(QCoreApplication::applicationDirPath() + "/plugins");
+
+    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
+auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
+QObject *pluginInstance = pluginLoader->instance();
+
+if (pluginInstance) {
+    auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
+    if (kiotPlugin) {
+        QString pluginName = kiotPlugin->name();
+
+        if (!integrationconfig.hasKey(pluginName)) {
+            integrationconfig.writeEntry(pluginName, true);
             config->sync();
         }
-        bool enabled = integrationconfig.readEntry(entry.name, entry.onByDefault);
+        
+        bool enabled = integrationconfig.readEntry(pluginName, true);
 
         if (enabled) {
-            entry.factory();
-            qCInfo(core) << "Started integration:" << entry.name;
+            if (kiotPlugin->checkCompatibility()) {
+                if (kiotPlugin->startPlugin()) {
+                    qCInfo(core) << "Started plugin integration:" << pluginName;
+                    // Lagre referansen slik at vi kan rydde opp senere
+                    m_loadedPlugins.append({kiotPlugin, pluginLoader});
+                } else {
+                    qCWarning(core) << "Failed to start plugin:" << pluginName;
+                    pluginLoader->unload();
+                    pluginLoader->deleteLater();
+                }
+            } else {
+                qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
+                pluginLoader->unload();
+                pluginLoader->deleteLater();
+            }
         } else {
-            qCDebug(core) << "Skipped integration:" << entry.name;
+            qCDebug(core) << "Skipped disabled plugin:" << pluginName;
+            pluginLoader->unload();
+            pluginLoader->deleteLater();
+        }
+    } else {
+        qCWarning(core) << "File" << fileName << "does not cast to KIOTPluginInterface!";
+        pluginLoader->unload();
+        pluginLoader->deleteLater();
+    }
+} else {
+    qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
+    pluginLoader->deleteLater();
+}
+}
+/* ORiginale 
+
+    // Finn mappen der plugins ligger relative til kjørbare fil eller fastsatt sti
+    QDir pluginsDir(QCoreApplication::applicationDirPath() + "/plugins");
+    
+    // For testing kan du også bruke absolutt sti midlertidig:
+    // QDir pluginsDir("/mnt/Development/Clones/kiot/build/bin/plugins");
+
+    qCInfo(core) << "Scanning for plugins in:" << pluginsDir.absolutePath();
+
+    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
+        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
+        QObject *pluginInstance = pluginLoader.instance();
+
+        if (pluginInstance) {
+            auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
+            if (kiotPlugin) {
+                QString pluginName = kiotPlugin->name();
+
+                if (!integrationconfig.hasKey(pluginName)) {
+                    integrationconfig.writeEntry(pluginName, true); // eller onByDefault om du har det definert
+                    config->sync();
+                }
+                
+                bool enabled = integrationconfig.readEntry(pluginName, true);
+
+                if (enabled) {
+                    if (kiotPlugin->checkCompatibility()) {
+                        kiotPlugin->startPlugin();
+                        qCInfo(core) << "Started plugin integration:" << pluginName;
+                    } else {
+                        qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
+                    }
+                } else {
+                    qCDebug(core) << "Skipped disabled plugin:" << pluginName;
+                    pluginLoader.unload();
+                }
+            } else {
+                qCWarning(core) << "File" << fileName << "loaded, but does not cast to KIOTPluginInterface!";
+                pluginLoader.unload();
+            }
+        } else {
+            qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader.errorString();
         }
     }
+        */
 }
 
 ConnectedNode::ConnectedNode(QObject *parent)

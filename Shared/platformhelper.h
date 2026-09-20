@@ -259,10 +259,16 @@ private:
 
 // Macro for creating a log category matching project_name from cmakelists
 #define LOG_CAT(suffix) PROJECT_NAME "." #suffix
+
+#define LOG_PLUGINCAT(suffix) PROJECT_NAME ".Plugins." #suffix
 // Enkel makro for å definere kategorien i en .cpp-fil med automatisk prosjekt-prefix
 #define DEFINE_LOGGER(Name, SubCategory) \
         DECLARE_LOGGER(Name); \
         Q_LOGGING_CATEGORY(Name, LOG_CAT(SubCategory))
+
+#define DEFINE_PLUGIN_LOGGER(Name, SubCategory) \
+        DECLARE_LOGGER(Name); \
+        Q_LOGGING_CATEGORY(Name, LOG_PLUGINCAT(SubCategory))
 
 
 // clang-format on

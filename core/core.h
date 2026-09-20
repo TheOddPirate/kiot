@@ -8,19 +8,19 @@
 #include <QMqttSubscription>
 #include <QObject>
 #include <QVariantMap>
+#include <QPluginLoader>
 
 // Trekk inn PlatformHelper i globalt scope (eller bruk KIOTShared::PlatformHelper i koden)
 using KIOTShared::PlatformHelper;
+using KIOTShared::Plugins::KIOTPluginInterface;
 
 class QMqttClient;
 class ConnectedNode;
 class MainWindow;
-struct IntegrationFactory {
-    QString name;
-    std::function<void()> factory;
-    bool onByDefault = true; // ny flag for default enabled
-};
-
+struct LoadedPlugin {
+        KIOTPluginInterface *interface = nullptr;
+        QPluginLoader *loader = nullptr;
+    };
 class HaControl : public QObject
 {
     Q_OBJECT
@@ -35,7 +35,8 @@ private:
     void validateStartup(bool autostart);
     bool validateConfig();
     void loadIntegrations(KSharedConfigPtr config);
-    static QList<IntegrationFactory> s_integrations;
+
+    QList<LoadedPlugin> m_loadedPlugins;
     static HaControl *s_self;
 
     ConnectedNode *m_connectedNode = nullptr;
@@ -44,8 +45,6 @@ private:
 
 // clang-format off
 
-// Macro for integrations
-#define REGISTER_INTEGRATION(nameStr, func, onByDefault) \
-static bool dummy##func = HaControl::registerIntegrationFactory(nameStr, [](){ func(); }, onByDefault);
+
 
 // clang-format on

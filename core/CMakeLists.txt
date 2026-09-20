@@ -28,7 +28,8 @@ qt_add_dbus_interface(KIOT_CORE_SOURCES ../dbus/org.freedesktop.portal.Backgroun
 # Core libraries used in final result
 set(KIOT_PARTS
     KIOTShared
-    KIOTIntegrations
+ # Commented out while porting to plugins
+ #   KIOTIntegrations
 )
 
 if(BUILD_QTUI AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ui_qt/CMakeLists.txt")

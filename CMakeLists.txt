@@ -117,8 +117,10 @@ kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
 # Deleger byggingen nedover i hierarkiet
 add_subdirectory(Shared)
-add_subdirectory(integrations)
 
+# Commented out while porting to plugin system
+#add_subdirectory(integrations)
+add_subdirectory(Plugins)
 if(NOT BUILD_FLATPAK)
     add_subdirectory(kcm)
 endif()
