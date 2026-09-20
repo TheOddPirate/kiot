@@ -23,7 +23,7 @@ QString TemplatePlugin::description() const
 }
 QUrl TemplatePlugin::url() const
 {
-    return QUrl::fromString(QString(PLUGIN_DOMAIN).replace("\"", ""));
+    return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
 QVersionNumber TemplatePlugin::version() const
 {

@@ -1,0 +1,5 @@
+{
+    "name": "AppLauncherPlugin",
+    "version": "0.0.1",
+    "description": "Lets you launch any installed software from home assistant"
+}
