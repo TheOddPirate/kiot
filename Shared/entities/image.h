@@ -16,6 +16,7 @@
 
 #pragma once
 #include "entity.h"
+
 #include <QByteArray>
 #include <QObject>
 
@@ -27,7 +28,13 @@
  * This class extends the Entity base class to implement an image entity
  * that can publish image snapshots or content types to Home Assistant via MQTT.
  */
-class Image : public Entity
+ #include "kiotshared_export.h"
+
+ using KIOTShared::Entities::Entity;
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Image : public Entity
 {
     Q_OBJECT
 public:
@@ -93,3 +100,5 @@ private:
     QString m_mimeType = QStringLiteral("image/jpeg");  ///< MIME type for image data payload
     bool m_isUrlMode = false;                          ///< Flag indicating if entity uses URL mode instead of binary image topic
 };
+}
+}

@@ -46,7 +46,12 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-class MediaPlayer : public Entity
+ #include "kiotshared_export.h"
+ using KIOTShared::Entities::Entity;
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT MediaPlayer : public Entity
 {
     Q_OBJECT
 public:
@@ -196,3 +201,5 @@ private:
     /** @private Current media player state information */
     QVariantMap m_state;
 };
+}
+}

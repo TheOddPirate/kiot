@@ -26,6 +26,7 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
 
 /**
  * @class Notify
@@ -46,7 +47,11 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management
  */
-class Notify : public Entity
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Notify : public Entity
 {
     Q_OBJECT
 public:
@@ -90,3 +95,5 @@ Q_SIGNALS:
      */
     void notificationReceived(QByteArray message);
 };
+}
+}

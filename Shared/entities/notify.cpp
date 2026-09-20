@@ -28,6 +28,13 @@
 
 
 DEFINE_LOGGER(notify, entities.Notify)
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Notify::Notify(QObject *parent)
     : Entity(parent)
 {
@@ -48,3 +55,5 @@ void Notify::init()
         emit notificationReceived(message.payload());
     });
 }
+} // namespace Entities
+} // namespace KIOTShared

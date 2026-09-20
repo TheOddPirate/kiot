@@ -7,6 +7,13 @@
 
 
 DEFINE_LOGGER(numb, Shared.Entities.Number)
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Number::Number(QObject *parent)
     : Entity(parent)
 {
@@ -60,3 +67,5 @@ int Number::value()
 {
     return m_value;
 }
+} // namespace Entities
+} // namespace KIOTShared

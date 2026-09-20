@@ -3,8 +3,12 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
 
-class Event : public Entity
+class KIOT_SHARED_EXPORT Event : public Entity
 {
     Q_OBJECT
 public:
@@ -14,3 +18,6 @@ public:
 protected:
     void init() override;
 };
+
+}
+}

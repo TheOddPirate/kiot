@@ -9,9 +9,14 @@
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QMqttSubscription>
-
-
 DEFINE_LOGGER(upd, Shared.Entities.Update)
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
+
 
 Update::Update(QObject *parent)
     : Entity(parent)
@@ -162,3 +167,6 @@ void Update::publishState()
     QJsonDocument doc(payload);
     TransportManager::mqttClient() ->publish(baseTopic(), doc.toJson(QJsonDocument::Compact), 0, true);
 }
+
+} // namespace Entities
+} // namespace KIOTShared

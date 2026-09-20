@@ -6,6 +6,13 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Sensor::Sensor(QObject *parent)
     : Entity(parent)
 {
@@ -38,3 +45,5 @@ void Sensor::publishState()
     TransportManager::mqttClient() ->publish(baseTopic(), m_state.toUtf8(), 0, true);
 }
 
+} // namespace Entities
+} // namespace KIOTShared

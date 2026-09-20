@@ -1,16 +1,15 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#ifndef DBUSPROPERTY_H
-#define DBUSPROPERTY_H
+#pragma once
 
 #include <QObject>
 #include <QVariant>
+#include "kiotshared_export.h"
 
-// Simple wrapper round a single DBus property
-// mostly because Qt bindings are not good at this
+namespace KIOTShared {
 
-class DBusProperty : public QObject
+class KIOT_SHARED_EXPORT DBusProperty : public QObject
 {
     Q_OBJECT
 public:
@@ -29,4 +28,4 @@ private:
     QVariant m_value;
 };
 
-#endif // DBUSPROPERTY_H
+} // namespace KIOTShared

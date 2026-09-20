@@ -6,6 +6,10 @@
 #include <QMqttClient>
 
 DEFINE_LOGGER(binary, Shared.Entities.BinarySensor)
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
 
 
 BinarySensor::BinarySensor(QObject *parent)
@@ -44,3 +48,5 @@ bool BinarySensor::state() const
 {
     return m_state;
 }
+} // namespace Entities
+} // namespace KIOTShared

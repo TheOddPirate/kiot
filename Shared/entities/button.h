@@ -3,8 +3,13 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+#include "kiotshared_export.h"
 
-class Button : public Entity
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT  Button : public Entity
 {
     Q_OBJECT
 public:
@@ -15,3 +20,5 @@ Q_SIGNALS:
 protected:
     void init() override;
 };
+}
+}

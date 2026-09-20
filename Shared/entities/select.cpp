@@ -11,6 +11,12 @@
 
 DEFINE_LOGGER(sel, Shared.Entities.Select)
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Select::Select(QObject *parent)
     : Entity(parent)
 {
@@ -81,3 +87,5 @@ void Select::publishState()
 
     TransportManager::mqttClient() ->publish(baseTopic(), m_state.toUtf8(), 0, true);
 }
+} // namespace Entities
+} // namespace KIOTShared

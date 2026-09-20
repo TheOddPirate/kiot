@@ -10,6 +10,12 @@
 
 DEFINE_LOGGER(swi, Shared.Entities.Switch)
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Switch::Switch(QObject *parent)
     : Entity(parent)
 {
@@ -47,3 +53,5 @@ void Switch::setState(bool state)
         TransportManager::mqttClient() ->publish(baseTopic(), state ? "true" : "false", 0, true);
     }
 }
+} // namespace Entities
+} // namespace KIOTShared

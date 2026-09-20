@@ -26,8 +26,11 @@
 #include <QMqttClient>
 #include <KConfigGroup>
 
-DEFINE_LOGGER(base, Shared.Entities.Entity)
 
+DEFINE_LOGGER(base, Shared.Entities.Entity)
+using KIOTShared::Transport::TransportManager;
+namespace KIOTShared {
+namespace Entities {
 
 static QString sanitizeForMqttTopic(const QString &input)
 {
@@ -53,11 +56,10 @@ static QString sanitizeForMqttTopic(const QString &input)
         result.chop(1);
     }    
     // Ensure it's not empty
-    // Should probably add something extra at det end to make sure we dont use same topic multiple times
     if (result.isEmpty()) {
         result = "empty_entity_id_detected_integration_error";
     }    
-    // Convert to lowercase for consistency (MQTT topics are case-sensitive but lowercase is conventional)
+    // Convert to lowercase for consistency
     result = result.toLower();
     return result;
 }
@@ -76,7 +78,6 @@ QString Entity::hostname() const
 QString Entity::baseTopic() const
 {
     return topixPrefix() + "/" + hostname() + "/" + id();
-
 }
 
 QString Entity::haType() const
@@ -98,6 +99,7 @@ void Entity::setName(const QString &newName)
 {
     m_name = newName;
 }
+
 void Entity::setDiscoveryConfig(const QString &key, const QVariant &value)
 {
     m_haConfig[key] = value;
@@ -135,7 +137,6 @@ void Entity::setId(const QString &newId)
 void Entity::init()
 {}
 
-
 void Entity::sendRegistration()
 {
     if (haType().isEmpty()) {
@@ -153,47 +154,45 @@ void Entity::sendRegistration()
             config["icon"] = icon;
         }
     }
-    //Attributes topic, since every mqtt entity looks like it supports attributes
+    //Attributes topic
     config["json_attributes_topic"] = baseTopic() + "/attributes";
     if (!config.contains("device")) {
         config["device"] = QVariantMap({{"name", hostname()},
                                     {"identifiers", "linux_ha_bridge_" + hostname()},
                                     {"sw_version", QStringLiteral(PROJECT_VERSION)},
-                                    {"manufacturer", QStringLiteral(PROJECT_DEVELOPERS)}, //TODO update to KDE if we manage to make it part of the official portfolio
+                                    {"manufacturer", QStringLiteral(PROJECT_DEVELOPERS)},
                                     {"model", QStringLiteral(PROJECT_NAME) },
-                                    {"hw_version",QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}});
+                                    {"hw_version", QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}});
     }
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
-    TransportManager::mqttClient() ->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
+    TransportManager::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        TransportManager::mqttClient() ->publish(topixPrefix() + "/" + hostname() + "/connected", "on", 0, false);
+        TransportManager::mqttClient()->publish(topixPrefix() + "/" + hostname() + "/connected", "on", 0, false);
     }
 }
 
 //================ Code to allow runtime adding/removing of entities =======================//
 void Entity::runtimeRegistration()
 {
-    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected) {
+    if (TransportManager::mqttClient()->state() != QMqttClient::Connected) {
         return;
     }
     
     qCDebug(base) << "Runtime registration of entity:" << id() << "(" << name() << ")";
     init();
-
 }
 
 void Entity::unRegister()
 {
-    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected) {
+    if (TransportManager::mqttClient()->state() != QMqttClient::Connected) {
         qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")"  << "- MQTT client not connected";
         return;
     }
     
     qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
-    TransportManager::mqttClient() ->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
-    QByteArray(), 0,true);
+    TransportManager::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    QByteArray(), 0, true);
 }
-
 
 void Entity::setAttributes(const QVariantMap &attrs)
 {
@@ -236,10 +235,9 @@ QVariant Entity::convertForHomeAssistant(const QVariant &value) {
     return value;
 }
 
-
 void Entity::publishAttributes()
 {
-    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient()->state() != QMqttClient::Connected)
         return;
 
     QJsonObject obj;
@@ -249,5 +247,8 @@ void Entity::publishAttributes()
     }
     
     QJsonDocument doc(obj);
-    TransportManager::mqttClient() ->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
+    TransportManager::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }
+
+} // namespace Entities
+} // namespace KIOTShared

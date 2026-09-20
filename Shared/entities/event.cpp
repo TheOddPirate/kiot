@@ -4,6 +4,14 @@
 #include "event.h"
 #include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
+
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Event::Event(QObject *parent)
     : Entity(parent)
 {
@@ -26,3 +34,5 @@ void Event::trigger()
         TransportManager::mqttClient() ->publish(baseTopic(), "", 0, true);
     }
 }
+} // namespace Entities
+} // namespace KIOTShared

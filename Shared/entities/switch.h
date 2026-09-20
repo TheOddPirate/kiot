@@ -3,8 +3,12 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
 
-class Switch : public Entity
+class KIOT_SHARED_EXPORT Switch : public Entity
 {
     Q_OBJECT
 public:
@@ -21,3 +25,5 @@ private:
     bool m_state = false;
 
 };
+}
+}

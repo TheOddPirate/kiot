@@ -10,6 +10,13 @@
 
 
 DEFINE_LOGGER(lock, Shared.Entities.Lock)
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Lock::Lock(QObject *parent)
     : Entity(parent)
 {
@@ -50,3 +57,6 @@ void Lock::setState(bool state)
         TransportManager::mqttClient() ->publish(baseTopic(), state ? "true" : "false", 0, true);
     }
 }
+
+} // namespace Entities
+} // namespace KIOTShared

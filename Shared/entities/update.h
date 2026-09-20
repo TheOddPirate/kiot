@@ -24,6 +24,7 @@
 #pragma once
 #include "entity.h"
 
+ #include "kiotshared_export.h"
 /**
  * @class Update
  * @brief Update entity for firmware/software updates
@@ -40,7 +41,11 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-class Update : public Entity
+using KIOTShared::Entities::Entity;
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Update : public Entity
 {
     Q_OBJECT
 public:
@@ -223,3 +228,5 @@ private:
     /** @private Update progress percentage (-1 = not set) */
     int m_updatePercentage = -1;
 };
+}
+}

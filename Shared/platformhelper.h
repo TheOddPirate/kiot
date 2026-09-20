@@ -6,6 +6,7 @@
 #include <QLoggingCategory>
 #include <QSystemTrayIcon>
 #include <qloggingcategory.h>
+#include "kiotshared_export.h"
 /**
  * @file platformhelper.h
  * @brief Platform-specific helpers for runtime environment detection.
@@ -24,7 +25,11 @@
  * The class is designed as a pure collection of static functions and cannot
  * be instantiated: both the constructor and the destructor are deleted.
  */
-class PlatformHelper
+
+ 
+namespace KIOTShared {
+
+class KIOT_SHARED_EXPORT PlatformHelper
 {
 public:
 
@@ -247,7 +252,7 @@ private:
 };
 
 
-
+} // namespace KIOTShared
 
 // Enkel makro for å deklarere en kategori i en header (.h)
 #define DECLARE_LOGGER(Name) Q_DECLARE_LOGGING_CATEGORY(Name)

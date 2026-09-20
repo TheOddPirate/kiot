@@ -8,6 +8,8 @@
 #include <QDBusPendingCall>
 #include <QDBusPendingReply>
 
+namespace KIOTShared {
+
 DBusProperty::DBusProperty(const QString &service, const QString &path, const QString &interface, const QString &property, QObject *parent)
     : QObject(parent)
     , m_service(service)
@@ -46,4 +48,6 @@ void DBusProperty::onFdoPropertiesChanged(const QString &interface, const QVaria
         m_value = changed[m_property];
         Q_EMIT valueChanged(m_value);
     }
+}
+
 }

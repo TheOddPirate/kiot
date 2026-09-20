@@ -21,6 +21,13 @@
 
 DEFINE_LOGGER(imgentity,Shared.Entities.Image)
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
+
 Image::Image(QObject *parent)
     : Entity(parent)
 {
@@ -94,3 +101,6 @@ void Image::publishImageUrl(const QString &imageUrl)
     attrs["image_url"] = imageUrl;
     setAttributes(attrs);
 }
+
+} // namespace Entities
+} // namespace KIOTShared

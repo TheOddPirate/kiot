@@ -26,6 +26,12 @@
 
 DEFINE_LOGGER(camentity, Shared.Entities.Camera)
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Camera::Camera(QObject *parent)
     : Entity(parent)
 {
@@ -61,3 +67,5 @@ void Camera::publishImage(const QByteArray &imageDataBase64)
     attrs["size_bytes"] = imageDataBase64.size();
     setAttributes(attrs);
 }
+} // namespace Entities
+} // namespace KIOTShared

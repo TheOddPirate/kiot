@@ -3,8 +3,12 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
 
-class Select : public Entity
+class KIOT_SHARED_EXPORT Select : public Entity
 {
     Q_OBJECT
 public:
@@ -27,3 +31,5 @@ private:
     QString m_state;
     QStringList m_options;
 };
+}
+}

@@ -3,8 +3,12 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
 
-class Number : public Entity
+class KIOT_SHARED_EXPORT Number : public Entity
 {
     Q_OBJECT
 public:
@@ -27,3 +31,5 @@ private:
     int m_step = 1;
     QString m_unit = "%";
 };
+}
+}
