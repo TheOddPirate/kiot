@@ -1,5 +1,6 @@
 #pragma once
 #include <QString>
+#include <QUrl>
 #include <QVersionNumber>
 #include <KIOTShared/kiotshared_export.h>
 
@@ -13,6 +14,8 @@ public:
     virtual QString name() const = 0;
     virtual QString description() const = 0;
     virtual QVersionNumber version() const = 0;
+    virtual QUrl url() const = 0;
+    
     virtual bool checkCompatibility() = 0;
     
     virtual bool startPlugin() = 0;
