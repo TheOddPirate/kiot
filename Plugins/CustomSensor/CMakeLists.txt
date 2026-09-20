@@ -29,7 +29,7 @@ target_include_directories(CustomSensor PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(CustomSensor PRIVATE
     KIOTShared
     KF6::CoreAddons
-    KF6::Config
+    KF6::ConfigCore
 
 )
 
