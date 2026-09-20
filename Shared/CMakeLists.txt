@@ -3,9 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 message(STATUS "[CMake] Building Shared library (.so) for ${PROJECT_NAME}")
 
 set(KIOT_SHARED_SRC
-    kiotshared_export.h
+  #  kiotshared_export.h
     KIOTShared/kiotshared.h
-  #  Plugins/plugininterface.h
+    KIOTShared/kiotshared_export.h
+    Plugins/plugininterface.h
 
     Transport/transportmanager.cpp
     Transport/transportmanager.h
@@ -76,5 +77,4 @@ target_include_directories(KIOTShared PUBLIC
     $<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/kiotshared>
 )
 
-# Sørg for installasjon av target og eventuelle public headers
 install(TARGETS KIOTShared ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

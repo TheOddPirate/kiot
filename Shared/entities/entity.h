@@ -28,7 +28,7 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include "platformhelper.h"
- #include "kiotshared_export.h"
+#include <KIOTShared/kiotshared_export.h>
 
 using KIOTShared::PlatformHelper;
 
@@ -63,7 +63,7 @@ using KIOTShared::PlatformHelper;
 namespace KIOTShared {
 namespace Entities {
 
-class Entity: public QObject
+class KIOT_SHARED_EXPORT Entity: public QObject
 {
     Q_OBJECT
 public:

@@ -1,4 +1,3 @@
-#include "Shared/platformhelper.h"
 #include "startupmanager.h"
 #include "systemdmanager.h" 
 #include "backgroundmanager.h"
@@ -6,6 +5,10 @@
 
 #include <QObject>
 #include <QCoreApplication>
+
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
+
 
 DEFINE_LOGGER(sum, Core.Startup.StartupManager)
 

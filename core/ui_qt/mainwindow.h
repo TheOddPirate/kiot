@@ -3,7 +3,6 @@
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#include "Shared/platformhelper.h"
 #include "settingsmanager.h"
 #include <QMainWindow>
 #include <QQuickWidget>
@@ -11,6 +10,12 @@
 #include <QWidget>
 #include <QSystemTrayIcon>
 #include <QMqttClient>
+
+
+
+#include <KIOTShared/kiotshared.h>
+using KIOTShared::PlatformHelper;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

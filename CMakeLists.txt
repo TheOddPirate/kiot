@@ -123,6 +123,6 @@ if(NOT BUILD_FLATPAK)
     add_subdirectory(kcm)
 endif()
 
-#add_subdirectory(core)
+add_subdirectory(core)
 
 #feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

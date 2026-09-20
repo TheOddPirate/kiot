@@ -1,4 +1,4 @@
-#include "Shared/platformhelper.h"
+
 #include "backgroundmanager.h"
 #include <QDBusConnection>
 #include <QDBusPendingReply>

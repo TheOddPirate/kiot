@@ -4,7 +4,7 @@
 #pragma once
 #include "entity.h"
 
- #include "kiotshared_export.h"
+#include <KIOTShared/kiotshared_export.h>
  using KIOTShared::Entities::Entity;
 namespace KIOTShared {
 namespace Entities {

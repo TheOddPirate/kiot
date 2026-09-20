@@ -22,7 +22,7 @@
 using KIOTShared::Entities::Entity;
 #include <QByteArray>
 #include <QObject>
-#include "kiotshared_export.h"
+#include "../kiotshared_export.h"
 /**
  * @class Camera
  * @brief Camera entity for publishing image snapshots to Home Assistant

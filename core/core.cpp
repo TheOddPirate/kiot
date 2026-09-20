@@ -1,11 +1,14 @@
 // SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "ui_qt/mainwindow.h"
 #include "core.h"
 #include "core/startup/startupmanager.h"
-#include "Shared/entities/entities.h"
-#include "Shared/Transport/transportmanager.h"
+#include <KIOTShared/kiotshared.h>
+
 #include <KConfigGroup>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -13,10 +16,17 @@
 #include <QTimer>
 #include <QLoggingCategory>
 #include <QApplication>
+
+// Trekk inn det vi trenger i globalt scope fra KIOTShared
+using KIOTShared::Entities::Entity;
+using KIOTShared::Transport::TransportManager;
+using KIOTShared::PlatformHelper;
+
 DEFINE_LOGGER(core, Core.HaControl)
 
 HaControl *HaControl::s_self = nullptr;
 QList<IntegrationFactory> HaControl::s_integrations;
+
 
 // core internal sensor
 class ConnectedNode : public Entity
