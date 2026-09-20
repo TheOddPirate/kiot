@@ -4,7 +4,12 @@
 #pragma once
 #include "entity.h"
 
-class Lock : public Entity
+ #include "kiotshared_export.h"
+ using KIOTShared::Entities::Entity;
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Lock : public Entity
 {
     Q_OBJECT
 public:
@@ -21,3 +26,5 @@ private:
     bool m_state = false;
 
 };
+}
+}

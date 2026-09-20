@@ -117,12 +117,12 @@ kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
 # Deleger byggingen nedover i hierarkiet
 add_subdirectory(Shared)
-add_subdirectory(integrations)
+#add_subdirectory(integrations)
 
-if(NOT BUILD_FLATPAK)
-    add_subdirectory(kcm)
-endif()
+#if(NOT BUILD_FLATPAK)
+#    add_subdirectory(kcm)
+#endif()
 
-add_subdirectory(core)
+#add_subdirectory(core)
 
-feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+#feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

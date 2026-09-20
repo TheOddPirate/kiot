@@ -6,7 +6,10 @@
 
 DEFINE_LOGGER(transportlogger, Shared.TransportManager)
 
-// Statiske variabler for å sikre at den kun instansieres én gang
+namespace KIOTShared {
+namespace Transport {
+
+// Statiske variabler
 static bool s_transportManagerInstantiated = false;
 TransportManager *TransportManager::s_self = nullptr;
 
@@ -22,7 +25,7 @@ TransportManager::TransportManager(QObject *parent) : QObject(parent), m_client(
     {
         qCWarning(transportlogger) << "Mqtt client not initiated";
         s_self = nullptr;
-        deleteLater(); // Sikrere opprydding i konstruktør enn direkte 'delete this'
+        deleteLater();
         return;
     }
 
@@ -43,11 +46,11 @@ TransportManager::~TransportManager()
 bool TransportManager::initiateMqttClient()
 {
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-    if(!config->hasGroup("general")) // Spesifiserer gjerne gruppen her
+    if(!config->hasGroup("general"))
     {
         qCFatal(transportlogger) << "No MQTT config found";
         Q_EMIT mqttConfigMissing();
-        return false; // Fikset manglende semikolon her
+        return false;
     }
     auto group = config->group("general");
 
@@ -72,12 +75,10 @@ bool TransportManager::initiateMqttClient()
     }
     
     qCInfo(transportlogger) << "MQTT server configured to" << m_client->hostname();
-    
 
     reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(5000);
     connect(reconnectTimer, &QTimer::timeout, this, &TransportManager::doConnect);
-    // Kobler til riktig klassenavn (TransportManager i stedet for Transport)
     connect(m_client, &QMqttClient::stateChanged, this, &TransportManager::handleStateChanged);
     return true;
 }
@@ -101,7 +102,6 @@ void TransportManager::handleStateChanged(QMqttClient::ClientState state) {
         break;
     }
 }
-
 
 void TransportManager::doConnect()
 {
@@ -133,3 +133,6 @@ void TransportManager::doDisconnect()
     }
     m_client->disconnectFromHost();
 }
+
+} // namespace Transport
+} // namespace KIOTShared

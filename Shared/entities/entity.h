@@ -28,6 +28,9 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include "Shared/platformhelper.h"
+ #include "kiotshared_export.h"
+
+using KIOTShared::PlatformHelper;
 
 /**
  * @class Entity
@@ -56,6 +59,10 @@
  * @note All entities are QObject-derived to support Qt's signal/slot system
  *       and automatic memory management.
  */
+
+namespace KIOTShared {
+namespace Entities {
+
 class Entity: public QObject
 {
     Q_OBJECT
@@ -362,3 +369,6 @@ private:
     /** @private Current entity attributes (additional contextual data) */
     QVariantMap m_attributes;
 };
+
+} // namespace Entities
+} // namespace KIOTShared

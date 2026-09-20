@@ -9,6 +9,13 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 #include <KConfigGroup>
+
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 MediaPlayer::MediaPlayer(QObject *parent)
     : Entity(parent)
 {
@@ -199,3 +206,6 @@ void MediaPlayer::publishState()
     }
     */
 }
+
+} // namespace Entities
+} // namespace KIOTShared

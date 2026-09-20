@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+#include "kiotshared_export.h"
 
-class BinarySensor : public Entity
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT  BinarySensor : public Entity
 {
     Q_OBJECT
 public:
@@ -18,3 +23,5 @@ private:
     void publish();
     bool m_state = false;
 };
+}
+}

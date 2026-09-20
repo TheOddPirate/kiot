@@ -3,8 +3,12 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
 
-class Sensor : public Entity
+class KIOT_SHARED_EXPORT Sensor : public Entity
 {
     Q_OBJECT
 public:
@@ -24,3 +28,5 @@ private:
 
     void publishState();
 };
+}
+}

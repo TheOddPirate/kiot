@@ -30,6 +30,9 @@
  */
 DEFINE_LOGGER(helper, Shared.PlatformHelper)
 
+
+namespace KIOTShared
+{
 /**
  * @brief Detect the current platform using compile-time macros.
  *
@@ -475,3 +478,4 @@ void PlatformHelper::startHostProcess(QProcess &process, QProcess::OpenMode mode
 }
 
 
+} // namespace KIOTShared

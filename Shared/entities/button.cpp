@@ -5,6 +5,12 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Button::Button(QObject *parent)
     : Entity(parent)
 {
@@ -23,3 +29,5 @@ void Button::init()
         });
     }
 }
+} // namespace Entities
+} // namespace KIOTShared

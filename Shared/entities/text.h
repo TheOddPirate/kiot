@@ -18,7 +18,7 @@
 #pragma once
 
 #include "entity.h"
-
+using KIOTShared::Entities::Entity;
 /**
  * @class Text
  * @brief Text entity for text input and editing
@@ -37,7 +37,11 @@
  * 
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-class Text : public Entity
+ #include "kiotshared_export.h"
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Text : public Entity
 {
     Q_OBJECT
 public:
@@ -97,3 +101,5 @@ private:
     /** @private Current text content */
     QString m_text;
 };
+}
+}

@@ -8,6 +8,12 @@
 #include <QMqttClient>
 #include <QMqttSubscription>
 
+using KIOTShared::Transport::TransportManager;
+
+namespace KIOTShared {
+namespace Entities {
+
+
 Text::Text(QObject *parent)
     : Entity(parent)
 {
@@ -41,3 +47,5 @@ void Text::setState(const QString &text)
         TransportManager::mqttClient() ->publish(baseTopic(), text.toUtf8(), 0, true);
     }
 }
+} // namespace Entities
+} // namespace KIOTShared

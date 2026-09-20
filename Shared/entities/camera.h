@@ -19,9 +19,10 @@
 
 #pragma once
 #include "entity.h"
+using KIOTShared::Entities::Entity;
 #include <QByteArray>
 #include <QObject>
-
+#include "kiotshared_export.h"
 /**
  * @class Camera
  * @brief Camera entity for publishing image snapshots to Home Assistant
@@ -37,7 +38,11 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management
  */
-class Camera : public Entity
+
+namespace KIOTShared {
+namespace Entities {
+
+class KIOT_SHARED_EXPORT Camera : public Entity
 {
     Q_OBJECT
 public:
@@ -89,3 +94,6 @@ protected:
      */
     void init() override;
 };
+
+}
+}

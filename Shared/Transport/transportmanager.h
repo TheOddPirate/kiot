@@ -3,7 +3,13 @@
 #include <QObject>
 #include <QMqttClient>
 #include <QTimer>
-class TransportManager : public QObject
+
+#include "kiotshared_export.h"
+
+namespace KIOTShared {
+namespace Transport {
+
+class KIOT_SHARED_EXPORT TransportManager : public QObject
 {
     Q_OBJECT
 
@@ -34,3 +40,6 @@ private:
     QTimer *reconnectTimer;
     bool initiateMqttClient();
 };
+
+} // namespace Transport
+} // namespace KIOTShared
