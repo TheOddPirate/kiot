@@ -1,0 +1,5 @@
+{
+    "name": "CamerWatcherPlugin",
+    "version": "0.0.1",
+    "description": "Exposes the camera activity to home assistant"
+}

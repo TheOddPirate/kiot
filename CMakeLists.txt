@@ -99,10 +99,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     GlobalAccel
     KCMUtils
     I18n
-    Solid
-    BluezQt
-    Service
-    KIO
+
 )
 find_package(KF6Screen REQUIRED)
 
