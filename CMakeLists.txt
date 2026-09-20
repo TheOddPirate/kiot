@@ -96,7 +96,6 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     CoreAddons
     DBusAddons
     Notifications
-    IdleTime
     GlobalAccel
     KCMUtils
     I18n
@@ -106,9 +105,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     KIO
 )
 find_package(KF6Screen REQUIRED)
-find_package(KF6 "1.7.0" REQUIRED COMPONENTS
-    PulseAudioQt
-)
+
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 

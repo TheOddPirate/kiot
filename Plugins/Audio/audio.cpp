@@ -1,11 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
-// SPDX-License-Identifier: LGPL-2.1-or-later
-
-#include <KIOTShared/kiotshared.h>
-#include "core/core.h"
-using KIOTShared::Entities::Number;
-using KIOTShared::Entities::Select;
-using KIOTShared::PlatformHelper;
+#include "audio.h"
 
 
 #include <PulseAudioQt/Context>
@@ -20,9 +13,13 @@ using KIOTShared::PlatformHelper;
 #include <QTimer>
 #include <QDir>
 
-DEFINE_LOGGER(audio, Integrations.Audio)
 
+using KIOTShared::Entities::Number;
+using KIOTShared::Entities::Select;
 
+using KIOTShared::PlatformHelper;
+
+DEFINE_PLUGIN_LOGGER(plugin_logger_audio,Audio)
 
 class Audio : public QObject
 {
@@ -113,7 +110,7 @@ Audio::Audio(QObject *parent)
     
     m_ctx = PulseAudioQt::Context::instance();
     if (!m_ctx || !m_ctx->isValid()) {
-        qCWarning(audio) << "PulseAudio context not valid";
+        qCWarning(plugin_logger_audio) << "PulseAudio context not valid";
         return;
     }
     // Connect to the events for sink added/removed
@@ -125,7 +122,7 @@ Audio::Audio(QObject *parent)
 
     auto *server = m_ctx->server();
     if (!server) {
-        qCWarning(audio) << "No PulseAudio server";
+        qCWarning(plugin_logger_audio) << "No PulseAudio server";
         return;
     }
 
@@ -175,7 +172,7 @@ void Audio::updateSinkInputs()
     bool activeAppStillExists = false;
 
     for (const auto *input : m_ctx->sinkInputs()) {
-        //qCDebug(audio) << "Sink input name" << input->name();
+        //qCDebug(plugin_logger_audio) << "Sink input name" << input->name();
         //QVariant appNameVar = input->properties().value(QStringLiteral("application.name"));
         QString appName = input->name();
         if (appName.isEmpty() || appName == "Playback") {
@@ -270,13 +267,13 @@ void Audio::onSinkSelected(const QString &newOption)
 
     for (PulseAudioQt::Sink *sink : m_ctx->sinks()) {
         if (sink->description() == newOption) {
-            qCDebug(audio) << "Setting sink to" << sink->description();
+            qCDebug(plugin_logger_audio) << "Setting sink to" << sink->description();
             sink->setDefault(true);
             return;
             ;
         }
     }
-    qCWarning(audio) << "Sink not found:" << newOption;
+    qCWarning(plugin_logger_audio) << "Sink not found:" << newOption;
 }
 
 //Controlled Application volume selected in HA
@@ -303,7 +300,7 @@ void Audio::onSinkInputSelected(const QString &newOption)
                 return;
             }
     }
-    qCWarning(audio) << "SinkInput not found:" << newOption;
+    qCWarning(plugin_logger_audio) << "SinkInput not found:" << newOption;
 }
 
 void Audio::onSourceSelected(const QString &newOption)
@@ -313,12 +310,12 @@ void Audio::onSourceSelected(const QString &newOption)
 
     for (PulseAudioQt::Source *source : m_ctx->sources()) {
         if (source->description() == newOption) {
-            qCDebug(audio) << "Setting source to" << source->description();
+            qCDebug(plugin_logger_audio) << "Setting source to" << source->description();
             source->setDefault(true);
             return;
         }
     }
-    qCWarning(audio) << "Source not found:" << newOption;
+    qCWarning(plugin_logger_audio) << "Source not found:" << newOption;
 }
 
 void Audio::onSinkVolumeChanged()
@@ -331,7 +328,7 @@ void Audio::onSinkVolumeChanged()
         return;
 
     m_sinkVolume->setValue(percent);
-    qCDebug(audio) << "Updated volume from system:" << percent << "%";
+    qCDebug(plugin_logger_audio) << "Updated volume from system:" << percent << "%";
 }
 
 void Audio::onSinkInputVolumeChanged()
@@ -344,7 +341,7 @@ void Audio::onSinkInputVolumeChanged()
         return;
 
     m_sinkInputVolume->setValue(percent);
-    qCDebug(audio) << "Updated application volume for" << m_sinkInput->name() << "  from system:" << percent << "%";
+    qCDebug(plugin_logger_audio) << "Updated application volume for" << m_sinkInput->name() << "  from system:" << percent << "%";
 }
 
 void Audio::onSourceVolumeChanged()
@@ -357,7 +354,7 @@ void Audio::onSourceVolumeChanged()
         return;
 
     m_sourceVolume->setValue(percent);
-    qCDebug(audio) << "Updated volume from system:" << percent << "%";
+    qCDebug(plugin_logger_audio) << "Updated volume from system:" << percent << "%";
 }
 void Audio::setSinkVolume(int v)
 {
@@ -368,7 +365,7 @@ void Audio::setSinkVolume(int v)
 
     qint64 paVol = percentToPa(v);
     m_sink->setVolume(paVol);
-    qCDebug(audio) << "Set volume to" << v << "%";
+    qCDebug(plugin_logger_audio) << "Set volume to" << v << "%";
 }
 
 void Audio::setSinkInputVolume(int v)
@@ -381,7 +378,7 @@ void Audio::setSinkInputVolume(int v)
     qint64 paVol = percentToPa(v);
     m_sinkInput->setVolume(paVol);
         
-    qCDebug(audio) << "Set application volume for " << m_sinkInput->name() << " to" << v << "%";
+    qCDebug(plugin_logger_audio) << "Set application volume for " << m_sinkInput->name() << " to" << v << "%";
 }
 
 void Audio::setSourceVolume(int v)
@@ -393,7 +390,7 @@ void Audio::setSourceVolume(int v)
 
     qint64 paVol = percentToPa(v);
     m_source->setVolume(paVol);
-    qCDebug(audio) << "Set volume to" << v << "%";
+    qCDebug(plugin_logger_audio) << "Set volume to" << v << "%";
 }
 bool Audio::checkIfRaiseMaxVolumeEnabled()
 {
@@ -425,11 +422,55 @@ qint64 Audio::percentToPa(int percent) const
     return qRound(PulseAudioQt::normalVolume() * (percent / 100.0));
 }
 
-void setupAudio()
+
+
+
+AudioPlugin::AudioPlugin(QObject *parent)
+    : QObject(parent)
 {
-    //TODO implement sandbox .flatpak-info parser to validate rights and give helpfull instructions for fix with flatseal
-    new Audio(qApp);
 }
 
-REGISTER_INTEGRATION("Audio", setupAudio, true)
+QString AudioPlugin::name() const
+{
+    return QString(PLUGIN_NAME).replace("\"", "");
+}
+
+QString AudioPlugin::description() const
+{
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+}
+QUrl AudioPlugin::url() const
+{
+    return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
+}
+QVersionNumber AudioPlugin::version() const
+{
+    QString version = QString(PLUGIN_VERSION).replace("\"", "");
+    return QVersionNumber::fromString(version);
+}
+
+bool AudioPlugin::checkCompatibility()
+{
+    return true;
+}
+
+bool AudioPlugin::startPlugin()
+{
+    m_audio = new Audio(this);
+
+    qCInfo(plugin_logger_audio) << name() << " plugin started successfully";
+    return true;
+}
+
+bool AudioPlugin::stopPlugin()
+{
+    if(m_audio)
+    {
+        m_audio->deleteLater();
+        m_audio = nullptr;
+    }
+    qCInfo(plugin_logger_audio) << name() << " plugin stopped";
+    return true;
+}
+
 #include "audio.moc"

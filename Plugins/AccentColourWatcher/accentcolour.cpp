@@ -1,5 +1,4 @@
 #include "accentcolour.h"
-#include <KIdleTime>
 #include <QCoreApplication>
 #include <KConfigGroup>
 #include <KConfigWatcher>
