@@ -4,6 +4,8 @@ project(KDEActiveWindowWatcher VERSION 0.0.1 DESCRIPTION "Makes active window ti
 
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.15")
@@ -17,7 +19,6 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     DBus
     Widgets
-    Mqtt
 )
 
 target_include_directories(KDEActiveWindowWatcher PRIVATE ${CMAKE_SOURCE_DIR})

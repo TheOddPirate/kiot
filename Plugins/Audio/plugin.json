@@ -1,0 +1,5 @@
+{
+    "name": "AudioPlugin",
+    "version": "0.0.1",
+    "description": "Lets you control the system audio"
+}

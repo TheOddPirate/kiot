@@ -6,6 +6,32 @@ message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 
 set(CMAKE_AUTOMOC ON)
 
+
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.15")
+set(KDE_COMPILERSETTINGS_LEVEL "5.82")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
+include(ECMOptionalAddSubdirectory)
+include(FeatureSummary)
+include(KDEClangFormat)
+include(ECMSetupVersion)
+include(ECMQtDeclareLoggingCategory)
+include(ECMQmlModule)
+include(ECMConfiguredInstall)
+
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    IdleTime
+)
+
 add_library(Active MODULE
     active.cpp
     active.h
