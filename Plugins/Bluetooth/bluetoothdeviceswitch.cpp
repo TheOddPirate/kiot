@@ -1,0 +1,92 @@
+#include "bluetoothdeviceswitch.h"
+
+DEFINE_PLUGIN_LOGGER(bt,Bluetooth)
+
+BluetoothDeviceSwitch::BluetoothDeviceSwitch(const BluezQt::DevicePtr &device, QObject *parent)
+    : QObject(parent)
+    , m_device(device)
+{
+    m_switch = new KIOTShared::Entities::Switch(this);
+    m_switch->setId("bluetooth_device_" + device->address().replace(':', '_'));
+    m_switch->setName(device->name());
+    m_switch->setDiscoveryConfig("icon", "mdi:bluetooth");
+    m_switch->runtimeRegistration();
+
+    // Connect signals
+    connect(m_device.data(), &BluezQt::Device::connectedChanged, this, [this](bool) {
+        update();
+    });
+    connect(device.data(), &BluezQt::Device::batteryChanged, this, [this](QSharedPointer<BluezQt::Battery>) {
+        update();
+    });
+    connect(device.data(), &BluezQt::Device::pairedChanged, this, [this](bool) {
+        update();
+    });
+    connect(device.data(), &BluezQt::Device::blockedChanged, this, [this](bool) {
+        update();
+    });
+    connect(device.data(), &BluezQt::Device::trustedChanged, this, [this](bool) {
+        update();
+    });
+    
+    // connect to signal from switch in HA
+    connect(m_switch, &KIOTShared::Entities::Switch::stateChangeRequested, this, [this](bool requestedState) {
+        if (!m_device)
+            return;
+        if (requestedState) {
+            m_device->connectToDevice();
+        } else {
+            m_device->disconnectFromDevice();
+        }
+    });
+    
+    update();
+    qCInfo(bt) << "Bluetooth device added: " << device->name() << " (" << device->address() << ")";
+}
+
+BluetoothDeviceSwitch::~BluetoothDeviceSwitch()
+{
+}
+
+void BluetoothDeviceSwitch::unregisterSwitch()
+{
+    if (m_switch)
+        m_switch->unRegister();
+}
+
+void BluetoothDeviceSwitch::update()
+{
+    if (!m_device)
+        return;
+    if (!m_device->isPaired()) {
+        qCDebug(bt) << m_device->name() << " is not paired anymore";
+        m_switch->unRegister();
+        this->deleteLater();
+        return;
+    }
+    
+    // Only update state and icon if actually changed to avoid unnecessary re registrations with mqtt
+    if (m_device->isConnected() && !m_switch->state()) {
+        m_switch->setHaIcon("mdi:bluetooth");
+        m_switch->setState(true);
+    } else if (!m_device->isConnected() && m_switch->state()) {
+        m_switch->setHaIcon("mdi:bluetooth-off");
+        m_switch->setState(false);
+    }
+    
+    // Update attributes
+    QVariantMap attrs;
+    attrs["mac"] = m_device->address();
+    attrs["rssi"] = m_device->rssi();
+
+    auto battery = m_device->battery();
+    if (battery)
+        attrs["battery"] = battery->percentage();
+
+    attrs["paired"] = QVariant(m_device->isPaired()).toString();
+    attrs["trusted"] = QVariant(m_device->isTrusted()).toString();
+    attrs["blocked"] = QVariant(m_device->isBlocked()).toString();
+    
+    if (m_switch->attributes() != attrs)
+        m_switch->setAttributes(attrs);
+}

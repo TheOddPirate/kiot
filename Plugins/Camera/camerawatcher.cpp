@@ -1,49 +1,7 @@
-// SPDX-FileCopyrightText: 2025 David Edmundson <davidedmundson@kde.org>
-// SPDX-License-Identifier: LGPL-2.1-or-later
 
-// SPDX-FileCopyrightText: 1998 Sven Radej <sven@lisa.exp.univie.ac.at>
-//      SPDX-FileCopyrightText: 2006 Dirk Mueller <mueller@kde.org>
-//          SPDX-FileCopyrightText: 2007 Flavio Castelli <flavio.castelli@gmail.com>
-#include <KIOTShared/kiotshared.h>
-#include "core/core.h"
-using KIOTShared::Entities::BinarySensor;
-using KIOTShared::PlatformHelper;
+#include "camerawatcher.h"
 
-
-#include <QDir>
-#include <QSocketNotifier>
-#include <QTimer>
-#include <fcntl.h>
-#include <sys/inotify.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-
-DEFINE_LOGGER(cam,Integrations.Camera)
-
-
-
-class CameraWatcher : public QObject
-{
-    Q_OBJECT
-public:
-    CameraWatcher(QObject *parent);
-    ~CameraWatcher();
-
-private:
-    BinarySensor *m_sensor;
-    void onInotifyCallback();
-    void onInotifyEvent(const inotify_event *event);
-    void onVideoDeviceAdded(const QString &devicePath);
-    void onVideoDeviceRemoved(const QString &devicePath);
-
-    int m_inotifyFd = -1;
-    QSocketNotifier *m_notifier = nullptr;
-    QHash<QString, int> m_watchFds;
-    QHash<QString, int> m_deviceOpenCounts;
-    QTimer *m_hysterisisDelay = nullptr;
-
-    void updateSensorState();
-};
+DEFINE_PLUGIN_LOGGER(cam,Camera)
 
 CameraWatcher::CameraWatcher(QObject *parent)
     : QObject(parent)
@@ -200,11 +158,3 @@ void CameraWatcher::onVideoDeviceRemoved(const QString &devicePath)
     m_deviceOpenCounts.remove(devicePath);
     updateSensorState();
 }
-
-void setupCamera()
-{
-    new CameraWatcher(qApp);
-}
-
-REGISTER_INTEGRATION("CameraWatcher", setupCamera, true)
-#include "camera.moc"

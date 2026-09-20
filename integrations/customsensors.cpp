@@ -194,7 +194,7 @@ void registerCustomSensors()
         if (!icon.isEmpty()) {
             sensor->setDiscoveryConfig("icon", icon);
         }
-
+        
         loaded++;
     }
 

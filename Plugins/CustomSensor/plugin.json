@@ -1,0 +1,5 @@
+{
+    "name": "CustomSensorPlugin",
+    "version": "0.0.1",
+    "description": "Allows you to create custom sensors with custom commands"
+}
