@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "sensor.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
@@ -32,9 +32,9 @@ void Sensor::setState(const QString &state)
 
 void Sensor::publishState()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
 
-    HaControl::mqttClient()->publish(baseTopic(), m_state.toUtf8(), 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic(), m_state.toUtf8(), 0, true);
 }
 

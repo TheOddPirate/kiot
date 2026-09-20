@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "binarysensor.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
 
 DEFINE_LOGGER(binary, Shared.Entities.BinarySensor)
@@ -26,8 +26,8 @@ void BinarySensor::init()
 void BinarySensor::publish()
 {
     qCDebug(binary) << name() << "publishing state" << m_state;
-    if (HaControl::mqttClient()->state() == QMqttClient::Connected) {
-        HaControl::mqttClient()->publish(baseTopic(), m_state ? "true" : "false", 0, true);
+    if (TransportManager::mqttClient() ->state() == QMqttClient::Connected) {
+        TransportManager::mqttClient() ->publish(baseTopic(), m_state ? "true" : "false", 0, true);
     }
 }
 

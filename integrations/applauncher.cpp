@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2025-2026 Odd Østlie <theoddpirate@gmail.com>
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "Shared/entities/select.h"
 #include "Shared/platformhelper.h"
-
+#include "core/core.h"
 #include <KService>
 #include <KServiceGroup>
 #include <KProcess>

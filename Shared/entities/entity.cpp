@@ -17,7 +17,7 @@
  */
 
 #include "entity.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QHostInfo>
 #include <QSysInfo>
 #include <QJsonDocument>
@@ -65,7 +65,7 @@ static QString sanitizeForMqttTopic(const QString &input)
 Entity::Entity(QObject *parent):
     QObject(parent)
 {
-    connect(HaControl::mqttClient(), &QMqttClient::connected, this, &Entity::init);
+    connect(TransportManager::mqttClient() , &QMqttClient::connected, this, &Entity::init);
 }
 
 QString Entity::hostname() const
@@ -164,16 +164,16 @@ void Entity::sendRegistration()
                                     {"hw_version",QSysInfo::prettyProductName() + " - " + QSysInfo::kernelVersion()}});
     }
     config["unique_id"] = "linux_ha_control_"+ hostname() + "_" + id();
-    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
+    TransportManager::mqttClient() ->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config", QJsonDocument(QJsonObject::fromVariantMap(config)).toJson(QJsonDocument::Compact), 0, true);
     if (id() != "connected") { //special case
-        HaControl::mqttClient()->publish(topixPrefix() + "/" + hostname() + "/connected", "on", 0, false);
+        TransportManager::mqttClient() ->publish(topixPrefix() + "/" + hostname() + "/connected", "on", 0, false);
     }
 }
 
 //================ Code to allow runtime adding/removing of entities =======================//
 void Entity::runtimeRegistration()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected) {
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected) {
         return;
     }
     
@@ -184,13 +184,13 @@ void Entity::runtimeRegistration()
 
 void Entity::unRegister()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected) {
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected) {
         qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")"  << "- MQTT client not connected";
         return;
     }
     
     qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
-    HaControl::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
+    TransportManager::mqttClient() ->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
     QByteArray(), 0,true);
 }
 
@@ -239,7 +239,7 @@ QVariant Entity::convertForHomeAssistant(const QVariant &value) {
 
 void Entity::publishAttributes()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
 
     QJsonObject obj;
@@ -249,5 +249,5 @@ void Entity::publishAttributes()
     }
     
     QJsonDocument doc(obj);
-    HaControl::mqttClient()->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic() + "/attributes", doc.toJson(QJsonDocument::Compact), 0, true);
 }

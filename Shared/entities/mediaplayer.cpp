@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 #include "mediaplayer.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -48,7 +48,7 @@ void MediaPlayer::init()
                                     {"model", "Linux"}}));
     sendRegistration();
     // subscriptions
-    auto mqtt = HaControl::mqttClient();
+    auto mqtt = TransportManager::mqttClient() ;
 
     auto subscribe = [mqtt, this](const QString &topic, auto slot) {
         auto subscription = mqtt->subscribe(topic);
@@ -174,7 +174,7 @@ void MediaPlayer::setVolume(double volume)
 // --- Publish current state to all HA topics ---
 void MediaPlayer::publishState()
 {
-    auto mqtt = HaControl::mqttClient();
+    auto mqtt = TransportManager::mqttClient() ;
 
     if (!mqtt || mqtt->state() != QMqttClient::Connected)
        return;

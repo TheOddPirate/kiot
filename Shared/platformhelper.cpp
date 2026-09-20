@@ -473,3 +473,5 @@ void PlatformHelper::startHostProcess(QProcess &process, QProcess::OpenMode mode
 {
     KSandbox::startHostProcess(process, mode);
 }
+
+

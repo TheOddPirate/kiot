@@ -8,11 +8,11 @@
  * Provides real-time monitoring and control of Docker containers
  * through Home Assistant switches and event listening.
  */
-
 #include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "Shared/entities/switch.h"
 #include "Shared/platformhelper.h"
-
+#include "core/core.h"
 
 #include <KConfigGroup>
 #include <KSharedConfig>

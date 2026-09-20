@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "mainwindow.h"
 #include "settingsmanager.h"
 #include <KConfigGroup>
@@ -141,7 +142,7 @@ void MainWindow::onReconnect()
 {
     qCDebug(mw) << "Manual reconnect requested";
 
-    auto mqttClient = HaControl::mqttClient();
+    auto mqttClient = TransportManager::mqttClient() ;
     if (!mqttClient) {
         return;
     }

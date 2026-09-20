@@ -21,6 +21,7 @@
  */
 #include "mpris.h"
 #include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include "Shared/entities/mediaplayer.h"
 #include "Shared/platformhelper.h"
 

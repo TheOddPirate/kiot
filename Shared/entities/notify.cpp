@@ -23,7 +23,7 @@
  */
 
 #include "notify.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QMqttClient>
 
 
@@ -42,7 +42,7 @@ void Notify::init()
 
     sendRegistration();
 
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/notifications");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/notifications");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](QMqttMessage message) {
         qCDebug(notify) << "Notify message received" << QString::fromUtf8(message.payload());
         emit notificationReceived(message.payload());

@@ -4,7 +4,7 @@
 // Based on Home Assistant's MQTT update integration documentation:
 // https://www.home-assistant.io/integrations/update.mqtt/
 #include "update.h"
-#include "core/core.h"
+#include "Shared/Transport/transportmanager.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMqttClient>
@@ -33,7 +33,7 @@ void Update::init()
     publishState();
 
     // Subscribe to command topic for installation requests
-    auto subscription = HaControl::mqttClient()->subscribe(baseTopic() + "/set");
+    auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/set");
     if (subscription) {
         connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
             if (message.payload() == "install") {
@@ -119,7 +119,7 @@ void Update::setUpdatePercentage(int percentage)
 
 void Update::publishState()
 {
-    if (HaControl::mqttClient()->state() != QMqttClient::Connected)
+    if (TransportManager::mqttClient() ->state() != QMqttClient::Connected)
         return;
 
     // Build JSON payload according to Home Assistant update entity schema
@@ -160,5 +160,5 @@ void Update::publishState()
     }
 
     QJsonDocument doc(payload);
-    HaControl::mqttClient()->publish(baseTopic(), doc.toJson(QJsonDocument::Compact), 0, true);
+    TransportManager::mqttClient() ->publish(baseTopic(), doc.toJson(QJsonDocument::Compact), 0, true);
 }
