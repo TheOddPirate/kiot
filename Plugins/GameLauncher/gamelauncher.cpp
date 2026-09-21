@@ -125,7 +125,7 @@ void GameLauncherPlugin::createGameEntity()
         // Add games that are enabled in config
     for (auto it = m_games.constBegin(); it != m_games.constEnd(); ++it) {
         const QString &displayName = it.key();
-        qCDebug(plugin_logger) << "Checking if" << sanitizeGameName(displayName) << "is enabled in config";
+      //  qCDebug(plugin_logger) << "Checking if" << sanitizeGameName(displayName) << "is enabled in config";
         
         if (settings.hasKey(sanitizeGameName(displayName))) {
             options.append(displayName);
