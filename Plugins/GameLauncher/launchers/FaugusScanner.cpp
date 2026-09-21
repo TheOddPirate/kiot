@@ -45,6 +45,7 @@ bool FaugusScanner::isLauncherInstalled() const
         }       
     }
 
+    // Check for Faugus desktop file, todo double check flatpak name
     QStringList desktopPaths = {
         QDir::homePath() + "/.local/share/applications/io.github.Faugus.faugus-launcher.desktop",
         "/usr/share/applications/io.github.Faugus.faugus-launcher.desktop",
@@ -57,6 +58,7 @@ bool FaugusScanner::isLauncherInstalled() const
         }
     }
 
+    // Check for Faugus installation directory
     QString FaugusHome = QDir::homePath() + "/.local/share/faugus-launcher/";
     
     if (QDir(FaugusHome).exists()) {
@@ -143,6 +145,7 @@ QMap<QString, GameData> FaugusScanner::scanGames()
         QFileInfo exeInfo(data.exePath);
         data.installPath = exeInfo.absolutePath();
         m_games[gameId] = data; 
+    }
 
     return m_games;
 }
