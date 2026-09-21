@@ -109,8 +109,6 @@ QMap<QString, QString> SteamScanner::getSteamGames()
             }
             braceDepth--;
         }
-
-        // Look for library path
         if (line.contains("\"path\"\t\t\"")) {
             int startPos = line.indexOf("\"path\"");
             startPos = line.indexOf('\"', startPos + 6);

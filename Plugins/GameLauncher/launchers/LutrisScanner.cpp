@@ -12,7 +12,6 @@
 #include <QRegularExpression>
 #include <qloggingcategory.h>
 
-// Definerer kategorien: vil utvides til f.eks "game_detector.LutrisScanner"
 DEFINE_PLUGIN_LOGGER(lutrislogger, GameLauncher.utrisScanner)
 
 LutrisScanner::LutrisScanner(QObject *parent) : GameBase(parent)
@@ -44,7 +43,6 @@ bool LutrisScanner::isLauncherInstalled() const
         }       
     }
 
-    // Check for Lutris desktop file
     QStringList desktopPaths = {
         QDir::homePath() + "/.local/share/applications/lutris.desktop",
         "/usr/share/applications/lutris.desktop",
@@ -57,7 +55,6 @@ bool LutrisScanner::isLauncherInstalled() const
         }
     }
 
-    // Check for Lutris installation directory
     QString lutrisHome = QDir::homePath() + "/.local/share/lutris";
     if (QDir(lutrisHome).exists()) {
         return true;
@@ -107,11 +104,6 @@ LutrisScanner::YamlInfo LutrisScanner::parseYamlFile(const QString &yamlPath)
     if (argsMatch.hasMatch()) {
          info.args = argsMatch.captured(1).trimmed();
     }
-
-
-    
-
-
     return info;
 }
 
@@ -139,7 +131,7 @@ QMap<QString, GameData> LutrisScanner::scanGames()
             data.exePath = info.exepath;
             data.launchOptions = info.args;
             m_games[data.displayName] = data;
-            qCDebug(lutrislogger) << "Found Lutris game:" << data.gameName << "(game ID:" << data.prefixPath << ")";
+          //  qCDebug(lutrislogger) << "Found Lutris game:" << data.gameName << "(game ID:" << data.prefixPath << ")";
         }
     }
     return m_games;
@@ -150,7 +142,6 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
 {
     QMap<QString, YamlInfo> games;
 
-    // Dynamisk path-sjekk for Lutris (native vs Flatpak)
     QString gamePathsPath;
     QString gamesDir;
 
@@ -167,7 +158,6 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
         gamePathsPath = nativeCache;
         gamesDir = nativeGames;
     } else {
-        // Ingen Lutris installasjon funnet
         return QMap<QString, YamlInfo>();
     }
 
@@ -176,7 +166,6 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
         return games;
     }
 
-    // Read game-paths.json
     QFile gamePathsFile(gamePathsPath);
     if (!gamePathsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qCWarning(lutrislogger) << "Could not open game-paths.json:" << gamePathsPath;
@@ -194,9 +183,8 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
 
     QJsonObject gamePaths = gamePathsDoc.object();
 
-    // Find all YAML files in games directory
     QDirIterator yamlIt(gamesDir, QStringList() << "*.yml", QDir::Files);
-    QMap<QString, YamlInfo> yamlGames; // Map executable name to game name
+    QMap<QString, YamlInfo> yamlGames; 
 
     while (yamlIt.hasNext()) {
         YamlInfo inf = parseYamlFile(yamlIt.next());
@@ -211,10 +199,6 @@ QMap<QString, LutrisScanner::YamlInfo> LutrisScanner::getLutrisGames()
         }
         inf.gameId = matchingKey;
         yamlGames[inf.gameName] = inf;
-        
     }
-
-   
-
     return yamlGames;
 }

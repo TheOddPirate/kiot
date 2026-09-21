@@ -1,5 +1,5 @@
 {
     "name": "GameLauncherPlugin",
     "version": "0.0.1",
-    "description": "A template plugin for KIOT"
+    "description": "Detects your game launchers and lets you launch games from home assistant"
 }

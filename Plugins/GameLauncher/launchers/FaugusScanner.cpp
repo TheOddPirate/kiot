@@ -45,7 +45,6 @@ bool FaugusScanner::isLauncherInstalled() const
         }       
     }
 
-    // Check for Faugus desktop file, todo double check flatpak name
     QStringList desktopPaths = {
         QDir::homePath() + "/.local/share/applications/io.github.Faugus.faugus-launcher.desktop",
         "/usr/share/applications/io.github.Faugus.faugus-launcher.desktop",
@@ -58,7 +57,6 @@ bool FaugusScanner::isLauncherInstalled() const
         }
     }
 
-    // Check for Faugus installation directory
     QString FaugusHome = QDir::homePath() + "/.local/share/faugus-launcher/";
     
     if (QDir(FaugusHome).exists()) {
@@ -79,7 +77,6 @@ QMap<QString, GameData> FaugusScanner::scanGames()
         return m_games;
     }
     qCDebug(fauguslogger) << launcherName() << " scanning for installed games";
-    // Tips: Håndter manglende '/' mellom homePath og stien trygt
     QString faugusGamesFile = QDir::homePath() + "/.local/share/faugus-launcher/games.json";
     if(!QFile(faugusGamesFile).exists())
     {
@@ -107,7 +104,6 @@ QMap<QString, GameData> FaugusScanner::scanGames()
         return m_games;
     }
 
-    // Sjekk at rot-elementet faktisk er en Array
     if (!doc.isArray()) {
         qCWarning(fauguslogger) << launcherName() << "Forventet en JSON Array i rot, men fikk noe annet.";
         return m_games;
@@ -115,9 +111,8 @@ QMap<QString, GameData> FaugusScanner::scanGames()
 
     QJsonArray gamesArray = doc.array();
 
-    // Range-based for-loop fungerer fint med QJsonArray i nyere Qt
     for (const QJsonValue &value : gamesArray) {
-        qCDebug(fauguslogger) << launcherName() << " json object " << value;
+        //qCDebug(fauguslogger) << launcherName() << " json object " << value;
         if (!value.isObject()) {
             continue;
         }
@@ -143,14 +138,11 @@ QMap<QString, GameData> FaugusScanner::scanGames()
         data.iconPath = iconPath;
         data.envVariables = launch_arguments;
         data.launchOptions = game_arguments;
-        // Faugus lagrer fullstendig sti til .exe direkte i "path"
         data.exePath     = gameObj["path"].toString(""); 
         
-        // Utled installPath fra exePath (henter mappen .exe-filen ligger i)
         QFileInfo exeInfo(data.exePath);
         data.installPath = exeInfo.absolutePath();
-        m_games[gameId] = data; // Merk: Bruk gjerne gameId som nøkkel i mappen i stedet for title for å unngå duplikater
-    }
+        m_games[gameId] = data; 
 
     return m_games;
 }
