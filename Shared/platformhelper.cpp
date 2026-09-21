@@ -239,6 +239,39 @@ QString PlatformHelper::configDirPath()
     return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PROJECT_NAME) ;
 }
 
+QStringList PlatformHelper::appdataDirPaths()
+{
+    QStringList paths;
+    //IF the userpaths does not exits, lets build them
+    QString userPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    qDebug() << userPath;
+    if(!QDir(userPath).exists())
+        QDir().mkpath(userPath);
+    if(QDir(userPath).exists())
+    {
+        qDebug() << userPath;
+        if(!QDir(userPath).exists())
+             QDir().mkpath(userPath);
+        paths.append(userPath);
+    }
+    QStringList dataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+    for (const QString &dataPath :  QStandardPaths::standardLocations(QStandardPaths::AppDataLocation))
+    {
+        qDebug() << dataPath;
+        QDir dir(dataPath);
+        if(dir.exists())
+        {
+            QString full_dataPath = dataPath +"/" + getProjectName();
+            QDir dir_full(full_dataPath);
+      
+            qDebug() << full_dataPath;
+            if(dir_full.exists())
+                paths.append(full_dataPath);
+        }
+    }
+
+    return paths;
+}
 
 
 /**

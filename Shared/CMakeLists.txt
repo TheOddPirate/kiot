@@ -11,6 +11,10 @@ set(KIOT_SHARED_SRC
     Transport/transportmanager.cpp
     Transport/transportmanager.h
     
+    Config/configmanager.cpp
+    Config/configmanager.h
+    
+
     entities/entity.cpp
     entities/entity.h
     entities/binarysensor.cpp

@@ -17,17 +17,15 @@
 #include <QLoggingCategory>
 #include <QApplication>
 
-// Trekk inn det vi trenger i globalt scope fra KIOTShared
 using KIOTShared::Entities::Entity;
 using KIOTShared::Transport::TransportManager;
 using KIOTShared::PlatformHelper;
-
+using KIOTShared::Config::ConfigManager;
 DEFINE_LOGGER(core, Core.HaControl)
 
 HaControl *HaControl::s_self = nullptr;
 
 
-// core internal sensor
 class ConnectedNode : public Entity
 {
     Q_OBJECT
@@ -98,7 +96,8 @@ HaControl::HaControl()
 {
     s_self = this;
     m_mainWindow = MainWindow::instance();
-    
+    ConfigManager *m_conf = new ConfigManager(this);
+    qCDebug(core) << m_conf->filePath();
     if(!validateConfig()) {
         QProcess::startDetached(QStringLiteral(PROJECT_NAME));
         QApplication::quit();
@@ -164,9 +163,20 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
         qCWarning(core) << "Integration group not found in config, defaulting to onByDefault values";
     }
 
-        QDir pluginsDir(QCoreApplication::applicationDirPath() + "/plugins");
 
-    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
+    QStringList pluginDirStrings = PlatformHelper::appdataDirPaths();
+    qCDebug(core) << "Checking plugin path:" << pluginDirStrings;
+    if(QDir(QCoreApplication::applicationDirPath() + "/plugins").exists())
+        pluginDirStrings.append(QCoreApplication::applicationDirPath() + "/plugins");
+    for (QString pathName : pluginDirStrings)
+    {
+        if(!pathName.endsWith("/plugins"))
+            pathName = pathName + "/plugins";
+        qCDebug(core) << "Checking plugin path:" << pathName;
+        QDir pluginsDir(pathName);
+        if(!pluginsDir.exists())
+            continue;
+        for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
 auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
 QObject *pluginInstance = pluginLoader->instance();
 
@@ -212,6 +222,8 @@ if (pluginInstance) {
     qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
     pluginLoader->deleteLater();
 }
+
+    }
 }
 /* ORiginale 
 
