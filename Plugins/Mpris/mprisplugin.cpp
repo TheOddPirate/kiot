@@ -1,60 +1,59 @@
-#include "lockedstateplugin.h"
+#include "mprisplugin.h"
+#include <QCoreApplication>
 
+using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
 
 DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
 
-LockedStatePlugin::LockedStatePlugin(QObject *parent)
+TemplatePlugin::TemplatePlugin(QObject *parent)
     : QObject(parent)
 {
 }
-LockedStatePlugin::~LockedStatePlugin()
-{
-}
-QString LockedStatePlugin::name() const
+
+QString TemplatePlugin::name() const
 {
     return QString(PLUGIN_NAME).replace("\"", "");
 }
 
-QString LockedStatePlugin::description() const
+QString TemplatePlugin::description() const
 {
     return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
-QUrl LockedStatePlugin::url() const
+QUrl TemplatePlugin::url() const
 {
     return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
-QVersionNumber LockedStatePlugin::version() const
+QVersionNumber TemplatePlugin::version() const
 {
     QString version = QString(PLUGIN_VERSION).replace("\"", "");
     return QVersionNumber::fromString(version);
 }
 
-bool LockedStatePlugin::checkCompatibility()
+bool TemplatePlugin::checkCompatibility()
 {
     return true;
 }
 
-bool LockedStatePlugin::startPlugin()
+bool TemplatePlugin::startPlugin()
 {
-    if(m_lockedState)
+    if(m_multiplexer)
         stopPlugin();
-    m_lockedState = new LockedState(this);
-    //m_lockedState = new LockedState(this);
+    m_multiplexer = new MprisMultiplexer(this);
+
     qCInfo(plugin_logger) << name() << " plugin started successfully";
     return true;
 }
 
-bool LockedStatePlugin::stopPlugin()
+bool TemplatePlugin::stopPlugin()
 {
-    if(m_lockedState)
+    if(m_multiplexer)
     {
-        m_lockedState->deleteLater();
-        m_lockedState = nullptr;
+        m_multiplexer->deleteLater();
+        m_multiplexer = nullptr;
     }
-
     qCInfo(plugin_logger) << name() << " plugin stopped";
     return true;
 }
 
-#include "lockedstateplugin.moc"
+#include "mprisplugin.moc"
