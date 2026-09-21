@@ -10,7 +10,7 @@ set(DBUS_XML_DIR "${CMAKE_SOURCE_DIR}/dbus")
 
 # Samler kildene akkurat som i din fungerende integrasjonskode
 set(MPRIS_SRCS
-mprisplugin.cpp
+    mprisplugin.cpp
     mprisplugin.h
     abstractplayercontainer.h
     abstractplayercontainer.cpp

@@ -1,59 +1,59 @@
-#include "mprisplugin.h"
+#include "nightmodeplugin.h"
+
 #include <QCoreApplication>
 
-using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger,NightMode)
 
-MprisPlugin::MprisPlugin(QObject *parent)
+NightModePlugin::NightModePlugin(QObject *parent)
     : QObject(parent)
 {
 }
 
-QString MprisPlugin::name() const
+QString NightModePlugin::name() const
 {
     return QString(PLUGIN_NAME).replace("\"", "");
 }
 
-QString MprisPlugin::description() const
+QString NightModePlugin::description() const
 {
     return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
-QUrl MprisPlugin::url() const
+QUrl NightModePlugin::url() const
 {
     return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
-QVersionNumber MprisPlugin::version() const
+QVersionNumber NightModePlugin::version() const
 {
     QString version = QString(PLUGIN_VERSION).replace("\"", "");
     return QVersionNumber::fromString(version);
 }
 
-bool MprisPlugin::checkCompatibility()
+bool NightModePlugin::checkCompatibility()
 {
     return true;
 }
 
-bool MprisPlugin::startPlugin()
+bool NightModePlugin::startPlugin()
 {
-    if(m_multiplexer)
+    if(m_nightMode)
         stopPlugin();
-    m_multiplexer = new MprisMultiplexer(this);
 
+    m_nightMode = new NightMode(this);
     qCInfo(plugin_logger) << name() << " plugin started successfully";
     return true;
 }
 
-bool MprisPlugin::stopPlugin()
+bool NightModePlugin::stopPlugin()
 {
-    if(m_multiplexer)
+    if(m_nightMode)
     {
-        m_multiplexer->deleteLater();
-        m_multiplexer = nullptr;
+        m_nightMode->deleteLater();
+        m_nightMode = nullptr;
     }
     qCInfo(plugin_logger) << name() << " plugin stopped";
     return true;
 }
 
-#include "mprisplugin.moc"
+#include "nightmodeplugin.moc"
