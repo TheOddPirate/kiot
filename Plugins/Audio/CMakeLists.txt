@@ -41,3 +41,10 @@ target_compile_definitions(Audio PRIVATE
     CURRENT_YEAR=\"${CURRENT_YEAR}\"
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
+
+
+
+install(TARGETS Audio
+    LIBRARY DESTINATION ${CMAKE_INSTALL_DATADIR}/${PARENT_APP_NAME}/plugins
+    RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+)

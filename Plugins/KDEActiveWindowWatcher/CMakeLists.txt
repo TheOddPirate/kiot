@@ -48,3 +48,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 target_sources(KDEActiveWindowWatcher PRIVATE 
     ${INTEGRATIONS_RESOURCES}
 )
+install(TARGETS KDEActiveWindowWatcher
+    LIBRARY DESTINATION ${CMAKE_INSTALL_DATADIR}/${PARENT_APP_NAME}/plugins
+    RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+)

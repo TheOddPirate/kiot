@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kiot_plugin_name VERSION 0.0.1 DESCRIPTION "Short Plugin Description" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
+project(GameLauncher VERSION 0.0.1 DESCRIPTION "Short Plugin Description" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
 
@@ -8,15 +8,31 @@ set(CMAKE_AUTOMOC ON)
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 
 add_library(${PROJECT_NAME} MODULE
+    helpers/VdfParser.cpp
+    helpers/VdfParser.h
+    
+    launchers/steamScanner.cpp
+    launchers/heroicScanner.cpp
+    launchers/LutrisScanner.cpp
+    launchers/FaugusScanner.cpp
+    launchers/steamScanner.h
+    launchers/heroicScanner.h
+    launchers/LutrisScanner.h
+    launchers/FaugusScanner.h
+    launchers/gamebase.h
     template.cpp
-    template.h
+    template.h    
 )
 
-target_include_directories(kiot_plugin PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
+
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     KIOTShared
-
+    Qt6::Core
 )
 
 # Plasser den ferdige .so-filen direkte i plugins-katalogen der Core forventer å finne den

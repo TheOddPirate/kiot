@@ -53,3 +53,9 @@ target_compile_definitions(Bluetooth PRIVATE
     CURRENT_YEAR=\"${CURRENT_YEAR}\"
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
+
+
+install(TARGETS Bluetooth
+    LIBRARY DESTINATION ${CMAKE_INSTALL_DATADIR}/${PARENT_APP_NAME}/plugins
+    RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+)
