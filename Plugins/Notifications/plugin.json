@@ -1,0 +1,5 @@
+{
+    "name": "NotificationPlugin",
+    "version": "0.0.1",
+    "description": "Lets you send notifications from home assistant to KDE"
+}
