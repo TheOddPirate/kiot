@@ -103,6 +103,14 @@ public:
      */
     static QString configFilePath(const QString &fileType="rc");
     /**
+     * @brief Path of this application's data Directory paths.
+     *
+     * @return the @c <PROJECT_NAME> dir inside the platform configuration
+     *         directory (e.g. @c ~/.local/share/kiot/ on Linux).
+     */
+    static QStringList appdataDirPaths();
+
+    /**
      * @brief Path of this application's configuration Directory path.
      *
      * @return the @c <PROJECT_NAME> dir inside the platform configuration

@@ -9,7 +9,7 @@
 #include "platformhelper.h"
 #include "dbusproperty.h"
 #include "Transport/transportmanager.h"
-
+#include "Config/configmanager.h"
 // Entities
 #include "entities/entity.h"
 #include "entities/switch.h"
