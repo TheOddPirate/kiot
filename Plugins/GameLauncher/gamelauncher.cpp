@@ -1,4 +1,4 @@
-#include "template.h"
+#include "gamelauncher.h"
 #include "launchers/FaugusScanner.h"
 #include "launchers/heroicScanner.h"
 #include "launchers/LutrisScanner.h"
@@ -251,7 +251,7 @@ void GameLauncherPlugin::onOptionSelected(const QString &option)
         }
 
         GameData data = m_games[option];
-        qCDebug(plugin_logger) << "Launching game:" << data.displayName << "(Launcher:" << data.launcher << ")";
+        qCDebug(plugin_logger) << "Launching game:" << data.gameName << "(Launcher:" << data.launcher << ")";
 
         QString launchCommand;
         if (data.launcher == "Steam") {
@@ -306,4 +306,4 @@ void GameLauncherPlugin::onOptionSelected(const QString &option)
 
         setToDefault();
     }
-#include "template.moc"
+#include "gamelauncher.moc"

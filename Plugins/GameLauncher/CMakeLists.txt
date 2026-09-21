@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(GameLauncher VERSION 0.0.1 DESCRIPTION "Short Plugin Description" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
+project(GameLauncher VERSION 0.0.1 DESCRIPTION "Detects your game launchers and lets you launch games from home assistant" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
 
@@ -20,8 +20,8 @@ add_library(${PROJECT_NAME} MODULE
     launchers/LutrisScanner.h
     launchers/FaugusScanner.h
     launchers/gamebase.h
-    template.cpp
-    template.h    
+    gamelauncher.cpp
+    gamelauncher.h    
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})

@@ -80,7 +80,7 @@ QMap<QString, GameData>  HeroicScanner::scanGames()
     else{
 
     
-        qCDebug(heroiclogger) << "Discovering Heroic games...";
+    qCDebug(heroiclogger) << "Discovering Heroic games...";
     QMap<QString, GameData> games;
         
     QString heroic_data_path;
