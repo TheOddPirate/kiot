@@ -61,7 +61,7 @@ QMap<QString, GameData>  SteamScanner::scanGames()
             data.installPath = gamePath;
             data.prefixPath = gamePrefix;
             m_games[data.displayName] = data;
-            qCDebug(steamlogger) << "Found Steam game:" << data.gameName << "(App ID:" << data.gameId << ")";
+            //qCDebug(steamlogger) << "Found Steam game:" << data.gameName << "(App ID:" << data.gameId << ")";
         }
     }
     return  m_games;
