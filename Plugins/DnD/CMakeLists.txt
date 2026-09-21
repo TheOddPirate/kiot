@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kiot_plugin_name VERSION 0.0.1 DESCRIPTION "Short Plugin Description" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
+project(DnD VERSION 0.0.1 DESCRIPTION "DnD mode status" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
 
@@ -8,15 +8,14 @@ set(CMAKE_AUTOMOC ON)
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 
 add_library(${PROJECT_NAME} MODULE
-    template.cpp
-    template.h
+    dnd.cpp
+    dnd.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     KIOTShared
-
 )
 
 # Plasser den ferdige .so-filen direkte i plugins-katalogen der Core forventer å finne den
