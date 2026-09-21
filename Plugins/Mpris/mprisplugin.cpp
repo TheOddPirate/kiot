@@ -1,10 +1,9 @@
 #include "mprisplugin.h"
 #include <QCoreApplication>
 
-using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger,Mpris)
 
 MprisPlugin::MprisPlugin(QObject *parent)
     : QObject(parent)

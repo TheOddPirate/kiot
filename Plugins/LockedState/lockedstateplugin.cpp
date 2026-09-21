@@ -2,7 +2,7 @@
 
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger,LockedState)
 
 LockedStatePlugin::LockedStatePlugin(QObject *parent)
     : QObject(parent)
