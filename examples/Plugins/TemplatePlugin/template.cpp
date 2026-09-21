@@ -5,7 +5,7 @@
 using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
 
-DEFINE_LOGGER(plugin_logger,PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
 
 TemplatePlugin::TemplatePlugin(QObject *parent)
     : QObject(parent)

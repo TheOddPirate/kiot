@@ -177,100 +177,52 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
         if(!pluginsDir.exists())
             continue;
         for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
-auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
-QObject *pluginInstance = pluginLoader->instance();
+            auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
+            QObject *pluginInstance = pluginLoader->instance();
 
-if (pluginInstance) {
-    auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
-    if (kiotPlugin) {
-        QString pluginName = kiotPlugin->name();
+            if (pluginInstance) {
+                auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
+                if (kiotPlugin) {
+                    QString pluginName = kiotPlugin->name();
 
-        if (!integrationconfig.hasKey(pluginName)) {
-            integrationconfig.writeEntry(pluginName, true);
-            config->sync();
-        }
+                    if (!integrationconfig.hasKey(pluginName)) {
+                        integrationconfig.writeEntry(pluginName, true);
+                        config->sync();
+                    }
         
-        bool enabled = integrationconfig.readEntry(pluginName, true);
+                    bool enabled = integrationconfig.readEntry(pluginName, true);
 
-        if (enabled) {
-            if (kiotPlugin->checkCompatibility()) {
-                if (kiotPlugin->startPlugin()) {
-                    qCInfo(core) << "Started plugin integration:" << pluginName;
-                    // Lagre referansen slik at vi kan rydde opp senere
-                    m_loadedPlugins.append({kiotPlugin, pluginLoader});
+                    if (enabled) {
+                        if (kiotPlugin->checkCompatibility()) {
+                            if (kiotPlugin->startPlugin()) {
+                                qCInfo(core) << "Started plugin integration:" << pluginName;
+                                m_loadedPlugins.append({kiotPlugin, pluginLoader});
+                            } else {
+                                qCWarning(core) << "Failed to start plugin:" << pluginName;
+                                pluginLoader->unload();
+                                pluginLoader->deleteLater();
+                            }
+                        } else {
+                            qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
+                            pluginLoader->unload();
+                            pluginLoader->deleteLater();
+                        }
+                    } else {
+                        qCDebug(core) << "Skipped disabled plugin:" << pluginName;
+                        pluginLoader->unload();
+                        pluginLoader->deleteLater();
+                    }
                 } else {
-                    qCWarning(core) << "Failed to start plugin:" << pluginName;
+                    qCWarning(core) << "File" << fileName << "does not cast to KIOTPluginInterface!";
                     pluginLoader->unload();
                     pluginLoader->deleteLater();
                 }
             } else {
-                qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
-                pluginLoader->unload();
+                qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
                 pluginLoader->deleteLater();
             }
-        } else {
-            qCDebug(core) << "Skipped disabled plugin:" << pluginName;
-            pluginLoader->unload();
-            pluginLoader->deleteLater();
         }
-    } else {
-        qCWarning(core) << "File" << fileName << "does not cast to KIOTPluginInterface!";
-        pluginLoader->unload();
-        pluginLoader->deleteLater();
-    }
-} else {
-    qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
-    pluginLoader->deleteLater();
-}
-
-    }
-}
-/* ORiginale 
-
-    // Finn mappen der plugins ligger relative til kjørbare fil eller fastsatt sti
-    QDir pluginsDir(QCoreApplication::applicationDirPath() + "/plugins");
-    
-    // For testing kan du også bruke absolutt sti midlertidig:
-    // QDir pluginsDir("/mnt/Development/Clones/kiot/build/bin/plugins");
-
-    qCInfo(core) << "Scanning for plugins in:" << pluginsDir.absolutePath();
-
-    for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
-        QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
-        QObject *pluginInstance = pluginLoader.instance();
-
-        if (pluginInstance) {
-            auto *kiotPlugin = qobject_cast<KIOTShared::Plugins::KIOTPluginInterface *>(pluginInstance);
-            if (kiotPlugin) {
-                QString pluginName = kiotPlugin->name();
-
-                if (!integrationconfig.hasKey(pluginName)) {
-                    integrationconfig.writeEntry(pluginName, true); // eller onByDefault om du har det definert
-                    config->sync();
-                }
-                
-                bool enabled = integrationconfig.readEntry(pluginName, true);
-
-                if (enabled) {
-                    if (kiotPlugin->checkCompatibility()) {
-                        kiotPlugin->startPlugin();
-                        qCInfo(core) << "Started plugin integration:" << pluginName;
-                    } else {
-                        qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
-                    }
-                } else {
-                    qCDebug(core) << "Skipped disabled plugin:" << pluginName;
-                    pluginLoader.unload();
-                }
-            } else {
-                qCWarning(core) << "File" << fileName << "loaded, but does not cast to KIOTPluginInterface!";
-                pluginLoader.unload();
-            }
-        } else {
-            qCWarning(core) << "Failed to load plugin from file" << fileName << ":" << pluginLoader.errorString();
-        }
-    }
-        */
+    }   
 }
 
 ConnectedNode::ConnectedNode(QObject *parent)
