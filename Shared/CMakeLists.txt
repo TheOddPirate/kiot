@@ -7,14 +7,10 @@ set(KIOT_SHARED_SRC
     KIOTShared/kiotshared.h
     KIOTShared/kiotshared_export.h
     Plugins/plugininterface.h
-
     Transport/transportmanager.cpp
     Transport/transportmanager.h
-    
     Config/configmanager.cpp
     Config/configmanager.h
-    
-
     entities/entity.cpp
     entities/entity.h
     entities/binarysensor.cpp
@@ -52,6 +48,32 @@ set(KIOT_SHARED_SRC
     dbusproperty.h
 )
 
+set(LIB_HEADERS 
+    KIOTShared/kiotshared.h
+    KIOTShared/kiotshared_export.h
+    Plugins/plugininterface.h
+    Transport/transportmanager.h
+    Config/configmanager.h
+    entities/entity.h
+    entities/binarysensor.h
+    entities/button.h
+    entities/number.h
+    entities/switch.h
+    entities/event.h
+    entities/select.h
+    entities/sensor.h
+    entities/text.h
+    entities/lock.h
+    entities/notify.h
+    entities/mediaplayer.h
+    entities/image.h 
+    entities/camera.h 
+    entities/update.h 
+
+    platformhelper.h
+    dbusproperty.h
+)
+
 # Bygger som dynamisk bibliotek (.so)
 add_library(KIOTShared SHARED ${KIOT_SHARED_SRC})
 
@@ -63,7 +85,7 @@ target_link_libraries(KIOTShared
     Qt6::Mqtt
     Qt6::DBus
 )
-
+set_target_properties(KIOTShared PROPERTIES PUBLIC_HEADER "${LIB_HEADERS}")
 target_compile_definitions(KIOTShared PRIVATE
     PROJECT_NAME="${PROJECT_NAME}"
     PROJECT_VERSION="${PROJECT_VERSION}"
@@ -78,7 +100,16 @@ target_compile_definitions(KIOTShared PRIVATE
 
 target_include_directories(KIOTShared PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/KIOTShared> # Sørg for at undermapper funker i build
     $<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/kiotshared>
 )
 
-install(TARGETS KIOTShared ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+#install(TARGETS KIOTShared ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+
+install(TARGETS KIOTShared
+    EXPORT "KIOTSharedTargets"
+    RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
+)

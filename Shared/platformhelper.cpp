@@ -241,8 +241,9 @@ QString PlatformHelper::configDirPath()
 
 QStringList PlatformHelper::appdataDirPaths()
 {
+    // TODO Cleanup this to make it more usable?
     QStringList paths;
-    //IF the userpaths does not exits, lets build them
+   
     QString userPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     qDebug() << userPath;
     if(!QDir(userPath).exists())
@@ -261,17 +262,13 @@ QStringList PlatformHelper::appdataDirPaths()
         QDir dir(dataPath);
         if(dir.exists())
         {
-            QString full_dataPath = dataPath +"/" + getProjectName();
-            QDir dir_full(full_dataPath);
-      
-            qDebug() << full_dataPath;
-            if(dir_full.exists())
-                paths.append(full_dataPath);
+            paths.append(dataPath);
         }
     }
 
     return paths;
 }
+
 
 
 /**

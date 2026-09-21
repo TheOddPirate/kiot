@@ -38,7 +38,7 @@ add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
 add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
 add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
 add_definitions(-DAPP_ID="${APP_ID}")
-
+set(PARENT_APP_NAME ${PROJECT_NAME})
 
 message(STATUS "[CMake] Using project_name: PROJECT_NAME: ${PROJECT_NAME}")
 message(STATUS "[CMake] Using project_version: PROJECT_VERSION: ${PROJECT_VERSION}")
