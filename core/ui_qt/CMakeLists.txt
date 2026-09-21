@@ -21,14 +21,19 @@ target_link_libraries(KIOT_UIQT PRIVATE
     KF6::ConfigCore
     KF6::CoreAddons
 )
-
-# 2. QML-modulen bor her nede og forblir hemmelig for roten!
+qt_policy(SET QTP0004 NEW)
 qt_add_qml_module(KIOT_UIQT
     URI main_qt.window
     RESOURCE_PREFIX /imports
     VERSION 1.0
     QML_FILES
         ui/main.qml
+        ui/views/ShortcutsView.qml
+        ui/views/ScriptsView.qml
+        ui/views/CustomSensorsView.qml
+        ui/views/GeneralSettingsView.qml
+        ui/views/GenericSettingsView.qml
+        
     RESOURCES
         resources.qrc
 )

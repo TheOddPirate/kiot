@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_trayIcon(nullptr)
     , m_quickWidget(nullptr)
     , m_menu(new QMenu())
+    , m_settingsManager(new SettingsManager(qApp))
 {
     s_instance = this;
     
@@ -91,11 +92,12 @@ void MainWindow::setupQml()
     QQmlContext *context = engine->rootContext();
     
     // Create and add settings manager context property
-    SettingsManager *settingsManager = new SettingsManager(this);
-    context->setContextProperty("settingsManager", settingsManager);
+  
+    context->setContextProperty("settingsManager", m_settingsManager);
     
     // Load QML from resources
     m_quickWidget->setSource(QUrl("qrc:/imports/main_qt/window/ui/main.qml"));
+    
 }
 
 //============ Start of the slots of mainwindow ========================/
