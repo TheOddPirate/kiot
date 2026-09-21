@@ -64,7 +64,7 @@ private:
     QAction *m_statusAction = nullptr;
     QAction *m_versionAction = nullptr;
     QMenu *m_menu = nullptr;
-
+    SettingsManager *m_settingsManager = nullptr;
     static MainWindow *s_instance;
 };
 

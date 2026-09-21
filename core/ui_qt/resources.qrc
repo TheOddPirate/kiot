@@ -1,6 +1,10 @@
-<!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/ui_qt">
         <file>ui/main.qml</file>
+        <file>ui/views/ShortcutsView.qml</file>
+        <file>ui/views/ScriptsView.qml</file>
+        <file>ui/views/CustomSensorsView.qml</file>
+        <file>ui/views/GenericSettingsView.qml</file>
+        <file>ui/views/GeneralSettingsView.qml</file>
     </qresource>
 </RCC>
