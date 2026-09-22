@@ -71,7 +71,7 @@ public:
      */
     bool checkCompatibility() override;
     
-    bool enabledByDefault();
+    bool enabledByDefault() override;
     /**
      * @brief Starts the plugin functionality, sets up entities and listeners.
      * @return bool True if successfully started.

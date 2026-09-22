@@ -10,7 +10,6 @@
 #include <QDir>
 #include <QTextStream>
 #include <QFileInfo>
-#include <QGuiApplication>
 
 #include <KIOTShared/kiotshared.h>
 using KIOTShared::PlatformHelper;

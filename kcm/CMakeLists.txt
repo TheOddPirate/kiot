@@ -1,5 +1,41 @@
 # KCM for kiot
 
+
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.15")
+set(KDE_COMPILERSETTINGS_LEVEL "5.82")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
+include(ECMOptionalAddSubdirectory)
+include(FeatureSummary)
+include(KDEClangFormat)
+include(ECMSetupVersion)
+include(ECMQtDeclareLoggingCategory)
+include(ECMQmlModule)
+include(ECMConfiguredInstall)
+
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+)
+
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    Config
+    CoreAddons
+    KCMUtils
+    I18n
+)
+
+
 kcmutils_add_qml_kcm(kcm_kiot SOURCES ${kcm_kiot_SRCS})
 
 target_sources(kcm_kiot PRIVATE
