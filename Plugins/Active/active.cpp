@@ -39,6 +39,14 @@ bool ActivePlugin::checkCompatibility()
     return true;
 }
 
+bool ActivePlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool ActivePlugin::startPlugin()
 {
     auto sensor = new BinarySensor(this);

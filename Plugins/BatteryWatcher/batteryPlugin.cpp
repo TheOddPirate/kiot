@@ -39,6 +39,14 @@ bool BatteryPlugin::checkCompatibility()
     return true;
 }
 
+bool BatteryPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool BatteryPlugin::startPlugin()
 {
     if(m_batteryWatcher)

@@ -52,6 +52,13 @@ bool SystemdPlugin::checkCompatibility()
     return true;
 }
 
+bool SystemdPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
 bool SystemdPlugin::startPlugin()
 {
     if(m_watcher)

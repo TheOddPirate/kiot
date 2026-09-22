@@ -86,6 +86,16 @@ bool DockerPlugin::checkCompatibility()
     return true;
 }
 
+
+bool DockerPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
+
 bool DockerPlugin::startPlugin()
 {
     if (m_dockerSwitch)

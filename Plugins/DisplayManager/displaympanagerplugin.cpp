@@ -50,9 +50,20 @@ QVersionNumber DisplayManager::version() const
 
 bool DisplayManager::checkCompatibility()
 {
-    // Add custom system checks here if needed
+    auto desktopEnviornment = PlatformHelper::detectDesktopEnvironment();
+    if(desktopEnviornment == "kde")
+        return true;
+    return false;
+}
+
+bool DisplayManager::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
     return true;
 }
+
 
 bool DisplayManager::startPlugin()
 {

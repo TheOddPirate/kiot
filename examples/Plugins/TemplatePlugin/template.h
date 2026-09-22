@@ -72,6 +72,11 @@ public:
     bool checkCompatibility() override;
     
     /**
+     * @brief Checks if the plugin should be enabled by default, mostly for writing config first load
+     * @return bool True if it should, false otherwise.
+     */
+    bool enabledByDefault() override;
+    /**
      * @brief Starts the plugin functionality, sets up entities and listeners.
      * @return bool True if successfully started.
      */

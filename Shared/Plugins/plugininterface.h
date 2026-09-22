@@ -17,7 +17,8 @@ public:
     virtual QUrl url() const = 0;
     
     virtual bool checkCompatibility() = 0;
-    
+
+    virtual bool enabledByDefault() = 0;
     virtual bool startPlugin() = 0;
     virtual bool stopPlugin() = 0;
 };

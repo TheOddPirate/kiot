@@ -37,6 +37,14 @@ bool LockedStatePlugin::checkCompatibility()
     return true;
 }
 
+bool LockedStatePlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
+
 bool LockedStatePlugin::startPlugin()
 {
     if(m_lockedState)

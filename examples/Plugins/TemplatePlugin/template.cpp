@@ -54,6 +54,14 @@ bool TemplatePlugin::checkCompatibility()
     return true;
 }
 
+bool TemplatePlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool TemplatePlugin::startPlugin()
 {
     qCInfo(plugin_logger) << name() << "plugin started successfully";

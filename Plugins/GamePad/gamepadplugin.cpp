@@ -35,6 +35,11 @@ bool GamepadPlugin::checkCompatibility()
     return true;
 }
 
+bool GamepadPlugin::enabledByDefault()
+{
+    return checkCompatibility();
+}
+
 bool GamepadPlugin::startPlugin()
 {
     if(m_gamepad)

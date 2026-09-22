@@ -38,8 +38,18 @@ bool DnDPlugin::checkCompatibility()
     return true;
 }
 
+bool DnDPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool DnDPlugin::startPlugin()
 {
+    if(m_dndProperty || m_dndSensor)
+        stopPlugin();
     m_dndSensor = new BinarySensor(this);
     m_dndSensor->setId("dnd");
     m_dndSensor->setName("Do not disturb");

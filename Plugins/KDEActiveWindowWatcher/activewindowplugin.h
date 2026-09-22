@@ -6,15 +6,15 @@
 #include <QObject>
 #include <KIOTShared/kiotshared.h>
 
-using KIOTShared::Plugins::KIOTPluginInterface;
 class KDEActiveWindowWatcher;
+
 class ActiveWindowPlugin : public QObject, public KIOTShared::Plugins::KIOTPluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID KIOTPluginInterface_iid FILE "plugin.json")
     Q_INTERFACES(KIOTShared::Plugins::KIOTPluginInterface)
 
 public:
-    ActiveWindowPlugin(QObject *parent = nullptr);
+    explicit ActiveWindowPlugin(QObject *parent = nullptr);
     ~ActiveWindowPlugin() override;
 
     QString name() const override;
@@ -22,7 +22,7 @@ public:
     QUrl url() const override;
     QVersionNumber version() const override;
     bool checkCompatibility() override;
-    
+    bool enabledByDefault() override;
     bool startPlugin() override;
     bool stopPlugin() override;
 

@@ -11,8 +11,10 @@ set(QT_MIN_VERSION "6.6.0")
 set(KF6_MIN_VERSION "6.15")
 
 add_library(KDEActiveWindowWatcher MODULE
-    activewindow.cpp
-    activewindow.h
+    activewindowplugin.cpp
+    activewindowplugin.h
+    kdeactivewindowwatcher.h
+    kdeactivewindowwatcher.cpp
 )
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS

@@ -47,6 +47,14 @@ bool AudioPlugin::checkCompatibility()
     return true;
 }
 
+bool AudioPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool AudioPlugin::startPlugin()
 {
     m_audio = new Audio(this);

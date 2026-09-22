@@ -36,6 +36,13 @@ bool ShortcutPlugin::checkCompatibility()
     return true;
 }
 
+bool ShortcutPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
 bool ShortcutPlugin::startPlugin()
 {
     if(m_shortcut)

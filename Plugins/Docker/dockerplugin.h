@@ -68,7 +68,7 @@ public:
      * @return bool True if compatible, false otherwise.
      */
     bool checkCompatibility() override;
-
+    bool enabledByDefault() override;
     /**
      * @brief Starts the plugin, initializing the Docker switch manager and event loops.
      * @return bool True if successfully started.
