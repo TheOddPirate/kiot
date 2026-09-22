@@ -1,3 +1,4 @@
+
 #include "shortcutplugin.h"
 #include <QCoreApplication>
 

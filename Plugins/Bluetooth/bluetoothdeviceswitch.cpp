@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 #include "bluetoothdeviceswitch.h"
 
 DEFINE_PLUGIN_LOGGER(bt,Bluetooth)
