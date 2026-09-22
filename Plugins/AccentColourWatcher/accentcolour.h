@@ -6,10 +6,9 @@
 
 #include <QObject>
 #include <KIOTShared/kiotshared.h>
-
+#include "accentcolourwatcher.h"
 using KIOTShared::Plugins::KIOTPluginInterface;
 
-class AccentColourWatcher;
 class AccentColourWatcherPlugin : public QObject, public KIOTShared::Plugins::KIOTPluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID KIOTPluginInterface_iid FILE "plugin.json")
