@@ -255,7 +255,7 @@ QStringList PlatformHelper::appdataDirPaths()
         paths.append(userPath);
     }
     QStringList dataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
-    for (const QString &dataPath :  QStandardPaths::standardLocations(QStandardPaths::AppDataLocation))
+    for (const QString &dataPath :  dataPaths)
     {
         QDir dir(dataPath);
         if(dir.exists())

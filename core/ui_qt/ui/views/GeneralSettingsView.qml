@@ -5,21 +5,37 @@ import QtQuick.Layouts
 ColumnLayout {
     id: root
     anchors.fill: parent
-    spacing: 10
+    anchors.margins: 16 // Gir en fin, luftig ramme rundt hele panelet
+    spacing: 12
 
     property var settingsManager: null
 
-    QQC2.Label {
-        text: "MQTT Connection"
-        font.bold: true
-        font.pixelSize: 16
+    // ---- Top branding header (Mer elegant og luftig) ----
+    ColumnLayout {
         Layout.fillWidth: true
+        spacing: 4
+
+        QQC2.Label {
+            text: "KDE Internet of Things"
+            font.bold: true
+            font.pixelSize: 22
+        }
+
+        QQC2.Label {
+            text: "MQTT Connection"
+            font.bold: true
+            font.pixelSize: 14
+            opacity: 0.7 // Gir en fin dempet effekt på undertittelen
+        }
     }
+
+    // Liten avstand før skjemaet starter
+    Item { Layout.preferredHeight: 4 }
 
     GridLayout {
         columns: 2
-        columnSpacing: 10
-        rowSpacing: 10
+        columnSpacing: 12
+        rowSpacing: 12
         Layout.fillWidth: true
 
         QQC2.Label { text: "Hostname:"; Layout.alignment: Qt.AlignRight }
@@ -85,13 +101,41 @@ ColumnLayout {
         }
     }
 
-    // ---- SPACER ----
     Item { 
         Layout.fillHeight: true 
         Layout.fillWidth: true
     }
 
-    // ---- Apply and Defaults buttons ----
+    RowLayout {
+        Layout.fillWidth: true
+        Layout.topMargin: 8
+        Layout.bottomMargin: 4
+        spacing: 16
+
+        QQC2.Label {
+            text: '<a href="https://kde.org/community/donations">Donate to KDE</a>'
+            onLinkActivated: (link) => Qt.openUrlExternally(link)
+            
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.NoButton
+            }
+        }
+
+        Item { Layout.fillWidth: true } 
+
+        QQC2.Label {
+            text: '<a href="https://github.com/davidedmundson/kiot">GitHub Repository</a>'
+            onLinkActivated: (link) => Qt.openUrlExternally(link)
+            
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.NoButton
+            }
+        }
+    }
     RowLayout {
         Layout.fillWidth: true
         spacing: 10
