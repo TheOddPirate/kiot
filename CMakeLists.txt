@@ -50,6 +50,7 @@ message(STATUS "[CMake] Using app_id: APP_ID: ${APP_ID}")
 option(BUILD_FLATPAK "Build for flatpak" OFF)
 option(BUILD_QTUI "Include the qt ui in core" ON)
 option(BUILD_APPDATA "Include the appdata in core" ON)
+option(BUILD_PLUGINS "Build every plugin project in the Plugins directory" ON)
 
 #USed to build the Qt UI if the cmakelists exitss
 set(HAS_QTUI EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/ui_qt/CMakeLists.txt")
@@ -93,7 +94,15 @@ kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 add_subdirectory(Shared)
 
 # Builds every plugin in the Plugins folder on loop
-add_subdirectory(Plugins)
+
+if(BUILD_PLUGINS)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/CMakeLists.txt")
+        add_subdirectory(Plugins)
+    else()
+        message(STATUS "[CMake] Plugins subdir missing Cmakelists.......PROBLEMPROBLEMPROBLEM")
+    endif()
+endif()
+
 
 # Builds the kcm module if not in a flatpak sandbox
 if(NOT BUILD_FLATPAK)
