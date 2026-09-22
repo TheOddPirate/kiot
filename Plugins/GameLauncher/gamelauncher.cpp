@@ -304,7 +304,7 @@ void GameLauncherPlugin::onOptionSelected(const QString &option)
             tempProcess.setProgram(program);
             tempProcess.setArguments(args);
     
-            KSandbox::ProcessContext ctx = PlatformHelper::makeHostContext(tempProcess);
+            PlatformHelper::ProcessContext ctx = PlatformHelper::makeHostContext(tempProcess);
     
             bool success = QProcess::startDetached(ctx.program, ctx.arguments);
     

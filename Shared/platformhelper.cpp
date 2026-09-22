@@ -81,11 +81,15 @@ PlatformHelper::Architecture PlatformHelper::currentArchitecture()
  */
 bool PlatformHelper::isFlatpak()
 {
+    // Sjekk standard Flatpak miljøvariabler
     static bool cached = false;
     static bool isFlatpakValue = false;
     
     if (!cached) {
-        isFlatpakValue = KSandbox::isFlatpak();
+        QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+        isFlatpakValue = env.contains("FLATPAK_ID") || 
+                         env.value("container") == "flatpak" ||
+                         env.contains("FLATPAK_SANDBOX_DIR");
         cached = true;
     }
     
@@ -99,7 +103,7 @@ bool PlatformHelper::isFlatpak()
  */
 bool PlatformHelper::isSnap()
 {
-    return KSandbox::isSnap();
+    return !qEnvironmentVariableIsEmpty("SNAP");
 }
 
 /**
@@ -263,7 +267,8 @@ QStringList PlatformHelper::appdataDirPaths()
             paths.append(dataPath);
         }
     }
-
+    if(isFlatpak())
+        paths.append("/app/plugins");
     return paths;
 }
 
@@ -489,9 +494,33 @@ bool PlatformHelper::checkFlatpakFeature(const QString &group, const QString &ke
  * @param process the source process definition.
  * @return the resulting host context.
  */
-KSandbox::ProcessContext PlatformHelper::makeHostContext(QProcess &process)
+PlatformHelper::ProcessContext PlatformHelper::makeHostContext(QProcess &process)
 {
-    return KSandbox::makeHostContext(process);
+    if (!isFlatpak()) {
+        return {process.program(), process.arguments()};
+    }
+    static const bool hasFlatpakSpawnPrivileges = checkHasFlatpakSpawnPrivileges();
+    if (!hasFlatpakSpawnPrivileges) {
+        qCWarning(helper) << "Process execution expects 'org.freedesktop.Flatpak=talk'" << process.program();
+        return {process.program(), process.arguments()};
+    }
+    QStringList args{QStringLiteral("--watch-bus"), QStringLiteral("--host"), QStringLiteral("--forward-fd=1"), QStringLiteral("--forward-fd=2")};
+    if (!process.workingDirectory().isEmpty()) {
+        args << QStringLiteral("--directory=%1").arg(process.workingDirectory());
+    }
+    const auto systemEnvironment = QProcessEnvironment::systemEnvironment().toStringList();
+    const auto processEnvironment = process.processEnvironment().toStringList();
+    for (const auto &variable : processEnvironment) {
+        if (systemEnvironment.contains(variable)) {
+            continue;
+        }
+        args << QStringLiteral("--env=%1").arg(variable);
+    }
+    if (!process.program().isEmpty()) { // some callers are cheeky and pass no program but put it into the arguments (e.g. konsole)
+        args << process.program();
+    }
+    args += process.arguments();
+    return {QStringLiteral("/usr/bin/flatpak-spawn"), args};
 }
 
 /**
@@ -500,9 +529,19 @@ KSandbox::ProcessContext PlatformHelper::makeHostContext(QProcess &process)
  * @param process the process to start.
  * @param mode    whether to start synchronously or detached.
  */
-void PlatformHelper::startHostProcess(QProcess &process, QProcess::OpenMode mode)
+void PlatformHelper::startHostProcess(QProcess &process, PlatformHelper::ProcessMode mode)
 {
-    KSandbox::startHostProcess(process, mode);
+    const auto context = makeHostContext(process);
+    switch (mode) {
+        case PlatformHelper::ProcessMode::start:
+            process.start(context.program, context.arguments);
+            return;
+        case PlatformHelper::ProcessMode::startDetached:
+            process.startDetached(context.program, context.arguments);
+            return;
+       
+    }
+
 }
 
 

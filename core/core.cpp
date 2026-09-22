@@ -39,8 +39,6 @@ void HaControl::validateStartup(bool autostart)
 {
     auto startupManager = new StartupManager(this);
     bool currentlyEnabled = startupManager->isAutostartEnabled();
-
-    // Hvis ønsket tilstand matcher det som allerede er satt, trenger vi ikke gjøre noe
     if (currentlyEnabled == autostart) {
         qCDebug(core) << "Autostart is already in desired state:" << autostart;
         return;
@@ -52,9 +50,6 @@ void HaControl::validateStartup(bool autostart)
     if (startupManager->setAutostart(autostart)) {
         if (autostart) {
             qCInfo(core) << "Autostart successfully enabled.";
-            
-            // Hvis vi bruker systemd (og ikke er i Flatpak), kan vi avslutte 
-            // slik at systemd tar over kjøringen i bakgrunnen som planlagt.
             if (!PlatformHelper::isFlatpak()) {
                 qCInfo(core) << "Running natively with systemd, closing instance to let systemd manage lifecycle.";
                 QApplication::exit(0);
@@ -137,7 +132,6 @@ HaControl::~HaControl()
         m_connectedNode = nullptr;
     }
 
-    // Stopp og rydd opp i alle lastede plugins
     for (const auto &plugin : std::as_const(m_loadedPlugins)) {
         if (plugin.interface) {
             plugin.interface->stopPlugin();
@@ -172,6 +166,8 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
         if(!pluginsDir.exists())
             continue;
         for (const QString &fileName : pluginsDir.entryList(QDir::Files)) {
+            if(!fileName.endsWith(".so"))
+                continue;
             auto pluginLoader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName), this);
             QObject *pluginInstance = pluginLoader->instance();
 
@@ -181,11 +177,11 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
                     QString pluginName = kiotPlugin->name();
 
                     if (!integrationconfig.hasKey(pluginName)) {
-                        integrationconfig.writeEntry(pluginName, true);
+                        integrationconfig.writeEntry(pluginName, kiotPlugin->enabledByDefault());
                         config->sync();
                     }
         
-                    bool enabled = integrationconfig.readEntry(pluginName, true);
+                    bool enabled = integrationconfig.readEntry(pluginName, false);
 
                     if (enabled) {
                         if (kiotPlugin->checkCompatibility()) {

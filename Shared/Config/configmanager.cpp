@@ -142,7 +142,7 @@ void ConfigManager::setupFilePath(ConfigType type, const QString &moduleName)
     }
 
     if (type == ConfigType::Core) {
-        m_filePath =  baseConfigDir + "/" +PlatformHelper::getProjectName() + ".json";// PlatformHelper::configFilePath();
+        m_filePath =  baseConfigDir + "/" +PlatformHelper::getProjectName();// PlatformHelper::configFilePath();
     } else {
         QString cleanName = sanitizeModuleName(moduleName);
         if (cleanName.isEmpty() || cleanName == "core") {
@@ -151,7 +151,7 @@ void ConfigManager::setupFilePath(ConfigType type, const QString &moduleName)
 
         QString pluginsDir = baseConfigDir + "/plugins";
         QDir().mkpath(pluginsDir);
-        m_filePath = pluginsDir + "/" + cleanName + ".json";
+        m_filePath = pluginsDir + "/" + cleanName;
     }
 }
 QString ConfigManager::filePath() { return m_filePath;}
@@ -199,6 +199,7 @@ void ConfigManager::setValue(const QString &keyPath, const QJsonValue &value)
         file.close();
     } else {
         qCWarning(lcConfig) << "Kunne ikke skrive konfigurasjon til fil:" << m_filePath;
+        emit configWriteError(m_filePath, file.errorString());
     }
     m_isSaving = false; 
     emit configChanged(keyPath, value);
@@ -243,6 +244,9 @@ void ConfigManager::validateAndMergeDefaults()
             QJsonDocument doc(m_data);
             file.write(doc.toJson(QJsonDocument::Indented));
             file.close();
+        }else{
+            qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
+            emit configWriteError(m_filePath, file.errorString());
         }
         m_isSaving = false; 
 
@@ -287,6 +291,9 @@ void ConfigManager::remove(const QString &keyPath)
         QJsonDocument doc(m_data);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.close();
+    }else{
+        qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
+        emit configWriteError(m_filePath, file.errorString());
     }
     m_isSaving = false; 
 
@@ -301,6 +308,9 @@ void ConfigManager::resetToDefaults()
         QJsonDocument doc(m_data);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.close();
+    }else{
+        qCDebug(lcConfig) << "Failed to open file for writing:" << file.errorString();
+        emit configWriteError(m_filePath, file.errorString());
     }
     m_isSaving = false; 
 }

@@ -4,30 +4,30 @@ This directory contains the core entity implementations for the KIOT (KDE Intern
 
 ## Quick Navigation
 
-- [Overview](#overview)
-- [Available Entity Types](#available-entity-types)
-  - [Binary Sensor](#1-binary-sensor-binarysensorh--binarysensorcpp)
-  - [Sensor](#2-sensor-sensorh--sensorcpp)
-  - [Switch](#3-switch-switchh--switchcpp)
-  - [Button](#4-button-buttonh--buttoncpp)
-  - [Lock](#5-lock-lockh--lockcpp)
-  - [Event](#6-event-eventh--eventcpp)
-  - [Select](#7-select-selecth--selectcpp)
-  - [Number](#8-number-numberh--numbercpp)
-  - [Text](#9-text-texth--textcpp)
-  - [Media Player](#10-mediaplayer-mediaplayerh--mediaplayercpp)
-  - [Notify](#11-notify-notifyh--notifycpp)
-  - [Camera](#12-camera-camerah--cameracpp)
-  - [Image](#13-image-imageh--imagecpp)
-  - [Update](#14-update-updateh--updatecpp)
-- [Creating New Entities](#creating-new-entities)
-- [MQTT Topic Structure](#mqtt-topic-structure)
-- [Home Assistant Discovery](#home-assistant-discovery)
-- [Best Practices](#best-practices)
-- [Integration with Home Assistant](#integration-with-home-assistant)
-- [Testing Entities](#testing-entities)
-- [Contributing New Entities](#contributing-new-entities)
-- [See Also](#see-also)
+* [Overview](#overview)
+* [Available Entity Types](#available-entity-types)
+  * [Binary Sensor](#1-binary-sensor-binarysensorh--binarysensorcpp)
+  * [Sensor](#2-sensor-sensorh--sensorcpp)
+  * [Switch](#3-switch-switchh--switchcpp)
+  * [Button](#4-button-buttonh--buttoncpp)
+  * [Lock](#5-lock-lockh--lockcpp)
+  * [Event](#6-event-eventh--eventcpp)
+  * [Select](#7-select-selecth--selectcpp)
+  * [Number](#8-number-numberh--numbercpp)
+  * [Text](#9-text-texth--textcpp)
+  * [Media Player](#10-mediaplayer-mediaplayerh--mediaplayercpp)
+  * [Notify](#11-notify-notifyh--notifycpp)
+  * [Camera](#12-camera-camerah--cameracpp)
+  * [Image](#13-image-imageh--imagecpp)
+  * [Update](#14-update-updateh--updatecpp)
+* [Creating New Entities](#creating-new-entities)
+* [MQTT Topic Structure](#mqtt-topic-structure)
+* [Home Assistant Discovery](#home-assistant-discovery)
+* [Best Practices](#best-practices)
+* [Integration with Home Assistant](#integration-with-home-assistant)
+* [Testing Entities](#testing-entities)
+* [Contributing New Entities](#contributing-new-entities)
+* [See Also](#see-also)
 
 ---
 
@@ -522,9 +522,9 @@ When adding new entity types:
 
 ## See Also
 
-- [Home Assistant MQTT Integration Documentation](https://www.home-assistant.io/integrations/mqtt/)
-- [Home Assistant Entity Types](https://www.home-assistant.io/integrations/#search/mqtt)
-- [KIOT Main README](../../README.md) for project overview and setup
-- [KIOT Core README](../../core/README.md)
-- [KIOT Integrations README](../../integrations/README.md) for creating new integrations
-- [KIOT Example](../../examples/README.md) for config examples and some inspiration
+* [Home Assistant MQTT Integration Documentation](https://www.home-assistant.io/integrations/mqtt/)
+* [Home Assistant Entity Types](https://www.home-assistant.io/integrations/#search/mqtt)
+* [KIOT Main README](../../README.md) for project overview and setup
+* [KIOT Core README](../../core/README.md)
+* [KIOT Integrations README](../../integrations/README.md) for creating new integrations
+* [KIOT Example](../../examples/README.md) for config examples and some inspiration

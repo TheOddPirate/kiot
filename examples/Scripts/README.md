@@ -1,8 +1,8 @@
 # Kiot - Scripts Integration Examples and Generators
 
 ## Navigation
-- [About](#about)
-- [Display](#display)
+* [About](#about)
+* [Display](#display)
 
 ## About
 

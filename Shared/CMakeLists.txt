@@ -89,12 +89,11 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
-    CoreAddons
 )
 
 target_link_libraries(KIOTShared
     PUBLIC
-    KF6::CoreAddons
+
     KF6::ConfigCore
     Qt6::Core
     Qt6::Widgets
@@ -120,12 +119,25 @@ target_include_directories(KIOTShared PUBLIC
     $<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/kiotshared>
 )
 
-#install(TARGETS KIOTShared ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
+install(DIRECTORY Transport Config entities KIOTShared Plugins
+    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
+    FILES_MATCHING PATTERN "*.h"
+)
+install(FILES
+    platformhelper.h
+    dbusproperty.h
+    ${CMAKE_CURRENT_BINARY_DIR}/KIOTShared/kiotshared_export.h
+    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
+)
+# Hvis du har genererte filer (som export-headeren) som havner i build-mappen:
+install(FILES 
+    ${CMAKE_CURRENT_BINARY_DIR}/KIOTShared/kiotshared_export.h
+    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
+)
 
 install(TARGETS KIOTShared
     EXPORT "KIOTSharedTargets"
     RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
 )

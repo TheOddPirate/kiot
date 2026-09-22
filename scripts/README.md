@@ -2,15 +2,15 @@
 
 ## Navigation
 
-- [About](#about)
-- [Recommended Usage](#recommended-usage)
-- [Available Scripts](#available-scripts)
-  - [dependencies.sh](#dependenciessh)
-  - [native.sh](#nativesh)
-  - [flatpak.sh](#flatpaksh)
-- [Usage](#usage)
-- [Notes](#notes)
-- [See Also](#see-also)
+* [About](#about)
+* [Recommended Usage](#recommended-usage)
+* [Available Scripts](#available-scripts)
+  * [dependencies.sh](#dependenciessh)
+  * [native.sh](#nativesh)
+  * [flatpak.sh](#flatpaksh)
+* [Usage](#usage)
+* [Notes](#notes)
+* [See Also](#see-also)
 
 ## About
 
@@ -77,9 +77,9 @@ Interactive menu for Flatpak installation.
 
 ## See Also
 
-- [KIOT Main](../README.md) for project overview and setup
-- [KIOT Core](../core/README.md) for information about the core bin part of the project
-- [KIOT Shared](../Shared/README.md)
-- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
-- [KIOT Integrations](../integrations/README.md) for creating new integrations
-- [KIOT Example](../examples/README.md) for config examples and some inspiration
+* [KIOT Main](../README.md) for project overview and setup
+* [KIOT Core](../core/README.md) for information about the core bin part of the project
+* [KIOT Shared](../Shared/README.md)
+* [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+* [KIOT Integrations](../integrations/README.md) for creating new integrations
+* [KIOT Example](../examples/README.md) for config examples and some inspiration

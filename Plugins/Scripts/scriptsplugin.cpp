@@ -94,7 +94,7 @@ bool ScriptsPlugin::startPlugin()
             p->setArguments(args);
 
             if (PlatformHelper::isFlatpak()) {
-                KSandbox::ProcessContext ctx = PlatformHelper::makeHostContext(*p);
+                PlatformHelper::ProcessContext ctx = PlatformHelper::makeHostContext(*p);
                 p->setProgram(ctx.program);
                 p->setArguments(ctx.arguments);
             }

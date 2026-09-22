@@ -2,13 +2,13 @@
 
 ## Navigation
 
-- [About](#about)
-- [Entities](#entities)
-- [PlatformHelper](#platformhelper)
-  - [Features](#platformhelper-features)
-- [DBusProperty](#dbusproperty)
-  - [Features](#dbusproperty-features)
-- [See Also](#see-also)
+* [About](#about)
+* [Entities](#entities)
+* [PlatformHelper](#platformhelper)
+  * [Features](#platformhelper-features)
+* [DBusProperty](#dbusproperty)
+  * [Features](#dbusproperty-features)
+* [See Also](#see-also)
 
 
 ## About
@@ -48,8 +48,8 @@ For more information about the MQTT entity types supported by Kiot, please check
 
 ## See Also
 
-- [KIOT Main](../README.md) for project overview and setup
-- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
-- [KIOT Integrations](../integrations/README.md) for creating new integrations
-- [KIOT Example](../examples/README.md) for config examples and some inspiration
-- [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
+* [KIOT Main](../README.md) for project overview and setup
+* [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+* [KIOT Integrations](../integrations/README.md) for creating new integrations
+* [KIOT Example](../examples/README.md) for config examples and some inspiration
+* [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
