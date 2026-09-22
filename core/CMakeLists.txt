@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 message(STATUS "[CMake] Building Core for ${PROJECT_NAME}")
 include_directories(../)
-# Kildekilder for selve kjerne-executabelen
+
 set(KIOT_CORE_SOURCES
     main.cpp
     core.cpp
