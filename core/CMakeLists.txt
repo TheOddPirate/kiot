@@ -1,6 +1,32 @@
 cmake_minimum_required(VERSION 3.16)
+
+
 message(STATUS "[CMake] Building Core for ${PROJECT_NAME}")
 include_directories(../)
+
+
+
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.15")
+set(KDE_COMPILERSETTINGS_LEVEL "5.82")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
+include(ECMOptionalAddSubdirectory)
+include(FeatureSummary)
+include(KDEClangFormat)
+include(ECMSetupVersion)
+include(ECMQtDeclareLoggingCategory)
+include(ECMQmlModule)
+include(ECMConfiguredInstall)
+
 
 set(KIOT_CORE_SOURCES
     main.cpp
@@ -25,11 +51,26 @@ set_source_files_properties(
 )
 qt_add_dbus_interface(KIOT_CORE_SOURCES ../dbus/org.freedesktop.portal.Background.xml backgroundportal)
 
+
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+    Gui
+    Widgets
+    DBus
+    Mqtt
+    Quick
+    QuickWidgets
+)
+
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    Config
+    CoreAddons
+    DBusAddons
+)
+
 # Core libraries used in final result
 set(KIOT_PARTS
     KIOTShared
- # Commented out while porting to plugins
- #   KIOTIntegrations
 )
 
 if(BUILD_QTUI AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ui_qt/CMakeLists.txt")
@@ -49,7 +90,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Gui
     Qt6::Mqtt
     Qt6::DBus
-    Qt6::Quick
     Qt6::QuickWidgets
     KF6::CoreAddons
     KF6::DBusAddons

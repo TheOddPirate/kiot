@@ -7,8 +7,9 @@
 #include <QLoggingCategory>
 #include <KIOTShared/kiotshared_export.h>
 
-namespace KIOTShared {
+class QFileSystemWatcher; // Forward deklarasjon
 
+namespace KIOTShared {
 namespace Config {
 
 class KIOT_SHARED_EXPORT ConfigManager : public QObject
@@ -49,6 +50,7 @@ public:
 
 signals:
     void configChanged(const QString &keyPath, const QJsonValue &newValue);
+    void configParseError(const QString &filePath, const QString &errorString); 
 
 private:
     enum class ConfigType {
@@ -66,6 +68,9 @@ private:
     QJsonObject m_data;
     QJsonObject m_defaultData;
 
+    QFileSystemWatcher *m_fileWatcher = nullptr;
+    bool m_isSaving = false; // For å unngå at vi triggermelding på egne lagringer
+    
     void setupFilePath(ConfigType type, const QString &moduleName);
     QString sanitizeModuleName(const QString &rawName) const;
     void validateAndMergeDefaults();
@@ -73,6 +78,9 @@ private:
 
     QJsonValue getRawValue(const QJsonObject &source, const QString &keyPath) const;
     void setRawValue(QJsonObject &target, const QString &keyPath, const QJsonValue &value);
+
+private slots:
+    void handleFileChanged(const QString &path);
 };
 
 }

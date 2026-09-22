@@ -109,16 +109,13 @@ HaControl::HaControl()
     auto autostart = group.readEntry("autostart", false);
     validateStartup(autostart);
 
-    // 1. Start opp TransportManager som tar over hele MQTT-ansvaret
     auto transportManager = new TransportManager(this);
 
-    // 2. Koble UI-oppdatering til TransportManager sine tilstandsendringer
     if (m_mainWindow) {
         connect(transportManager, &TransportManager::connectionStateChanged, 
                 m_mainWindow, &MainWindow::updateIcon);
     }
-
-    // 3. Håndter hvis konfigurasjonen mangler via signal
+    
     connect(transportManager, &TransportManager::mqttConfigMissing, this, [this]() {
         if (m_mainWindow) {
             MainWindow::sendNotification(QString(PROJECT_NAME), "Please configure your MQTT settings");
@@ -126,10 +123,8 @@ HaControl::HaControl()
         }
     });
 
-    // 4. Opprett internt sensor-node (ConnectedNode henter nå klienten via HaControl::mqttClient())
     m_connectedNode = new ConnectedNode(this);
 
-    // 5. Last inn integrasjoner
     loadIntegrations(config);
 
     transportManager->doConnect();

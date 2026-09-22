@@ -82,26 +82,6 @@ include(ECMQmlModule)
 include(ECMConfiguredInstall)
 
 
-find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
-    Core
-    DBus
-    Widgets
-    Mqtt
-    Quick
-    QuickWidgets
-)
-
-find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
-    Config
-    CoreAddons
-    DBusAddons
-    Notifications
-    GlobalAccel
-    KCMUtils
-    I18n
-
-)
-
 
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
@@ -109,16 +89,18 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 
-# Deleger byggingen nedover i hierarkiet
+# Builds the shared lib needed by everything else
 add_subdirectory(Shared)
 
-# Commented out while porting to plugin system
-#add_subdirectory(integrations)
+# Builds every plugin in the Plugins folder on loop
 add_subdirectory(Plugins)
+
+# Builds the kcm module if not in a flatpak sandbox
 if(NOT BUILD_FLATPAK)
     add_subdirectory(kcm)
 endif()
 
+# Builds the core binary
 add_subdirectory(core)
 
 #feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)

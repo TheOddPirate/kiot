@@ -77,10 +77,26 @@ set(LIB_HEADERS
 # Bygger som dynamisk bibliotek (.so)
 add_library(KIOTShared SHARED ${KIOT_SHARED_SRC})
 
+
+
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+    DBus
+    Widgets
+    Mqtt
+
+)
+
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    Config
+    CoreAddons
+)
+
 target_link_libraries(KIOTShared
     PUBLIC
     KF6::CoreAddons
     KF6::ConfigCore
+    Qt6::Core
     Qt6::Widgets
     Qt6::Mqtt
     Qt6::DBus

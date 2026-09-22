@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QDir>
 #include <QJsonDocument>
-
+#include <QFileSystemWatcher>
 DEFINE_LOGGER(lcConfig, ConfigManager)
 
 
@@ -46,27 +46,22 @@ ConfigManager::ConfigManager(const QString &moduleName, const QJsonObject &defau
     : ConfigManager(ConfigType::Plugin, moduleName, defaultConfig, parent)
 {}
 
-// PRIVATE Master-konstruktør
 ConfigManager::ConfigManager(ConfigType type, const QString &moduleName, const QJsonObject &defaultConfig, QObject *parent)
     : QObject(parent)
     , m_type(type)
     , m_defaultData(defaultConfig)
 {
-    // SIKRING 1: Sjekk om Core allerede eksisterer
     if (m_type == ConfigType::Core) {
         if (s_coreInstance != nullptr) {
             qCCritical(lcConfig) << "SIKKERHETSAVBRUDD: Forsøk på å opprette en sekundær Core ConfigManager ble blokkert!";
-            // Degraderes til et uautorisert plugin
             m_type = ConfigType::Plugin;
             m_moduleName = "unauthorized_core_attempt";
         } else {
-            // Dette er den FØRSTE og EKTE Core-instansen!
             s_coreInstance = this;
             s_coreInstantiated = true;
             m_moduleName = "Core";
         }
     } else {
-        // SIKRING 2: Forhindre at plugins prøver å gi seg selv navnet "Core"
         if (moduleName.trimmed().compare("Core", Qt::CaseInsensitive) == 0) {
             qCCritical(lcConfig) << "SIKKERHETSADVARSEL: Plugin prøvde å kalle seg 'Core'. Omdøpes automatisk.";
             m_moduleName = "invalid_plugin_name";
@@ -77,7 +72,6 @@ ConfigManager::ConfigManager(ConfigType type, const QString &moduleName, const Q
 
     setupFilePath(m_type, m_moduleName);
 
-    // Step 1: Les eksisterende fil fra disk
     QFile file(m_filePath);
     if (file.exists() && file.open(QIODevice::ReadOnly)) {
         QJsonParseError parseError;
@@ -85,16 +79,23 @@ ConfigManager::ConfigManager(ConfigType type, const QString &moduleName, const Q
         if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
             m_data = doc.object();
         } else {
-            qCCritical(lcConfig) << "Kunne ikke parse konfigurasjonsfil:" << m_filePath 
-                                 << "Feil:" << parseError.errorString();
+            qCCritical(lcConfig) << "Failed at parsing the config file:" << m_filePath  << "Error:" << parseError.errorString();
+            emit configParseError(m_filePath, parseError.errorString());
         }
         file.close();
     }
 
-    // Step 2: Flett inn eventuelle manglende standardverdier uten å overskrive eksisterende
     if (!m_defaultData.isEmpty()) {
         validateAndMergeDefaults();
     }
+
+    m_fileWatcher = new QFileSystemWatcher(this);
+    if (!m_filePath.isEmpty()) {
+        if (QFile::exists(m_filePath)) {
+            m_fileWatcher->addPath(m_filePath);
+        }
+    }
+    connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &ConfigManager::handleFileChanged);
 }
 
 ConfigManager::JsonResult ConfigManager::validateJsonString(const QString &json)
@@ -189,7 +190,8 @@ QJsonValue ConfigManager::getRawValue(const QJsonObject &source, const QString &
 void ConfigManager::setValue(const QString &keyPath, const QJsonValue &value)
 {
     setRawValue(m_data, keyPath, value);
-
+    m_isSaving = true;
+    
     QFile file(m_filePath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(m_data);
@@ -198,7 +200,7 @@ void ConfigManager::setValue(const QString &keyPath, const QJsonValue &value)
     } else {
         qCWarning(lcConfig) << "Kunne ikke skrive konfigurasjon til fil:" << m_filePath;
     }
-
+    m_isSaving = false; 
     emit configChanged(keyPath, value);
 }
 
@@ -236,11 +238,14 @@ void ConfigManager::validateAndMergeDefaults()
 
     if (mergeObjects(m_data, m_defaultData)) {
         QFile file(m_filePath);
+        m_isSaving = true;
         if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
             QJsonDocument doc(m_data);
             file.write(doc.toJson(QJsonDocument::Indented));
             file.close();
         }
+        m_isSaving = false; 
+
     }
 }
 
@@ -277,23 +282,63 @@ void ConfigManager::remove(const QString &keyPath)
 {
     m_data.remove(keyPath);
     QFile file(m_filePath);
+    m_isSaving = true;
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(m_data);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.close();
     }
+    m_isSaving = false; 
+
 }
 
 void ConfigManager::resetToDefaults()
 {
     m_data = m_defaultData;
     QFile file(m_filePath);
+    m_isSaving = true;
     if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         QJsonDocument doc(m_data);
         file.write(doc.toJson(QJsonDocument::Indented));
         file.close();
     }
+    m_isSaving = false; 
 }
+
+
+void ConfigManager::handleFileChanged(const QString &path)
+{
+    if (!m_fileWatcher->files().contains(path)) {
+        if (QFile::exists(path)) {
+            m_fileWatcher->addPath(path);
+        }
+    }
+
+    if (m_isSaving) {
+        return;
+    }
+
+    qCInfo(lcConfig) << "Config file changed externally, reloading:" << path;
+
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly)) {
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+        file.close();
+
+        if (parseError.error == QJsonParseError::NoError && doc.isObject()) {
+            QJsonObject newData = doc.object();
+            //Here we update with new info from outside edits before sending signal
+            m_data = newData;
+
+            emit configChanged("*", QJsonValue()); 
+        } else {
+            qCWarning(lcConfig) << "Failed to parse JSON file:" << parseError.errorString();
+            emit configParseError(path, parseError.errorString());
+        }
+    }
+}
+
 
 }
 }

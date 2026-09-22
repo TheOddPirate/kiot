@@ -23,7 +23,7 @@ public:
     QUrl url() const override;
     QVersionNumber version() const override;
     bool checkCompatibility() override;
-    bool enabledByDefault();
+    bool enabledByDefault() override;
     bool startPlugin() override;
     bool stopPlugin() override;
 private:

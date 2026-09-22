@@ -49,7 +49,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Inject project metadata as preprocessor definitions for runtime retrieval
-target_compile_definitions(CamerWatcher PRIVATE
+target_compile_definitions(${PROJECT_NAME} PRIVATE
     PLUGIN_NAME="${PROJECT_NAME}"
     PLUGIN_VERSION="${PROJECT_VERSION}"
     PLUGIN_DESCRIPTION="${PROJECT_DESCRIPTION}"

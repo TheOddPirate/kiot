@@ -2,18 +2,10 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "audio.h"
 
-
-
-
-
-
-
-using KIOTShared::Entities::Number;
-using KIOTShared::Entities::Select;
-
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger_audio,Audio)
+
+Q_DECLARE_LOGGING_CATEGORY(plugin_logger_audio)
 
 Audio::Audio(QObject *parent)
     : QObject(parent)
