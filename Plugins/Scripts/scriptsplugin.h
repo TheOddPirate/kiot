@@ -7,14 +7,14 @@
 #include <KIOTShared/kiotshared.h>
 
 using KIOTShared::Plugins::KIOTPluginInterface;
-class TemplatePlugin : public QObject, public KIOTShared::Plugins::KIOTPluginInterface {
+class ScriptsPlugin : public QObject, public KIOTShared::Plugins::KIOTPluginInterface {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID KIOTPluginInterface_iid FILE "plugin.json")
     Q_INTERFACES(KIOTShared::Plugins::KIOTPluginInterface)
 
 public:
-    TemplatePlugin(QObject *parent = nullptr);
-    ~TemplatePlugin() override = default;
+    ScriptsPlugin(QObject *parent = nullptr);
+    ~ScriptsPlugin() override = default;
 
     QString name() const override;
     QString description() const override;
@@ -24,4 +24,7 @@ public:
     
     bool startPlugin() override;
     bool stopPlugin() override;
+
+private:
+    QObject *m_container =nullptr;
 };
