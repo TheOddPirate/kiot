@@ -26,6 +26,8 @@ Depending on how you plan to distribute your integration, KIOT supports two diff
 * **Directory:** [`Native-Plugin-Template/`](https://www.google.com/search?q=./Native-Plugin-Template/&utm_source=gemini)
 * **Best used for:** Core integrations, local development, or if your plugin lives directly inside the main KIOT source tree.
 * **How it works:** It compiles directly alongside the main application structure using standard CMake configurations and integrates natively with the core binary path.
+* **Native plugins works in flatpak to:** Yes, you can install the native plugins under '/home/theoddpirate/.var/app/org.davidedmundson.kiot/data/kiot/plugins/' and it should load
+
 
 ### 2. Flatpak-Extension-Plugin-Template
 

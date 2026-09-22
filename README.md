@@ -263,10 +263,7 @@ Or you can directly execute:
 Long-term, Flatpak distribution is the primary focus. The goal is to publish to Flathub once a user interface is implemented.
 
 ### Planned Improvements
-1. **Graphical Configuration UI** - Simplify setup without manual config file editing
-2. **Enhanced Integration** - More desktop environment features and system monitoring
-3. **Better Documentation** - Needs to be updated for the new modular setup
-4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
+1. **Better Documentation** - Needs to be updated for the new modular setup
 
 ## Project Structure
 
@@ -275,6 +272,8 @@ As part of the modular rewrite of Kiot, the repository is organized into distinc
 - **[Core (`core/`)](core/README.md)** – Contains the main binary logic, entry point, appdata/metadata generation, and custom logging.
 - **[Shared (`Shared/`)](Shared/README.md)** – Shared utility classes (`PlatformHelper`, `DBusProperty`) and foundational elements.
   - **[Entities (`Shared/entities/`)](Shared/entities/README.md)** – Core entity implementations required by all integrations to build and communicate with Home Assistant via MQTT.
+- **[Plugins (`Plugins/`)](Plugins/README.md)** – Some information about the plugins that Kiot supports.
+
 - **[Examples (`examples/`)](examples/README.md)** – Detailed configuration files and inspiration.
 
 ## Contributing
