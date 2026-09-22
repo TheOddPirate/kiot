@@ -35,6 +35,8 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 add_library(AccentColourWatcher MODULE
     accentcolour.cpp
     accentcolour.h
+    accentcolourwatcher.cpp
+    accentcolourwatcher.h
 )
 
 target_include_directories(AccentColourWatcher PRIVATE ${CMAKE_SOURCE_DIR})

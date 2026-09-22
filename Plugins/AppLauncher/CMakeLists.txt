@@ -10,6 +10,8 @@ message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
 add_library(AppLauncher MODULE
     applauncher.cpp
     applauncher.h
+    applauncherplugin.cpp
+    applauncherplugin.h
 )
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core

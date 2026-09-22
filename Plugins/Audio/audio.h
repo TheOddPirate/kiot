@@ -3,28 +3,58 @@
 #pragma once
 
 #include <QObject>
+#include <QFileSystemWatcher>
+#include <QFile>
+#include <QTimer>
+#include <QDir>
+
+#include <PulseAudioQt/Context>
+#include <PulseAudioQt/SinkInput>
+#include <PulseAudioQt/Server>
+#include <PulseAudioQt/Sink>
+#include <PulseAudioQt/Source>
+#include <PulseAudioQt/VolumeObject>
 #include <KIOTShared/kiotshared.h>
 
-using KIOTShared::Plugins::KIOTPluginInterface;
-class Audio;
-class AudioPlugin : public QObject, public KIOTPluginInterface {
+using KIOTShared::Entities::Select;
+using KIOTShared::Entities::Number;
+class Audio : public QObject
+{
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID KIOTPluginInterface_iid FILE "plugin.json")
-    Q_INTERFACES(KIOTShared::Plugins::KIOTPluginInterface)
 
 public:
-    AudioPlugin(QObject *parent = nullptr);
-    ~AudioPlugin() override = default;
+    explicit Audio(QObject *parent = nullptr);
 
-    QString name() const override;
-    QString description() const override;
-    QUrl url() const override;
-    QVersionNumber version() const override;
-    bool checkCompatibility() override;
+private slots:
+    void updateSinks();
+    void updateSources();
+    void updateSinkInputs();
+    void onSinkSelected(const QString &newOption);
+    void onSinkInputSelected(const QString &newOption);
+    void onSourceSelected(const QString &newOption);
+    void onSourceVolumeChanged();
+    void onSinkVolumeChanged();
+    void onSinkInputVolumeChanged();
+    void setSinkVolume(int v);
+    void setSourceVolume(int v);
+    void setSinkInputVolume(int v);
     
-    bool startPlugin() override;
-    bool stopPlugin() override;
 
 private:
-    Audio *m_audio = nullptr;
+    bool checkIfRaiseMaxVolumeEnabled();
+    int paToPercent(qint64 v) const;
+    qint64 percentToPa(int percent) const;
+
+    QFileSystemWatcher *watcher = nullptr;
+    Number *m_sinkVolume = nullptr;
+    Number *m_sinkInputVolume = nullptr;
+    Number *m_sourceVolume = nullptr;
+    Select *m_sinkSelector = nullptr;
+    Select *m_sourceSelector = nullptr;
+    Select *m_sinkInputSelector = nullptr;
+
+    PulseAudioQt::SinkInput *m_sinkInput = nullptr;
+    PulseAudioQt::Sink *m_sink = nullptr;
+    PulseAudioQt::Source *m_source = nullptr;
+    PulseAudioQt::Context *m_ctx = nullptr;
 };

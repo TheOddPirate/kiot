@@ -3,17 +3,9 @@
 #include "audio.h"
 
 
-#include <PulseAudioQt/Context>
-#include <PulseAudioQt/SinkInput>
-#include <PulseAudioQt/Server>
-#include <PulseAudioQt/Sink>
-#include <PulseAudioQt/Source>
-#include <PulseAudioQt/VolumeObject>
 
-#include <QFileSystemWatcher>
-#include <QFile>
-#include <QTimer>
-#include <QDir>
+
+
 
 
 using KIOTShared::Entities::Number;
@@ -22,47 +14,6 @@ using KIOTShared::Entities::Select;
 using KIOTShared::PlatformHelper;
 
 DEFINE_PLUGIN_LOGGER(plugin_logger_audio,Audio)
-
-class Audio : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit Audio(QObject *parent = nullptr);
-
-private slots:
-    void updateSinks();
-    void updateSources();
-    void updateSinkInputs();
-    void onSinkSelected(const QString &newOption);
-    void onSinkInputSelected(const QString &newOption);
-    void onSourceSelected(const QString &newOption);
-    void onSourceVolumeChanged();
-    void onSinkVolumeChanged();
-    void onSinkInputVolumeChanged();
-    void setSinkVolume(int v);
-    void setSourceVolume(int v);
-    void setSinkInputVolume(int v);
-    
-
-private:
-    bool checkIfRaiseMaxVolumeEnabled();
-    int paToPercent(qint64 v) const;
-    qint64 percentToPa(int percent) const;
-
-    QFileSystemWatcher *watcher = nullptr;
-    Number *m_sinkVolume = nullptr;
-    Number *m_sinkInputVolume = nullptr;
-    Number *m_sourceVolume = nullptr;
-    Select *m_sinkSelector = nullptr;
-    Select *m_sourceSelector = nullptr;
-    Select *m_sinkInputSelector = nullptr;
-
-    PulseAudioQt::SinkInput *m_sinkInput = nullptr;
-    PulseAudioQt::Sink *m_sink = nullptr;
-    PulseAudioQt::Source *m_source = nullptr;
-    PulseAudioQt::Context *m_ctx = nullptr;
-};
 
 Audio::Audio(QObject *parent)
     : QObject(parent)
@@ -427,52 +378,3 @@ qint64 Audio::percentToPa(int percent) const
 
 
 
-AudioPlugin::AudioPlugin(QObject *parent)
-    : QObject(parent)
-{
-}
-
-QString AudioPlugin::name() const
-{
-    return QString(PLUGIN_NAME).replace("\"", "");
-}
-
-QString AudioPlugin::description() const
-{
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
-}
-QUrl AudioPlugin::url() const
-{
-    return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
-}
-QVersionNumber AudioPlugin::version() const
-{
-    QString version = QString(PLUGIN_VERSION).replace("\"", "");
-    return QVersionNumber::fromString(version);
-}
-
-bool AudioPlugin::checkCompatibility()
-{
-    return true;
-}
-
-bool AudioPlugin::startPlugin()
-{
-    m_audio = new Audio(this);
-
-    qCInfo(plugin_logger_audio) << name() << " plugin started successfully";
-    return true;
-}
-
-bool AudioPlugin::stopPlugin()
-{
-    if(m_audio)
-    {
-        m_audio->deleteLater();
-        m_audio = nullptr;
-    }
-    qCInfo(plugin_logger_audio) << name() << " plugin stopped";
-    return true;
-}
-
-#include "audio.moc"
