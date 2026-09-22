@@ -52,8 +52,20 @@ bool AppLauncherPlugin::checkCompatibility()
         qCInfo(appla_logger) << name() << " is not supported on Flatpak, we recommend disabling this plugin for now";
         return false;
     }
+    auto desktopEnviornment = PlatformHelper::detectDesktopEnvironment();
+    if(desktopEnviornment == "kde")
+        return true;
+    return false;
+}
+
+bool AppLauncherPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
     return true;
 }
+
 
 bool AppLauncherPlugin::startPlugin()
 {

@@ -23,11 +23,11 @@ public:
     QUrl url() const override;
     QVersionNumber version() const override;
     bool checkCompatibility() override;
-    
+    bool enabledByDefault() override;
     bool startPlugin() override;
     bool stopPlugin() override;
 
 private:
-    BinarySensor *m_dndSensor; // Binary sensor for Do Not Disturb state
-    DBusProperty *m_dndProperty; // DBus
+    BinarySensor *m_dndSensor = nullptr; // Binary sensor for Do Not Disturb state
+    DBusProperty *m_dndProperty = nullptr; // DBus
 };

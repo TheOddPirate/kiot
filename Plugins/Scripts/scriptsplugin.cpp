@@ -45,6 +45,15 @@ bool ScriptsPlugin::checkCompatibility()
 {
     return true;
 }
+
+bool ScriptsPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
+
 bool ScriptsPlugin::startPlugin()
 {
     if(m_container)

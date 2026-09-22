@@ -38,6 +38,14 @@ bool NightModePlugin::checkCompatibility()
     return true;
 }
 
+bool NightModePlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
+
 bool NightModePlugin::startPlugin()
 {
     if(m_nightMode)

@@ -48,6 +48,13 @@ bool AccentColourWatcherPlugin::checkCompatibility()
     return false;
 }
 
+bool AccentColourWatcherPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
 bool AccentColourWatcherPlugin::startPlugin()
 {
     if(!checkCompatibility())

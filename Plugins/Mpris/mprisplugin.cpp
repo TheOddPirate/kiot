@@ -37,6 +37,14 @@ bool MprisPlugin::checkCompatibility()
     return true;
 }
 
+bool MprisPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
+
 bool MprisPlugin::startPlugin()
 {
     if(m_multiplexer)

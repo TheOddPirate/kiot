@@ -40,7 +40,13 @@ bool NotificationPlugin::checkCompatibility()
 {
     return true;
 }
-
+bool NotificationPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
 bool NotificationPlugin::startPlugin()
 {
     if(m_notify)

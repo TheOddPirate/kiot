@@ -38,6 +38,15 @@ bool CustomSensorPlugin::checkCompatibility()
     return true;
 }
 
+bool CustomSensorPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
+
 bool CustomSensorPlugin::startPlugin()
 {
     if(!checkCompatibility())

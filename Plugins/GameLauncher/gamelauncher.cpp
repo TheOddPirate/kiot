@@ -59,7 +59,22 @@ QVersionNumber GameLauncherPlugin::version() const
 
 bool GameLauncherPlugin::checkCompatibility()
 {
-    return true;
+    bool launcher = false;
+    for (auto *scanner : m_scanners) {
+        if (scanner->isLauncherInstalled())
+        {   
+            launcher = true;
+            break; 
+        }
+    }
+    return launcher;
+}
+
+
+bool GameLauncherPlugin::enabledByDefault()
+{
+
+    return checkCompatibility();
 }
 
 bool GameLauncherPlugin::startPlugin()

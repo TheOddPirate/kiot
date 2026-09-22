@@ -42,6 +42,14 @@ bool CameraPlugin::checkCompatibility()
     return true;
 }
 
+bool CameraPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool CameraPlugin::startPlugin()
 {
     if(!checkCompatibility())

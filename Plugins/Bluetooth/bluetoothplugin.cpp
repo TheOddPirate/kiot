@@ -39,6 +39,14 @@ bool BluetoothPlugin::checkCompatibility()
     return true;
 }
 
+bool BluetoothPlugin::enabledByDefault()
+{
+    if(!checkCompatibility())
+        return false;
+
+    return true;
+}
+
 bool BluetoothPlugin::startPlugin()
 {
     if(m_adapterWatcher)

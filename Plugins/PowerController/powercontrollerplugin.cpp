@@ -10,36 +10,44 @@
 
 DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
 
-TemplatePlugin::TemplatePlugin(QObject *parent)
+PowControlelrPlugin::PowControlelrPlugin(QObject *parent)
     : QObject(parent)
 {
 }
 
-QString TemplatePlugin::name() const
+QString PowControlelrPlugin::name() const
 {
     return QString(PLUGIN_NAME).replace("\"", "");
 }
 
-QString TemplatePlugin::description() const
+QString PowControlelrPlugin::description() const
 {
     return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
-QUrl TemplatePlugin::url() const
+QUrl PowControlelrPlugin::url() const
 {
     return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
-QVersionNumber TemplatePlugin::version() const
+QVersionNumber PowControlelrPlugin::version() const
 {
     QString version = QString(PLUGIN_VERSION).replace("\"", "");
     return QVersionNumber::fromString(version);
 }
 
-bool TemplatePlugin::checkCompatibility()
+bool PowControlelrPlugin::checkCompatibility()
 {
     return true;
 }
 
-bool TemplatePlugin::startPlugin()
+bool PowControlelrPlugin::enabledByDefault()
+{
+    if (!checkCompatibility()) {
+        return false;
+    }
+    return true; 
+}
+
+bool PowControlelrPlugin::startPlugin()
 {
     if(m_restartButton || m_hibernateButton || m_powerButton || m_suspendButton)
         stopPlugin();
@@ -49,7 +57,7 @@ bool TemplatePlugin::startPlugin()
     return true;
 }
 
-bool TemplatePlugin::stopPlugin()
+bool PowControlelrPlugin::stopPlugin()
 {
     if(m_suspendButton)
     {
@@ -82,7 +90,7 @@ bool TemplatePlugin::stopPlugin()
     return true;
 }
 
-void TemplatePlugin::setupPowerButtons()
+void PowControlelrPlugin::setupPowerButtons()
 {
         m_suspendButton = new Button(qApp);
         m_suspendButton->setId("suspend");
