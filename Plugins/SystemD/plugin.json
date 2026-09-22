@@ -1,0 +1,5 @@
+{
+    "name": "SystemDPlugin",
+    "version": "0.0.1",
+    "description": "Lets you expose and control user systemd services in home assistant" 
+}

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 /**
- * @file template.cpp
- * @brief Implementation of the KIOT plugin template.
+ * @file systemdplugin.cpp
+ * @brief Implementation of the KIOT plugin systemdplugin.
  */
 
-#include "template.h"
-
+#include "systemdplugin.h"
+#include <QString>
 #include <QCoreApplication>
 
 // Add the entities you need from the shared lib like this:
@@ -15,55 +15,61 @@
 
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger, PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger, SystemD)
 
-TemplatePlugin::TemplatePlugin(QObject *parent)
+SystemdPlugin::SystemdPlugin(QObject *parent)
     : QObject(parent)
 {
 }
 
-TemplatePlugin::~TemplatePlugin()
+SystemdPlugin::~SystemdPlugin()
 {
     stopPlugin();
 }
 
-QString TemplatePlugin::name() const
+QString SystemdPlugin::name() const
 {
     return QString(PLUGIN_NAME).replace("\"", "");
 }
 
-QString TemplatePlugin::description() const
+QString SystemdPlugin::description() const
 {
     return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
-
-QUrl TemplatePlugin::url() const
+QUrl SystemdPlugin::url() const
 {
     return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
-
-QVersionNumber TemplatePlugin::version() const
+QVersionNumber SystemdPlugin::version() const
 {
     QString version = QString(PLUGIN_VERSION).replace("\"", "");
     return QVersionNumber::fromString(version);
 }
 
-bool TemplatePlugin::checkCompatibility()
+bool SystemdPlugin::checkCompatibility()
 {
     // Add custom system checks here if needed
     return true;
 }
 
-bool TemplatePlugin::startPlugin()
+bool SystemdPlugin::startPlugin()
 {
+    if(m_watcher)
+        stopPlugin();
+    m_watcher = new SystemDWatcher(this);
     qCInfo(plugin_logger) << name() << "plugin started successfully";
     return true;
 }
 
-bool TemplatePlugin::stopPlugin()
+bool SystemdPlugin::stopPlugin()
 {
+    if(m_watcher)
+    {
+        m_watcher->deleteLater();
+        m_watcher = nullptr;
+    }
     qCInfo(plugin_logger) << name() << "plugin stopped";
     return true;
 }
 
-#include "template.moc"
+#include "systemdplugin.moc"
