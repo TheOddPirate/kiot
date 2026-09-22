@@ -203,6 +203,10 @@ ActiveWindowPlugin::ActiveWindowPlugin(QObject *parent)
 {
 }
 
+ActiveWindowPlugin::~ActiveWindowPlugin()
+{
+    stopPlugin();
+}
 QString ActiveWindowPlugin::name() const
 {
     return QString(PLUGIN_NAME).replace("\"", "");
@@ -232,6 +236,8 @@ bool ActiveWindowPlugin::checkCompatibility()
 
 bool ActiveWindowPlugin::startPlugin()
 {
+    if(m_watcher)
+        stopPlugin();
     m_watcher = new KDEActiveWindowWatcher(this);
     qCInfo(plugin_logger_activewindow) << name() + " plugin started successfully";
     return true;

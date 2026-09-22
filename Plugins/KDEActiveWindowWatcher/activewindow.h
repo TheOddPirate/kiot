@@ -15,7 +15,7 @@ class ActiveWindowPlugin : public QObject, public KIOTShared::Plugins::KIOTPlugi
 
 public:
     ActiveWindowPlugin(QObject *parent = nullptr);
-    ~ActiveWindowPlugin() override = default;
+    ~ActiveWindowPlugin() override;
 
     QString name() const override;
     QString description() const override;

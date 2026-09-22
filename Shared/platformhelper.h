@@ -262,6 +262,7 @@ private:
 
 } // namespace KIOTShared
 
+#define KIOT_UNQUOTE(s) QString(s).remove(QLatin1Char('"'))
 // Enkel makro for å deklarere en kategori i en header (.h)
 #define DECLARE_LOGGER(Name) Q_DECLARE_LOGGING_CATEGORY(Name)
 

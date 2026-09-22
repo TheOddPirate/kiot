@@ -1,0 +1,5 @@
+{
+    "name": "DockerePlugin",
+    "version": "0.0.1",
+    "description": "Lets you controll local docker images from home assistant"
+}

@@ -22,6 +22,7 @@ ConfigManager::~ConfigManager()
     if (this == s_coreInstance) {
         qCInfo(lcConfig) << "Core ConfigManager destruert. Core-låsen er nå frigjort.";
         s_coreInstance = nullptr;
+        s_coreInstantiated = false;
     }
 }
 
@@ -61,6 +62,7 @@ ConfigManager::ConfigManager(ConfigType type, const QString &moduleName, const Q
         } else {
             // Dette er den FØRSTE og EKTE Core-instansen!
             s_coreInstance = this;
+            s_coreInstantiated = true;
             m_moduleName = "Core";
         }
     } else {
