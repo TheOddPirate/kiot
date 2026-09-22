@@ -1,15 +1,30 @@
+// SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+/**
+ * @file template.cpp
+ * @brief Implementation of the KIOT plugin template.
+ */
+
 #include "template.h"
 #include <KIdleTime>
 #include <QCoreApplication>
 
-using KIOTShared::Entities::BinarySensor;
+// Add the entities you need from the shared lib like this:
+// using KIOTShared::Entities::Sensor;
+
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger,PLUGIN_NAME)
+DEFINE_PLUGIN_LOGGER(plugin_logger, PLUGIN_NAME)
 
 TemplatePlugin::TemplatePlugin(QObject *parent)
     : QObject(parent)
 {
+}
+
+TemplatePlugin::~TemplatePlugin()
+{
+    stopPlugin();
 }
 
 QString TemplatePlugin::name() const
@@ -21,10 +36,12 @@ QString TemplatePlugin::description() const
 {
     return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
+
 QUrl TemplatePlugin::url() const
 {
     return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
 }
+
 QVersionNumber TemplatePlugin::version() const
 {
     QString version = QString(PLUGIN_VERSION).replace("\"", "");
@@ -33,40 +50,19 @@ QVersionNumber TemplatePlugin::version() const
 
 bool TemplatePlugin::checkCompatibility()
 {
+    // Add custom system checks here if needed
     return true;
 }
 
 bool TemplatePlugin::startPlugin()
 {
-    auto sensor = new BinarySensor(this);
-    sensor->setId("active");
-    sensor->setName("Active");
-    sensor->setDiscoveryConfig("device_class", "presence");
-
-    // Idle-logikk fra din originale kode
-    auto kidletime = KIdleTime::instance();
-    auto id = kidletime->addIdleTimeout(60 * 1000);
-    
-    QObject::connect(kidletime, &KIdleTime::resumingFromIdle, this, [sensor]() {
-        sensor->setState(true);
-    });
-    
-    QObject::connect(kidletime, &KIdleTime::timeoutReached, this, [id, kidletime, sensor](int _id) {
-        if (_id != id) {
-            return;
-        }
-        sensor->setState(false);
-        kidletime->catchNextResumeEvent();
-    });
-    
-    sensor->setState(true);
-    qCInfo(plugin_logger) << name() << " plugin started successfully";
+    qCInfo(plugin_logger) << name() << "plugin started successfully";
     return true;
 }
 
 bool TemplatePlugin::stopPlugin()
 {
-    qCInfo(plugin_logger) << name() << " plugin stopped";
+    qCInfo(plugin_logger) << name() << "plugin stopped";
     return true;
 }
 
