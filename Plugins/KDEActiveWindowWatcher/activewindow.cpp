@@ -92,6 +92,7 @@ private:
         }
         //TODO implement dynamic servicename generation
         const QString serviceName = PlatformHelper::generateServiceName() + ".ActiveWindow";
+        qCInfo(plugin_logger_activewindow) << "ActiveWindowWatcher: DBus service name:" << serviceName;
       //  const QString serviceName = QString(APP_ID) + ".ActiveWindow";
             
         if (QDBusConnection::sessionBus().registerService(serviceName) &&
