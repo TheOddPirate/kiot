@@ -27,5 +27,5 @@ public:
     bool startPlugin() override;
     bool stopPlugin() override;
 private:
-    AccentColourWatcher *m_watcher;
+    AccentColourWatcher *m_watcher = nullptr;
 };
