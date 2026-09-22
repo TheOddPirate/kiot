@@ -4,7 +4,6 @@
 #include "shortcut.h"
 
 #include <KIOTShared/kiotshared.h>
-#include "core/core.h"
 
 using KIOTShared::Entities::Event;
 using KIOTShared::Entities::Select;
