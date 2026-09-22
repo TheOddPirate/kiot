@@ -15,7 +15,7 @@
 
 using KIOTShared::PlatformHelper;
 
-DEFINE_PLUGIN_LOGGER(plugin_logger, SystemD)
+DEFINE_PLUGIN_LOGGER(systemdlogger, SystemD)
 
 SystemdPlugin::SystemdPlugin(QObject *parent)
     : QObject(parent)
@@ -57,7 +57,7 @@ bool SystemdPlugin::startPlugin()
     if(m_watcher)
         stopPlugin();
     m_watcher = new SystemDWatcher(this);
-    qCInfo(plugin_logger) << name() << "plugin started successfully";
+    qCInfo(systemdlogger) << name() << "plugin started successfully";
     return true;
 }
 
@@ -68,7 +68,7 @@ bool SystemdPlugin::stopPlugin()
         m_watcher->deleteLater();
         m_watcher = nullptr;
     }
-    qCInfo(plugin_logger) << name() << "plugin stopped";
+    qCInfo(systemdlogger) << name() << "plugin stopped";
     return true;
 }
 

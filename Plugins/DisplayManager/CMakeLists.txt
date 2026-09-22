@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 # ==============================================================================
 # Plugin Project Configuration
 # ==============================================================================
-project(kiot_script_plugin 
+project(DisplayManager 
     VERSION 0.0.1 
     DESCRIPTION "Template Plugin for KIOT" 
     HOMEPAGE_URL "https://github.com/davidedmundson/kiot" 
@@ -22,8 +22,10 @@ message(STATUS "[CMake] Configuring Plugin Module: ${PROJECT_NAME}")
 # Target Definition & Sources
 # ==============================================================================
 add_library(${PROJECT_NAME} MODULE
-    template.cpp
-    template.h
+    displaympanagerplugin.cpp
+    displaympanagerplugin.h
+    screencontroller.cpp
+    screencontroller.h
 )
 
 # Include current directory for local header resolution
@@ -35,10 +37,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
 )
-
+find_package(KF6Screen REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     KIOTShared
     Qt6::Core
+    KF6::Screen
 )
 
 # ==============================================================================
@@ -49,7 +52,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Inject project metadata as preprocessor definitions for runtime retrieval
-target_compile_definitions(CamerWatcher PRIVATE
+target_compile_definitions(${PROJECT_NAME} PRIVATE
     PLUGIN_NAME="${PROJECT_NAME}"
     PLUGIN_VERSION="${PROJECT_VERSION}"
     PLUGIN_DESCRIPTION="${PROJECT_DESCRIPTION}"

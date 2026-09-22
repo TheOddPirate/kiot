@@ -101,7 +101,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     I18n
 
 )
-find_package(KF6Screen REQUIRED)
+
 
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
