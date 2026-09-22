@@ -1,3 +1,15 @@
+/*
+    SPDX-FileCopyrightText: 2012 Alex Merry <alex.merry@kdemail.net>
+    SPDX-FileCopyrightText: 2023 Fushan Wen <qydwhotmail@gmail.com>
+    SPDX-FileCopyrightText: 2025 Odd Østlie <theoddpirate@gmail.com>
+
+    SPDX-License-Identifier: LGPL-2.1-or-later
+*/
+// TODO figure out if its okay to add my own name here under license as
+// i copied most of the code from here
+//  https://invent.kde.org/plasma/plasma-workspace/-/tree/master/libkmpris?ref_type=heads
+// and stripped it to fit my needs
+
 #pragma once
 
 #include "abstractplayercontainer.h"
