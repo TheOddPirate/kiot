@@ -20,7 +20,7 @@ function updateActiveWindow(w) {
         pid: w.pid
     };
 
-    if (payload == lastPayload) {
+    if (payload === lastPayload) {
         return;
     }
     lastPayload = payload;

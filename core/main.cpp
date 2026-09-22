@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     QApplication::setDesktopFileName(PlatformHelper::generateServiceName());
     QApplication::setApplicationName(QStringLiteral(PROJECT_NAME));
     QApplication::setApplicationVersion(QStringLiteral(PROJECT_VERSION));
-    //QApplication::setOrganizationName(QStringLiteral(PROJECT_NAME));
+  //  QApplication::setOrganizationName(QStringLiteral(PROJECT_NAME));
     QString domain = PlatformHelper::resolveOrganizationDomain(QStringLiteral(PROJECT_DOMAIN));
     QApplication::setOrganizationDomain( domain);
     QApplication app(argc, argv);
