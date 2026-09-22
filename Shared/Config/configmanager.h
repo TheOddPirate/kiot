@@ -51,7 +51,7 @@ public:
 signals:
     void configChanged(const QString &keyPath, const QJsonValue &newValue);
     void configParseError(const QString &filePath, const QString &errorString); 
-
+    void configWriteError(const QString &filePath, const QString &errorString); 
 private:
     enum class ConfigType {
         Core,

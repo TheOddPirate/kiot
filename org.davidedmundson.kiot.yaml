@@ -2,7 +2,7 @@ id: org.davidedmundson.kiot
 branch: master
 runtime: org.kde.Platform
 runtime-version: "6.11" # don't forget to change QtMqtt
-sdk: org.kde.Sdk//6.11
+sdk: org.kde.Sdk
 command: kiot
 tags:
   - nightly
@@ -14,15 +14,12 @@ desktop-file-name-suffix: " (Nightly)"
 
 
 add-extensions:
-  org.davidedmundson.kiot.plugin:
-    version: '1.0'
+  org.davidedmundson.kiot.Plugin:
     directory: plugins
     subdirectories: true
-    no-autodownload: true
-    merge-dirs: "."
     autodelete: true
-cleanup-commands:
-  - mkdir -p ${FLATPAK_DEST}/plugins
+    no-autodownload: false
+    
 
 finish-args:
   - "--share=ipc"

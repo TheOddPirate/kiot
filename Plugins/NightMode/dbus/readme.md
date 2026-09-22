@@ -2,10 +2,10 @@
 
 ## Navigation
 
-- [About](#about)
-- [How to create](#how-to-create)
-- [How to add to cmakelists](#how-to-add-to-cmakelists)
-- [See Also](#see-also)
+* [About](#about)
+* [How to create](#how-to-create)
+* [How to add to cmakelists](#how-to-add-to-cmakelists)
+* [See Also](#see-also)
 
 
 ## About
@@ -39,11 +39,11 @@ qt_add_dbus_interface(TARGET_SOURCES org.kde.KWin.NightLight.xml kwinnightlight)
 
 ## See Also
 
-- [KIOT Core](/core/README.md) for information about the core bin part of the project
-- [KIOT Shared](/Shared/README.md) for information about the shared lib part of the project
-- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
-- [KIOT Integrations](/integrations/README.md) for creating new integrations
-- [KIOT Examples](/examples/README.md) for config examples and some inspiration
-- [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
+* [KIOT Core](/core/README.md) for information about the core bin part of the project
+* [KIOT Shared](/Shared/README.md) for information about the shared lib part of the project
+* [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+* [KIOT Integrations](/integrations/README.md) for creating new integrations
+* [KIOT Examples](/examples/README.md) for config examples and some inspiration
+* [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
 
 ---

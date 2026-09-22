@@ -2,10 +2,10 @@
 
 ## Navigation
 
-- [About](#about)
-- [Autostart](#autostart)
-  - [Installation](#installation)
-  - [Uninstallation](#uninstallation)
+* [About](#about)
+* [Autostart](#autostart)
+  * [Installation](#installation)
+  * [Uninstallation](#uninstallation)
 
 ## About
 

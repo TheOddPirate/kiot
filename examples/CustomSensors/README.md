@@ -2,20 +2,20 @@
 
 ## Navigation
 
-- [About](#about)
-- [Nvidia](#nvidia)
-  - [Power draw](#1-power-draw)
-  - [Total Memory](#2-total-memory)
-  - [Used Memory](#3-used-memory)
-  - [Free Memory](#4-free-memory)
-  - [Current Temperature](#5-current-temperature)
-- [System](#system)
-  - [CPU Temperature](#1-cpu-temperature)
-  - [Uptime](#2-uptime)
-  - [Free RAM](#3-free-ram)
-  - [Total RAM](#4-total-ram)
-  - [CPU Usage](#5-cpu-usage)
-  - [Disk Free Space](#6-disk-free-space)
+* [About](#about)
+* [Nvidia](#nvidia)
+  * [Power draw](#1-power-draw)
+  * [Total Memory](#2-total-memory)
+  * [Used Memory](#3-used-memory)
+  * [Free Memory](#4-free-memory)
+  * [Current Temperature](#5-current-temperature)
+* [System](#system)
+  * [CPU Temperature](#1-cpu-temperature)
+  * [Uptime](#2-uptime)
+  * [Free RAM](#3-free-ram)
+  * [Total RAM](#4-total-ram)
+  * [CPU Usage](#5-cpu-usage)
+  * [Disk Free Space](#6-disk-free-space)
 
 
 ## About

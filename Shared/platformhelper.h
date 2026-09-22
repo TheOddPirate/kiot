@@ -1,5 +1,5 @@
 #pragma once
-#include <KSandbox>
+
 #include <QProcess>
 #include <QString>
 #include <QStringList>
@@ -33,6 +33,23 @@ class KIOT_SHARED_EXPORT PlatformHelper
 {
 public:
 
+    /**
+     * @brief A program together with its command line arguments.
+     *
+     * Returned by @ref makeHostContext(QProcess&) so that a full, host-ready
+     * process invocation can be transported as a value.
+     */
+    struct ProcessContext {
+        /*!
+         * \brief The program to execute.
+         */
+        const QString program;
+
+        /*!
+         * \brief The arguments to pass to the program.
+         */
+        const QStringList arguments;
+    };
 
     /**
      * @brief Supported operating system platforms.
@@ -58,7 +75,13 @@ public:
     };
 
 
-
+    /**
+     * @brief Controls how a host process is launched.
+     */
+    enum ProcessMode {
+        start,          ///< Launch synchronously via QProcess::start()
+        startDetached   ///< Launch detached via QProcess::startDetached()
+    };
     /**
      * @brief Detect the current operating system platform.
      *
@@ -230,7 +253,7 @@ public:
      * @param process the source process definition.
      * @return the resulting host context.
      */
-    static KSandbox::ProcessContext makeHostContext(QProcess &process);
+    static ProcessContext makeHostContext(QProcess &process);
     
     /**
      * @brief Start a process on the host system.
@@ -239,8 +262,7 @@ public:
      *                host execution as needed).
      * @param mode    whether to start synchronously or detached.
      */
-    static void startHostProcess(QProcess &process, QProcess::OpenMode mode = QProcess::ReadWrite);
-
+    static void startHostProcess(QProcess &process, PlatformHelper::ProcessMode mode = PlatformHelper::ProcessMode::startDetached);
 
 
 private:

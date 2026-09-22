@@ -1,23 +1,23 @@
 # Kiot - KDE Internet Of Things
 
 ## Navigation
-- [About](#about)
-- [Setup](#setup)
-  - [Recommended Setup (Helper Script)](#recommended-setup-helper-script)
-  - [Dependencies](#dependencies)
-  - [Download and Install](#download-and-install)
-- [Configuration](#configuration)
-  - [MQTT Configuration](#mqtt-configuration)
-  - [Configuration Examples](#configuration-examples)
-- [Supported Features](#supported-features)
-- [Flatpak Build](#flatpak-build)
-   - [Quick Install](#quick-build)
-   - [Manual Install](#manual-build)
-- [Future Development](#future-development)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [Troubleshooting](#troubleshooting)
-- [See Also](#see-also)
+* [About](#about)
+* [Setup](#setup)
+  * [Recommended Setup (Helper Script)](#recommended-setup-helper-script)
+  * [Dependencies](#dependencies)
+  * [Download and Install](#download-and-install)
+* [Configuration](#configuration)
+  * [MQTT Configuration](#mqtt-configuration)
+  * [Configuration Examples](#configuration-examples)
+* [Supported Features](#supported-features)
+* [Flatpak Build](#flatpak-build)
+   * [Quick Install](#quick-build)
+   * [Manual Install](#manual-build)
+* [Future Development](#future-development)
+* [Project Structure](#project-structure)
+* [Contributing](#contributing)
+* [Troubleshooting](#troubleshooting)
+* [See Also](#see-also)
 
 ## About
 
@@ -265,7 +265,7 @@ Long-term, Flatpak distribution is the primary focus. The goal is to publish to 
 ### Planned Improvements
 1. **Graphical Configuration UI** - Simplify setup without manual config file editing
 2. **Enhanced Integration** - More desktop environment features and system monitoring
-3. **Better Documentation** - Comprehensive guides and examples
+3. **Better Documentation** - Needs to be updated for the new modular setup
 4. **Extensibility / Plugin System** – Explore ways to allow community developed integrations
 
 ## Project Structure
@@ -300,11 +300,11 @@ Contributions are welcome!
 
 ## See Also
 
-- [KIOT Core](/core/README.md) for information about the core bin part of the project
-- [KIOT Shared](/Shared/README.md) for information about the shared lib part of the project
-- [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
-- [KIOT Integrations](/integrations/README.md) for creating new integrations
-- [KIOT Examples](/examples/README.md) for config examples and some inspiration
-- [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
+* [KIOT Core](/core/README.md) for information about the core bin part of the project
+* [KIOT Shared](/Shared/README.md) for information about the shared lib part of the project
+* [KIOT Shared/Entities](/Shared/entities/README.md) for information about the shared lib entites part of the project
+* [KIOT Integrations](/integrations/README.md) for creating new integrations
+* [KIOT Examples](/examples/README.md) for config examples and some inspiration
+* [KIOT Helper Scripts](/scripts/README.md) for information about the helper scripts
 
 ---
