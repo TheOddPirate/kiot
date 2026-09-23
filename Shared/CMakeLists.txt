@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 message(STATUS "[CMake] Building Shared library (.so) for ${PROJECT_NAME}")
 
 set(KIOT_SHARED_SRC
-  #  kiotshared_export.h
+
     KIOTShared/kiotshared.h
     KIOTShared/kiotshared_export.h
     Plugins/plugininterface.h
@@ -51,7 +51,7 @@ set(KIOT_SHARED_SRC
 
 set(LIB_HEADERS 
     KIOTShared/kiotshared.h
-    KIOTShared/kiotshared_export.h
+    kiotshared_export.h
     Plugins/plugininterface.h
     Transport/transportmanager.h
     Config/configmanager.h
@@ -128,18 +128,15 @@ install(DIRECTORY Transport Config entities KIOTShared Plugins
 install(FILES
     platformhelper.h
     dbusproperty.h
-    ${CMAKE_CURRENT_BINARY_DIR}/KIOTShared/kiotshared_export.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/KIOTShared/kiotshared_export.h
     DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
 )
-# Hvis du har genererte filer (som export-headeren) som havner i build-mappen:
-install(FILES 
-    ${CMAKE_CURRENT_BINARY_DIR}/KIOTShared/kiotshared_export.h
-    DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
-)
+
 
 install(TARGETS KIOTShared
     EXPORT "KIOTSharedTargets"
     RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION include 
 )
