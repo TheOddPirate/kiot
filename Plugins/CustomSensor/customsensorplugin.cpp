@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #include "customsensorplugin.h"
 #include "customsensor.h"
-
+#include <KSharedConfig>
+#include <KConfigGroup>
 using KIOTShared::Entities::BinarySensor;
 using KIOTShared::PlatformHelper;
 

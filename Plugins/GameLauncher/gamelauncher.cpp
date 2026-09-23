@@ -10,6 +10,8 @@
 #include "launchers/gamebase.h"
 #include <QCoreApplication>
 #include <QRegularExpression>
+#include <KSharedConfig>
+#include <KConfigGroup>
 namespace
 {
 static const QRegularExpression invalidCharRegex("[^a-zA-Z0-9_-]");

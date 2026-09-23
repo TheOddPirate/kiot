@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.16)
 project(GameLauncher VERSION 0.0.1 DESCRIPTION "Detects your game launchers and lets you launch games from home assistant" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.15")
+set(KDE_COMPILERSETTINGS_LEVEL "5.82")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
@@ -29,10 +38,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
 )
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
+    Config
+    CoreAddons
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     KIOTShared
     Qt6::Core
+    KF6::CoreAddons
+    KF6::ConfigCore
 )
 
 # Plasser den ferdige .so-filen direkte i plugins-katalogen der Core forventer å finne den

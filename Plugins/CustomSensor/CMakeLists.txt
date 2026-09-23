@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.16)
 project(CustomSensor VERSION 0.0.1 DESCRIPTION "Allows you to create custom sensors with custom commands" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 set(CMAKE_AUTOMOC ON)
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.15")
+set(KDE_COMPILERSETTINGS_LEVEL "5.82")
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
 
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
