@@ -98,6 +98,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.cmake_version.outputs.version }}
-          body: "Just a test release for now"
+         # body: ${{ steps.build_changelog.outputs.changelog }}
           name: kiot ${{ env.BRANCH }} V ${{ steps.cmake_version.outputs.version }}
           files: kiot-${{ env.BRANCH }}-V${{ steps.cmake_version.outputs.version }}.flatpak
