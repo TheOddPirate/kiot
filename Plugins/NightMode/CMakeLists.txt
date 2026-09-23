@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 
 
 message(STATUS "[CMake] Plugin: ${PROJECT_NAME}")
-set(DBUS_XML_DIR "${CMAKE_SOURCE_DIR}/dbus")
+set(DBUS_XML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbus")
 
 set(NIGHTMODE_SRC
     nightmodeplugin.cpp

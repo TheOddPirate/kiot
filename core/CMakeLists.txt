@@ -43,13 +43,14 @@ set(KIOT_CORE_SOURCES
     startup/backgroundmanager.h    
 )
 
+set(DBUS_XML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dbus")
 # Dbus interfaces used by core
 set_source_files_properties(
-    ../dbus/org.freedesktop.portal.Background.xml
+    ${DBUS_XML_DIR}/org.freedesktop.portal.Background.xml
     PROPERTIES
     NO_NAMESPACE ON
 )
-qt_add_dbus_interface(KIOT_CORE_SOURCES ../dbus/org.freedesktop.portal.Background.xml backgroundportal)
+qt_add_dbus_interface(KIOT_CORE_SOURCES ${DBUS_XML_DIR}/org.freedesktop.portal.Background.xml backgroundportal)
 
 
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS

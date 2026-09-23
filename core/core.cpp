@@ -194,7 +194,9 @@ void HaControl::loadIntegrations(KSharedConfigPtr config)
                                 pluginLoader->deleteLater();
                             }
                         } else {
-                            qCWarning(core) << "Plugin compatibility check failed for:" << pluginName;
+                            qCWarning(core) << "Plugin compatibility check failed for:" << pluginName << "Disabling";
+                            integrationconfig.writeEntry(pluginName, false);
+                            config->sync();
                             pluginLoader->unload();
                             pluginLoader->deleteLater();
                         }
