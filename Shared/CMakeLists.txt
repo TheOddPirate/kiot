@@ -10,6 +10,7 @@ set(KIOT_SHARED_SRC
     Transport/transportmanager.cpp
     Transport/transportmanager.h
     Config/configmanager.cpp
+
     Config/configmanager.h
     entities/entity.cpp
     entities/entity.h
@@ -54,6 +55,7 @@ set(LIB_HEADERS
     Plugins/plugininterface.h
     Transport/transportmanager.h
     Config/configmanager.h
+
     entities/entity.h
     entities/binarysensor.h
     entities/button.h

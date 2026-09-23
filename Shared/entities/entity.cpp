@@ -24,7 +24,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QMqttClient>
-#include <KConfigGroup>
+//#include <KConfigGroup>
 
 
 DEFINE_LOGGER(base, Shared.Entities.Entity)
