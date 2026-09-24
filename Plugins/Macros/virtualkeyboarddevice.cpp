@@ -137,7 +137,7 @@ VirtualKeyboardDevice::VirtualKeyboardDevice(SetupOptions options, QObject *pare
     usetup.id.vendor = 0x2333;
     usetup.id.product = 0x6666;
     usetup.id.version = 1;
-    std::strncpy(usetup.name, QStringLiteral(PARENT_APP_NAME).toUtf8() + " Virtual Keyboard Device", UINPUT_MAX_NAME_SIZE - 1);
+    std::strncpy(usetup.name, QStringLiteral(PROJECT_NAME).toUtf8() + " Virtual Keyboard Device", UINPUT_MAX_NAME_SIZE - 1);
 
     if (ioctl(m_fd, UI_DEV_SETUP, &usetup) < 0) {
         m_lastError = QString("UI_DEV_SETUP ioctl failed: %1").arg(strerror(errno));

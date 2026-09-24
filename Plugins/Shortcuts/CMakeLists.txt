@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(Shortcuts VERSION 0.0.1 DESCRIPTION "Lets you trigger automation from shortcuts and trigger every global shortcut" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 

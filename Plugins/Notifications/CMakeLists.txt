@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(Notification VERSION 0.0.1 DESCRIPTION "Lets you send notifications from home assistant to KDE" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 

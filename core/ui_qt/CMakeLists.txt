@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 message(STATUS "[CMake] Building Qt UI for ${PROJECT_NAME}")
 
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(CustomSensor VERSION 0.0.1 DESCRIPTION "Allows you to create custom sensors with custom commands" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 # ------------------------------------------------------------------------------
 # PROJECT INFO, sets the variables used in src to identify everything
@@ -30,6 +30,7 @@ set(APP_ID "${REVERSED_DOMAIN}.${PROJECT_NAME}" CACHE STRING "Reverse-DNS App ID
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
 set(CURRENT_YEAR ${CURRENT_YEAR} CACHE STRING "Current year")
+
 # ------------------------------------------------------------------------------
 # Adds project definition for reusability in sub directories cmakelists
 # ------------------------------------------------------------------------------
@@ -40,21 +41,24 @@ add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
 add_definitions(-DAPP_ID="${APP_ID}")
 set(PARENT_APP_NAME ${PROJECT_NAME})
 
+# ------------------------------------------------------------------------------
+# Prints the project information
+# ------------------------------------------------------------------------------
 message(STATUS "[CMake] Using project_name: PROJECT_NAME: ${PROJECT_NAME}")
 message(STATUS "[CMake] Using project_version: PROJECT_VERSION: ${PROJECT_VERSION}")
 message(STATUS "[CMake] Using project_description: PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}")
 message(STATUS "[CMake] Using project_developers: PROJECT_DEVELOPERS: ${PROJECT_DEVELOPERS}")
 message(STATUS "[CMake] Using app_id: APP_ID: ${APP_ID}")
 
-#Build options to make enable/disable features simple
+# ------------------------------------------------------------------------------
+# Adds build options to make enable/disable features simple
+# ------------------------------------------------------------------------------
 option(BUILD_FLATPAK "Build for flatpak" OFF)
 option(BUILD_QTUI "Include the qt ui in core" ON)
 option(BUILD_APPDATA "Include the appdata in core" ON)
 option(BUILD_PLUGINS "Build every plugin project in the Plugins directory" ON)
-
 #USed to build the Qt UI if the cmakelists exitss
 set(HAS_QTUI EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/ui_qt/CMakeLists.txt")
-
 
 # ------------------------------------------------------------------------------
 # Adds project definition for packaging builds into difrent systems
@@ -100,9 +104,6 @@ include(ECMQtDeclareLoggingCategory)
 include(ECMQmlModule)
 include(ECMConfiguredInstall)
 
-
-
-
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h *.hpp *.c)
@@ -112,7 +113,6 @@ kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 add_subdirectory(Shared)
 
 # Builds every plugin in the Plugins folder on loop
-
 if(BUILD_PLUGINS)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Plugins/CMakeLists.txt")
         add_subdirectory(Plugins)
@@ -120,7 +120,6 @@ if(BUILD_PLUGINS)
         message(STATUS "[CMake] Plugins subdir missing Cmakelists.......PROBLEMPROBLEMPROBLEM")
     endif()
 endif()
-
 
 # Builds the kcm module if not in a flatpak sandbox
 if(NOT BUILD_FLATPAK)

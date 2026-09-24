@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(AccentColourWatcher VERSION 0.0.1 DESCRIPTION "Exposes template info and more" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 

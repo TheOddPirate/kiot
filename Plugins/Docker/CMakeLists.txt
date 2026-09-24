@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(Docker VERSION 0.0.1 DESCRIPTION "Lets you controll local docker images from home assistant" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
