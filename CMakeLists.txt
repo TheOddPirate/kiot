@@ -56,6 +56,24 @@ option(BUILD_PLUGINS "Build every plugin project in the Plugins directory" ON)
 set(HAS_QTUI EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/core/ui_qt/CMakeLists.txt")
 
 
+# ------------------------------------------------------------------------------
+# Adds project definition for packaging builds into difrent systems
+# ------------------------------------------------------------------------------
+set(CPACK_GENERATOR "DEB;RPM;AppImage;TGZ")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
+set(CPACK_PACKAGE_MAINTAINER "${PROJECT_DEVELOPERS}")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PROJECT_DEVELOPERS}")
+#DEB check for dependency building
+find_program(DPKG_SHLIBDEPS_EXECUTABLE NAMES dpkg-shlibdeps)
+if(DPKG_SHLIBDEPS_EXECUTABLE)
+    message(STATUS "[CMake] Using dpkg-shlibdeps for DEB dependencies.")
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+else()
+    message(STATUS "[CMake] Using manual list for DEB dependencies.")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, qt6-base-common, qt6-mqtt, libkf6configcore, libkf6coreaddons, libkf6dbusaddons")
+endif()
 
 #IS this needed when we use the project part to set it?
 #set(PROJECT_VERSION "0.1")
@@ -113,3 +131,6 @@ endif()
 add_subdirectory(core)
 
 #feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
+
+
+include(CPack)
