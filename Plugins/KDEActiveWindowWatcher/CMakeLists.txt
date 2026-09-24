@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(KDEActiveWindowWatcher VERSION 0.0.1 DESCRIPTION "Makes active window title and attributes available in home assistant" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 

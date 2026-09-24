@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.31)
 
 project(Active VERSION 0.0.1 DESCRIPTION "Shows user activity" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
