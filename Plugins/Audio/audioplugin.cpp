@@ -57,6 +57,8 @@ bool AudioPlugin::enabledByDefault()
 
 bool AudioPlugin::startPlugin()
 {
+    if(m_audio)
+        stopPlugin();
     m_audio = new Audio(this);
 
     qCInfo(plugin_logger_audio) << name() << " plugin started successfully";

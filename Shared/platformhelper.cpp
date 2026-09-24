@@ -314,7 +314,6 @@ QString PlatformHelper::productName()
  */
 bool PlatformHelper::isWayland()
 {
-    // 1. Den sikreste måten i Qt hvis QGuiApplication er initialisert:
     if (QGuiApplication::instance()) {
         QString platformName = QGuiApplication::platformName().toLower();
         if (platformName.contains("wayland")) {
@@ -325,7 +324,6 @@ bool PlatformHelper::isWayland()
         }
     }
 
-    // 2. Fallback til miljøvariabler
     QString waylandDisplay = qEnvironmentVariable("WAYLAND_DISPLAY");
     if (!waylandDisplay.isEmpty()) {
         return true;

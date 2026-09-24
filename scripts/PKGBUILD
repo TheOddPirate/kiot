@@ -1,0 +1,58 @@
+_pkgbase=kiot
+pkgname=kiot
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="KDE Internet of Things desktop integration for Home Automation"
+arch=(x86_64)
+url="https://github.com/davidedmundson/kiot"
+license=(LGPL-2.1-or-later)
+depends=(
+    # Qt6
+    qt6-base
+    qt6-mqtt
+    qt6-declarative
+    
+    # KDE Frameworks (KF6)
+    kconfig
+    kcoreaddons
+    kdbusaddons
+    knotifications
+    kidletime
+    kglobalaccel
+    kcmutils
+    ki18n
+    solid
+    bluez-qt
+    pulseaudio-qt
+    kservice
+    kio
+    libkscreen
+    
+    # System
+    systemd-libs
+)
+makedepends=(cmake extra-cmake-modules)
+provides=(kiot)
+conflicts=(kiot)
+source=("kiot::git+file://${PWD}/../")   
+md5sums=('SKIP')
+
+
+
+build() {
+	cd "$srcdir/$_pkgbase"
+	local cmake_options=(
+		-B build
+		-DCMAKE_INSTALL_PREFIX=/usr
+		-DCMAKE_BUILD_TYPE=None
+		-Wno-dev
+	)
+	cmake "${cmake_options[@]}"
+	cmake --build build -j$(nproc)
+}
+
+package() {
+	cd "$srcdir/$_pkgbase"
+	DESTDIR="$pkgdir" cmake --install build 
+
+}

@@ -10,7 +10,7 @@ project(TemplatePlugin
     LANGUAGES CXX 
 )
 
-# Viktige variabler må settes FØR de brukes av ECM / Qt
+
 set(PARENT_APP_NAME "kiot")
 set(CMAKE_AUTOMOC ON)
 set(QT_MIN_VERSION "6.6.0")
