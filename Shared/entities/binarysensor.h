@@ -3,7 +3,7 @@
 #pragma once
 #include "entity.h"
 using KIOTShared::Entities::Entity;
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
 namespace KIOTShared {
 namespace Entities {

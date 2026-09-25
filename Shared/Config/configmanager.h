@@ -5,7 +5,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLoggingCategory>
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
 class QFileSystemWatcher; // Forward deklarasjon
 

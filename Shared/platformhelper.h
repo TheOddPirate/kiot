@@ -6,7 +6,7 @@
 #include <QLoggingCategory>
 #include <QSystemTrayIcon>
 #include <qloggingcategory.h>
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 /**
  * @file platformhelper.h
  * @brief Platform-specific helpers for runtime environment detection.

@@ -24,7 +24,7 @@
 #pragma once
 #include "entity.h"
 
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 /**
  * @class Update
  * @brief Update entity for firmware/software updates

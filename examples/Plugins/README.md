@@ -15,6 +15,8 @@
 
 Welcome to the KIOT plugin development playground!
 
+New folder added, Combined, for both flatpak and native builds, documentation will be updated later
+
 Depending on how you plan to distribute your integration, KIOT supports two different approaches for writing plugins. Whether you want to bake it directly into the main repository or package it as an independent, modular Flatpak extension (à la OBS Studio) for the community, we have a boilerplate template ready for you.
 
 ---
