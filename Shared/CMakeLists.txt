@@ -1,50 +1,66 @@
 cmake_minimum_required(VERSION 3.31)
+
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
-
+set(CMAKE_AUTOMOC ON)
 set(LIB_TARGET "KIOTShared")
 
 message(STATUS "[CMake] Generating Shared library (.so) for ${LIB_TARGET}")
 
-# ==============================================================================
-# 1. Target Sources & Library Definition
-# ==============================================================================
-# Explicit list of all source and header files as they reside on disk
-set(KIOT_SHARED_SRCS
-    Transport/transportmanager.cpp Transport/transportmanager.h
-    Config/configmanager.cpp Config/configmanager.h
-    entities/entity.cpp entities/entity.h
-    entities/binarysensor.cpp entities/binarysensor.h
-    entities/button.cpp entities/button.h
-    entities/number.cpp entities/number.h
-    entities/switch.cpp entities/switch.h
-    entities/event.cpp entities/event.h
-    entities/select.cpp entities/select.h
-    entities/sensor.cpp entities/sensor.h
-    entities/text.cpp entities/text.h
-    entities/lock.cpp entities/lock.h
-    entities/notify.cpp entities/notify.h
-    entities/mediaplayer.cpp entities/mediaplayer.h
-    entities/image.cpp entities/image.h
-    entities/camera.cpp entities/camera.h
-    entities/update.cpp entities/update.h
-    platformhelper.cpp platformhelper.h
-    dbusproperty.cpp dbusproperty.h
-    KIOTShared/kiotshared.h
-    Plugins/plugininterface.h
-    Plugins/uiinterface.h
+set(KIOT_SHARED_SRC
+    Transport/transportmanager.cpp
+    Config/configmanager.cpp
+    entities/entity.cpp
+    entities/binarysensor.cpp
+    entities/button.cpp
+    entities/number.cpp
+    entities/switch.cpp
+    entities/event.cpp
+    entities/select.cpp
+    entities/sensor.cpp
+    entities/text.cpp
+    entities/lock.cpp
+    entities/notify.cpp
+    entities/mediaplayer.cpp
+    entities/image.cpp
+    entities/camera.cpp
+    entities/update.cpp
+    platformhelper.cpp
+    dbusproperty.cpp
 )
 
-# Build the shared library target
-add_library(${LIB_TARGET} SHARED ${KIOT_SHARED_SRCS})
+add_library(${LIB_TARGET} SHARED ${KIOT_SHARED_SRC})
 
-# Automatically generate the export macro header (e.g., kiotshared_export.h)
-generate_export_header(${LIB_TARGET} BASE_NAME ${LIB_TARGET})
+target_sources(${LIB_TARGET} PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS .
+    FILES
+        KIOTShared/kiotshared.h
+        KIOTShared/kiotshared_export.h
+        Plugins/plugininterface.h
+        Plugins/uiinterface.h
+        Transport/transportmanager.h
+        Config/configmanager.h
+        entities/entity.h
+        entities/binarysensor.h
+        entities/button.h
+        entities/number.h
+        entities/switch.h
+        entities/event.h
+        entities/select.h
+        entities/sensor.h
+        entities/text.h
+        entities/lock.h
+        entities/notify.h
+        entities/mediaplayer.h
+        entities/image.h
+        entities/camera.h
+        entities/update.h
+        platformhelper.h
+        dbusproperty.h
+)
 
-# ==============================================================================
-# 2. Dependencies & Linking
-# ==============================================================================
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     DBus
@@ -56,7 +72,6 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
 )
 
-# Link required Qt and KF6 modules publicly so consuming plugins inherit them
 target_link_libraries(${LIB_TARGET}
     PUBLIC
     KF6::ConfigCore
@@ -66,9 +81,6 @@ target_link_libraries(${LIB_TARGET}
     Qt6::DBus
 )
 
-# ==============================================================================
-# 3. Compile Definitions & Include Directories
-# ==============================================================================
 target_compile_definitions(${LIB_TARGET} PRIVATE
     PROJECT_NAME="${PROJECT_NAME}"
     PROJECT_VERSION="${PROJECT_VERSION}"
@@ -77,16 +89,15 @@ target_compile_definitions(${LIB_TARGET} PRIVATE
     PROJECT_DEVELOPERS="${PROJECT_DEVELOPERS}"
     CURRENT_YEAR="${CURRENT_YEAR}"
     KIOT_SHARED_LIBRARY=1
+
     $<$<CONFIG:Release>:QT_NO_DEBUG_OUTPUT>
 )
 
-# Configure include paths for both build-tree usage and installation layout
 target_include_directories(${LIB_TARGET} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/KIOTShared>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/kiotshared>
+    $<INSTALL_INTERFACE:${KDE_INSTALL_INCLUDEDIR}/kiotshared>
 )
-
 # ==============================================================================
 # 4. Target Properties & Aliasing
 # ==============================================================================
@@ -98,33 +109,15 @@ set_target_properties(${LIB_TARGET} PROPERTIES
 
 # Create a modern namespaced alias for internal and external consumption
 add_library(KIOTShared::KIOTShared ALIAS ${LIB_TARGET})
-
-# ==============================================================================
-# 5. Installation Rules & Package Export Configuration
-# ==============================================================================
-set(KIOT_CMAKECONFIG_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/KIOTShared")
-
-# Install the shared library binaries and archives
+# Installasjonen blir kjempeenkel fordi FILE_SET tar seg av alt!
 install(TARGETS ${LIB_TARGET}
-    EXPORT KIOTSharedTargets
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    EXPORT "${LIB_TARGET}Targets"
+    RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
+    FILE_SET HEADERS DESTINATION ${KDE_INSTALL_INCLUDEDIR}/kiotshared
 )
-
-# Install header subdirectories while maintaining their internal directory structure
-install(DIRECTORY KIOTShared Plugins Transport Config entities
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kiotshared
-    FILES_MATCHING PATTERN "*.h"
-)
-
-# Install loose root-level header files (like platformhelper.h) optionally
-install(FILES
-    platformhelper.h
-    dbusproperty.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kiotshared
-    OPTIONAL
-)
+set(KIOT_CMAKECONFIG_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/KIOTShared")
 
 # Export targets file so find_package(KIOTShared) works correctly
 install(EXPORT KIOTSharedTargets

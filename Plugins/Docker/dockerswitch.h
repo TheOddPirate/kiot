@@ -124,7 +124,7 @@ private:
      */
     void updateSwitch(const QString &name, KIOTShared::Entities::Switch *sw);
 
-private slots:
+private Q_SLOTS:
     /**
      * @brief Handles incoming container state change events from the background listener.
      * @param name Name of the container affected by the event.

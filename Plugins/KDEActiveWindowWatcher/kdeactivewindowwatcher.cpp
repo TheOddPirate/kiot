@@ -156,7 +156,7 @@ bool KDEActiveWindowWatcher::registerKWinScript()
 
     QVariant arg = reply.arguments().first();
     int scriptId = arg.toInt();
-    QString scriptObjectPath = QString("/Scripting/Script%1").arg(scriptId);
+    QString scriptObjectPath =QStringLiteral("/Scripting/Script%1").arg(scriptId);
     QDBusInterface scriptIface("org.kde.KWin", scriptObjectPath, "org.kde.kwin.Script", QDBusConnection::sessionBus());
     if (!scriptIface.isValid()) return false;
 

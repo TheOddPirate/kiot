@@ -22,7 +22,7 @@ QString PowControlelrPlugin::name() const
 
 QString PowControlelrPlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 QUrl PowControlelrPlugin::url() const
 {

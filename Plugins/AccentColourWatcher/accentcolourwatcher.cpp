@@ -92,7 +92,7 @@ void AccentColourWatcher::setRgbAttributes(QVariantMap &attributes, const QStrin
             attributes[attrPrefix + "red"] = r;
             attributes[attrPrefix + "green"] = g;
             attributes[attrPrefix + "blue"] = b;
-            attributes[attrPrefix + "rgb"] = QString("%1,%2,%3").arg(r).arg(g).arg(b);
+            attributes[attrPrefix + "rgb"] =QStringLiteral("%1,%2,%3").arg(r).arg(g).arg(b);
         }
     }
 }

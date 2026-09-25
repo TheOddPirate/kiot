@@ -33,7 +33,7 @@ Q_SIGNALS:
     void screenNamesChanged();
     void lastErrorChanged();
 
-private slots:
+private Q_SLOTS:
     void onOptionSelected(const QString &option);
     void onResolutionSelected(const QString &option);
     void onScreenNamesChanged();

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 
 // Hjelpere og Transport
 #include "platformhelper.h"

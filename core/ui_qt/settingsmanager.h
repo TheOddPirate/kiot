@@ -39,7 +39,7 @@ public:
     Q_INVOKABLE QString getDiscoveryPrefix() const;
     Q_INVOKABLE void setDiscoveryPrefix(const QString &prefix);
 
-signals:
+Q_SIGNALS:
     void configSectionsChanged();
     void sectionOrderChanged();
 

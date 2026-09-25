@@ -37,7 +37,7 @@ public:
      */
     void stop();
 
-signals:
+Q_SIGNALS:
     /**
      * @brief Emitted whenever a valid container event is parsed from the Docker stream.
      * @param name The name of the Docker container.

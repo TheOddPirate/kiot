@@ -23,7 +23,7 @@ public:
 
     Sensor *sensor() const;
 
-private slots:
+private Q_SLOTS:
     void poll();
 
 private:

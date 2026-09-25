@@ -43,7 +43,7 @@ For more information about the MQTT entity types supported by Kiot, please check
 ### DBusProperty Features
 
 * **Automatic Property Fetching:** Queries the initial value of a specified D-Bus property upon construction via a synchronous call.
-* **Live Updates via Signals:** Automatically connects to `PropertiesChanged` signals on the session bus, updating the internal value and emitting `valueChanged()` whenever the property changes.
+* **Live Updates via Q_SIGNALS:** Automatically connects to `PropertiesChanged` signals on the session bus, updating the internal value and emitting `valueChanged()` whenever the property changes.
 
 
 ## See Also

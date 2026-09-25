@@ -15,7 +15,7 @@ class BatteryWatcher : public QObject
 public:
     explicit BatteryWatcher(QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void deviceAdded(const QString &udi);
     void deviceRemoved(const QString &udi);
 

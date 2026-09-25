@@ -28,7 +28,7 @@ public:
     bool startPlugin() override;
     bool stopPlugin() override;
 
-private slots:
+private Q_SLOTS:
     void onOptionSelected(const QString &option);
 
 private:

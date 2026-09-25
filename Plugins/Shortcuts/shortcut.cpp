@@ -100,7 +100,7 @@ void Shortcut::exposeShortcuts()
     QStringList components = getGlobalAccelComponents();
     for (QString component : components) {
         QDBusInterface componentInterface("org.kde.kglobalaccel", 
-                                        QString("%1").arg(component), 
+                                       QStringLiteral("%1").arg(component), 
                                    "org.kde.kglobalaccel.Component",
                                   QDBusConnection::sessionBus());
         if (componentInterface.isValid()) {

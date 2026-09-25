@@ -4,7 +4,7 @@
 #pragma once
 #include "entity.h"
 using KIOTShared::Entities::Entity;
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 namespace KIOTShared {
 namespace Entities {
 
@@ -16,7 +16,7 @@ public:
     void setValue(int value);
     int value();
     // Optional customization for integrations before init()
-    void setRange(int min, int max, int step = 1, const QString &unit = "%");
+    void setRange(int min, int max, int step = 1, const QString &unit =QStringLiteral("%"));
 
 protected:
     void init() override;
@@ -29,7 +29,7 @@ private:
     int m_min = 0;
     int m_max = 100;
     int m_step = 1;
-    QString m_unit = "%";
+    QString m_unit =QStringLiteral("%");
 };
 }
 }

@@ -33,7 +33,7 @@ QString AppLauncherPlugin::name() const
 
 QString AppLauncherPlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 QUrl AppLauncherPlugin::url() const
 {

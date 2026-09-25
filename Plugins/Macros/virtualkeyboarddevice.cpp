@@ -124,7 +124,7 @@ VirtualKeyboardDevice::VirtualKeyboardDevice(SetupOptions options, QObject *pare
 
     m_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (m_fd < 0) {
-        m_lastError = QString("Failed to open /dev/uinput: %1").arg(strerror(errno));
+        m_lastError =QStringLiteral("Failed to open /dev/uinput: %1").arg(strerror(errno));
         qCWarning(vkblogs) << m_lastError;
         return;
     }
@@ -140,7 +140,7 @@ VirtualKeyboardDevice::VirtualKeyboardDevice(SetupOptions options, QObject *pare
     std::strncpy(usetup.name, QStringLiteral(PROJECT_NAME).toUtf8() + " Virtual Keyboard Device", UINPUT_MAX_NAME_SIZE - 1);
 
     if (ioctl(m_fd, UI_DEV_SETUP, &usetup) < 0) {
-        m_lastError = QString("UI_DEV_SETUP ioctl failed: %1").arg(strerror(errno));
+        m_lastError =QStringLiteral("UI_DEV_SETUP ioctl failed: %1").arg(strerror(errno));
         qCWarning(vkblogs) << m_lastError;
         close(m_fd);
         m_fd = -1;
@@ -148,7 +148,7 @@ VirtualKeyboardDevice::VirtualKeyboardDevice(SetupOptions options, QObject *pare
     }
 
     if (ioctl(m_fd, UI_DEV_CREATE) < 0) {
-        m_lastError = QString("UI_DEV_CREATE ioctl failed: %1").arg(strerror(errno));
+        m_lastError =QStringLiteral("UI_DEV_CREATE ioctl failed: %1").arg(strerror(errno));
         qCWarning(vkblogs) << m_lastError;
         close(m_fd);
         m_fd = -1;
@@ -336,7 +336,7 @@ void VirtualKeyboardDevice::printRegisteredKeys() const {
     qCInfo(vkblogs) << "=== Registered Keys in VirtualKeyboardDevice ===";
     size_t count = sizeof(ALL_KEYS) / sizeof(KeyInfo);
     for (size_t i = 0; i < count; ++i) {
-        qCInfo(vkblogs).noquote() << QString("Keycode: %1 \t -> %2").arg(ALL_KEYS[i].code, 4).arg(ALL_KEYS[i].name);
+        qCInfo(vkblogs).noquote() <<QStringLiteral("Keycode: %1 \t -> %2").arg(ALL_KEYS[i].code, 4).arg(ALL_KEYS[i].name);
     }
     qCInfo(vkblogs) << "================================================";
 }

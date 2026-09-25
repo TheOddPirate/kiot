@@ -22,7 +22,7 @@ public:
     explicit Gamepad(QObject *parent = nullptr);
     ~Gamepad();
 
-private slots:
+private Q_SLOTS:
     void udevEvent();
 
 private:

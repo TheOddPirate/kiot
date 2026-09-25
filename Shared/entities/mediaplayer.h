@@ -46,7 +46,7 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
  using KIOTShared::Entities::Entity;
 namespace KIOTShared {
 namespace Entities {
@@ -103,7 +103,7 @@ protected:
      */
     void publishState();
 
-private slots:
+private Q_SLOTS:
     // Command handlers for MQTT messages from Home Assistant
     void onPlayCommand(const QString &payload);
     void onPauseCommand(const QString &payload);
@@ -115,7 +115,7 @@ private slots:
     void onPlayMediaCommand(const QString &payload);
     void onPositionCommand(const QString &payload);
 
-public slots:
+public Q_SLOTS:
     /**
      * @brief Starts media playback
      */
@@ -147,7 +147,7 @@ public slots:
      */
     void setVolume(qreal volume);
 
-signals:
+Q_SIGNALS:
     /**
      * @brief Signal emitted when media player state changes
      * @param newState New media player state information

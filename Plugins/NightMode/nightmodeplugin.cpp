@@ -21,7 +21,7 @@ QString NightModePlugin::name() const
 
 QString NightModePlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 QUrl NightModePlugin::url() const
 {

@@ -22,7 +22,7 @@ QString CustomSensorPlugin::name() const
 
 QString CustomSensorPlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 QUrl CustomSensorPlugin::url() const
 {

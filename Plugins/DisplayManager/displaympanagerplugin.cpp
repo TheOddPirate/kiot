@@ -34,7 +34,7 @@ QString DisplayManager::name() const
 
 QString DisplayManager::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 
 QUrl DisplayManager::url() const

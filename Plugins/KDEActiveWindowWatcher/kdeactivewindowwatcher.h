@@ -21,7 +21,7 @@ public:
     explicit KDEActiveWindowWatcher(QObject *parent = nullptr);
     ~KDEActiveWindowWatcher() override;
 
-public slots:
+public Q_SLOTS:
     Q_SCRIPTABLE void UpdateAttributes(const QVariantMap &attributes);
 
 private:
