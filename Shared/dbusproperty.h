@@ -5,7 +5,7 @@
 
 #include <QObject>
 #include <QVariant>
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
 namespace KIOTShared {
 

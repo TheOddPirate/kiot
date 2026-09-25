@@ -46,7 +46,7 @@
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management.
  */
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
  using KIOTShared::Entities::Entity;
 namespace KIOTShared {
 namespace Entities {

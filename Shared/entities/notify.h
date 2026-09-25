@@ -47,7 +47,7 @@ using KIOTShared::Entities::Entity;
  *
  * @note Inherits from Entity to leverage MQTT discovery and topic management
  */
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 namespace KIOTShared {
 namespace Entities {
 

@@ -28,7 +28,7 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include "platformhelper.h"
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
 using KIOTShared::PlatformHelper;
 

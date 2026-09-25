@@ -4,7 +4,7 @@
 #include <QMqttClient>
 #include <QTimer>
 
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
 namespace KIOTShared {
 namespace Transport {

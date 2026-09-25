@@ -28,7 +28,7 @@
  * This class extends the Entity base class to implement an image entity
  * that can publish image snapshots or content types to Home Assistant via MQTT.
  */
-#include <KIOTShared/kiotshared_export.h>
+#include "kiotshared_export.h"
 
  using KIOTShared::Entities::Entity;
 namespace KIOTShared {
