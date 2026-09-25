@@ -181,11 +181,8 @@ QString PlatformHelper::generateServiceName()
  */
 QString PlatformHelper::getProjectName()
 {
-    return QString(PROJECT_NAME);
-    
+    return QString(PROJECT_NAME);    
 }
-
-
 
 /**
  * @brief Normalise a raw domain string into a lower-cased host name.
@@ -203,13 +200,11 @@ QString PlatformHelper::resolveOrganizationDomain(const QString &input)
 
     QUrl url(input);
 
-    // Hvis ingen scheme er satt, prøv å tolke det som en host
     if (!url.isValid() || url.scheme().isEmpty())
         url = QUrl(QStringLiteral("https://") + input);
 
     QString host = url.host();
 
-    // QUrl kan feile stille, så dobbeltsjekk
     if (host.isEmpty())
         return QStringLiteral("davidedmundson.org");
 
@@ -236,13 +231,21 @@ QString PlatformHelper::configFilePath(const QString &fileType)
     }
     return configFilePath;
 }
-
+/**
+ * @brief Path of this application's configuration directory.
+ *
+ * @return e.g. <tt>~/.config/kiot</tt> on Linux.
+ */
 QString PlatformHelper::configDirPath()
 {
-
     return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PROJECT_NAME) ;
 }
 
+/**
+ * @brief Paths of this application's app data locations.
+ *
+ * @return e.g. <tt>~{"/home/theoddpirate/.local/share/kiot/","/usr/share/kiot/"}</tt> on Linux.
+ */
 QStringList PlatformHelper::appdataDirPaths()
 {
     // TODO Cleanup this to make it more usable?
