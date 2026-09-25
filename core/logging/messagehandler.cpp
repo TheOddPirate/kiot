@@ -47,7 +47,7 @@ void kiotMessageHandler(QtMsgType type, const QMessageLogContext &context, const
             break;
     }
 
-    QString line = QString("[%1] [%2] [%3] %4").arg(timestamp, level, context.category, msg);
+    QString line =QStringLiteral("[%1] [%2] [%3] %4").arg(timestamp, level, context.category, msg);
     
     // 1. Print to the terminal
     fprintf(stderr, "%s%s%s\n", color, line.toUtf8().constData(), reset);

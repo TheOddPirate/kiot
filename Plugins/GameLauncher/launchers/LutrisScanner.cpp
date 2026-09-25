@@ -124,7 +124,7 @@ QMap<QString, GameData> LutrisScanner::scanGames()
             data.launcher = launcherName();
             data.gameId = info.gameId;
             data.gameName = it.key();
-            data.displayName = QString("%1").arg(data.gameName);
+            data.displayName =QStringLiteral("%1").arg(data.gameName);
             data.runner = "";
             data.installPath = fileInfo.absolutePath();
             data.prefixPath = info.prefixPath;    

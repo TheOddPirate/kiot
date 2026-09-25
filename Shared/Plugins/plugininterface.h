@@ -2,7 +2,7 @@
 #include <QString>
 #include <QUrl>
 #include <QVersionNumber>
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 
 namespace KIOTShared {
 namespace Plugins {

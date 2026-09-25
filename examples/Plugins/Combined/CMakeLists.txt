@@ -8,8 +8,15 @@ project(TemplatePlugin
 )
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Make sure this follows the root cmakelists version
+set(KF6_MIN_VERSION "6.15")
+# Make sure this follows the root cmakelists version
+set(QT_MIN_VERSION "6.6.0")
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+include(KDEInstallDirs)
 
 # Option to control whether we are building for the Flatpak sandbox
 option(BUILD_FLATPAK_EXTENSION "Build as a Flatpak extension module" OFF)
@@ -22,21 +29,6 @@ message(STATUS "[CMake] Plugin: ${PROJECT_NAME} | Flatpak Mode: ${BUILD_FLATPAK_
 if(BUILD_FLATPAK_EXTENSION)
     # Hardcoded path inside the sandbox for sharedlib
     include_directories(/app/include/kiotshared/)
-    
-    # Make sure this follows the root cmakelists version
-    set(KF6_MIN_VERSION "6.15")
-    # Make sure this follows the root cmakelists version
-    set(QT_MIN_VERSION "6.6.0")
-    find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
-    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-else()
-    # Make sure this follows the root cmakelists version
-    set(KF6_MIN_VERSION "6.15")
-    # Make sure this follows the root cmakelists version
-    set(QT_MIN_VERSION "6.6.0")
-    find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
-    set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-
 endif()
 
 # ==============================================================================
@@ -58,26 +50,22 @@ find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Widgets
     Mqtt
 )
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS 
+    Config
 
-# Optional dependencies
-find_package(KF6 ${KF6_MIN_VERSION} COMPONENTS 
-    ConfigCore 
-    QUIET
 )
+
 # Finds our Shared lib on disk
 find_package(KIOTShared REQUIRED)
-
+message(STATUS "FINNER KIOTShared HER: ${KIOTShared_DIR}")
 # Build target link libraries dynamically based on what was found
 set(PLUGIN_LINK_LIBS 
-    KIOTShared 
+    KIOTShared::KIOTShared
     Qt6::Core
     Qt6::Widgets
     Qt6::Mqtt    
-)
-
-if(TARGET KF6::ConfigCore)
-    list(APPEND PLUGIN_LINK_LIBS KF6::ConfigCore)
-endif()
+KF6::ConfigCore
+    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIN_LINK_LIBS})
 
@@ -85,6 +73,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PLUGIN_LINK_LIBS})
 # 4. Compile Definitions & Metadata
 # ==============================================================================
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+    PROJECT_NAME="kiot"
     PLUGIN_NAME="${PROJECT_NAME}"
     PLUGIN_VERSION="${PROJECT_VERSION}"
     PLUGIN_DESCRIPTION="${PROJECT_DESCRIPTION}"

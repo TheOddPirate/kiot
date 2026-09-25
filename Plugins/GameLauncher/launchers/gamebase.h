@@ -61,7 +61,7 @@ public:
     QMap<QString, GameData> getGameList() const { return m_games; }
 
 
-signals:
+Q_SIGNALS:
     void gamesUpdated();
 
 protected:

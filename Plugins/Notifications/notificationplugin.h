@@ -25,7 +25,7 @@ public:
     bool enabledByDefault() override;
     bool startPlugin() override;
     bool stopPlugin() override;
-private slots:
+private Q_SLOTS:
     void notificationCallback(QByteArray message);
     
 private:

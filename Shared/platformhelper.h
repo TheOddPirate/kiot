@@ -6,7 +6,7 @@
 #include <QLoggingCategory>
 #include <QSystemTrayIcon>
 #include <qloggingcategory.h>
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 /**
  * @file platformhelper.h
  * @brief Platform-specific helpers for runtime environment detection.
@@ -124,7 +124,7 @@ public:
      * @return the @c <PROJECT_NAME>rc file inside the platform configuration
      *         directory (e.g. @c ~/.config/kiotrc on Linux).
      */
-    static QString configFilePath(const QString &fileType="rc");
+    static QString configFilePath(const QString &fileType=QStringLiteral("rc"));
     /**
      * @brief Path of this application's data Directory paths.
      *

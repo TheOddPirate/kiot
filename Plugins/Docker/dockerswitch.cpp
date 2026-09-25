@@ -255,7 +255,7 @@ QByteArray DockerSwitch::extractHttpBody(const QByteArray &response)
 void DockerSwitch::toggleContainer(const QString &name, bool start)
 {
     const QString action = start ? "start" : "stop";
-    const QByteArray request = QString("POST /containers/%1/%2 HTTP/1.0\r\n\r\n").arg(name, action).toUtf8();
+    const QByteArray request =QStringLiteral("POST /containers/%1/%2 HTTP/1.0\r\n\r\n").arg(name, action).toUtf8();
 
     QByteArray response;
     if (!callDockerSocket(request, response)) {
@@ -279,7 +279,7 @@ void DockerSwitch::updateSwitch(const QString &name, Switch *sw)
     sw->setState(running);
 
     QByteArray response;
-    const QByteArray request = QString("GET /containers/%1/json HTTP/1.0\r\n\r\n").arg(name).toUtf8();
+    const QByteArray request =QStringLiteral("GET /containers/%1/json HTTP/1.0\r\n\r\n").arg(name).toUtf8();
 
     if (!callDockerSocket(request, response)) {
         qCDebug(docker_switch_logs) << "Failed to get container details for" << name;

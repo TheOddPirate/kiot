@@ -25,7 +25,7 @@ class Audio : public QObject
 public:
     explicit Audio(QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void updateSinks();
     void updateSources();
     void updateSinkInputs();

@@ -88,7 +88,7 @@ public:
      */
     bool stopPlugin() override;
 
-private slots:
+private Q_SLOTS:
     void notificationCallback(QByteArray message);
 private:
     bool validateSequence(const QString &sequenceStr, QString &errorMessage);

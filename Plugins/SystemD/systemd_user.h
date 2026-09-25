@@ -25,7 +25,7 @@ public:
 
     bool ensureConfig();
 
-private slots:
+private Q_SLOTS:
     void onUnitPropertiesChanged(const QString &interface, const QVariantMap &changedProps, const QStringList &invalidatedProps, const QDBusMessage &msg);
     void performInit();
 

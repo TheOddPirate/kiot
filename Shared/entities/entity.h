@@ -28,7 +28,7 @@
 #include <KSharedConfig>
 #include <KConfigGroup>
 #include "platformhelper.h"
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 
 using KIOTShared::PlatformHelper;
 
@@ -234,8 +234,8 @@ public:
         static QString prefix;
         if (prefix.isEmpty()) {
             auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-            auto group = conf->group("general");
-            prefix = group.readEntry("discoveryprefix","homeassistant");
+            auto group = conf->group(QStringLiteral("general"));
+            prefix = group.readEntry(QStringLiteral("discoveryprefix"),QStringLiteral("homeassistant"));
         }
         return prefix;
     }
@@ -245,8 +245,8 @@ public:
         static QString prefix;
         if (prefix.isEmpty()) {
             auto conf = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
-            auto group = conf->group("general");
-            prefix = group.readEntry("topicprefix","kiot");
+            auto group = conf->group(QStringLiteral("general"));
+            prefix = group.readEntry(QStringLiteral("topicprefix"),QStringLiteral("kiot"));
         }
         return prefix;
     }
@@ -358,7 +358,7 @@ private:
     QString m_name;
     
     /** @private Material Design icon name */
-    QString m_haIcon = "";
+    QString m_haIcon =QStringLiteral("");
     
     /** @private Home Assistant entity type */
     QString m_haType;

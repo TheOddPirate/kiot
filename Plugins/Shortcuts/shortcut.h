@@ -19,7 +19,7 @@ class Shortcut : public QObject
 public:
     explicit Shortcut(QObject *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void onOptionSelected(const QString &newOption);
 
 private:

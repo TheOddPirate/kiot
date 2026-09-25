@@ -7,7 +7,7 @@
  */
 
 #include "template.h"
-
+#include <QString>
 DEFINE_PLUGIN_LOGGER(tplogger, TemplatePlugin) //Change TeplatePlugin to you plugin name for better logs
 
 TemplatePlugin::TemplatePlugin(QObject *parent)
@@ -22,30 +22,29 @@ TemplatePlugin::~TemplatePlugin()
 
 QString TemplatePlugin::name() const
 {
-    return QString(PLUGIN_NAME).replace("\"", "");
+    return QStringLiteral(PLUGIN_NAME);
 }
 
 QString TemplatePlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QStringLiteral(PLUGIN_DESCRIPTION);
 }
 
 QUrl TemplatePlugin::url() const
 {
-    return QUrl(QString(PLUGIN_DOMAIN).replace("\"", ""));
+    return QUrl(QStringLiteral(PLUGIN_DOMAIN));
 }
 
 QVersionNumber TemplatePlugin::version() const
 {
-    QString version = QString(PLUGIN_VERSION).replace("\"", "");
+    QString version = QStringLiteral(PLUGIN_VERSION);
     return QVersionNumber::fromString(version);
 }
 
 bool TemplatePlugin::checkCompatibility()
 {
-    if(PlatformHelper::isFlatpak())
-        return true;
-    return false;
+
+    return true;
 }
 
 bool TemplatePlugin::enabledByDefault()
@@ -66,8 +65,8 @@ bool TemplatePlugin::startPlugin()
     if(m_dndSensor)
         stopPlugin();
     m_dndSensor = new BinarySensor(this);
-    m_dndSensor->setId("Teplate_FlatpakExtension");
-    m_dndSensor->setName("Test Flatpak Extensions");
+    m_dndSensor->setId(QStringLiteral("Teplate_FlatpakExtension"));
+    m_dndSensor->setName(QStringLiteral("Test Flatpak Extensions"));
 
     m_dndSensor->setState(true);
 
@@ -85,5 +84,3 @@ bool TemplatePlugin::stopPlugin()
     qCInfo(tplogger) << name() << "plugin stopped";
     return true;
 }
-
-#include "template.moc"

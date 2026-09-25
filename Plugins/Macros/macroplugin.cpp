@@ -41,7 +41,7 @@ QString MacroPlugin::name() const
 
 QString MacroPlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 
 QUrl MacroPlugin::url() const
@@ -167,7 +167,7 @@ bool MacroPlugin::validateSequence(const QString &sequenceStr, QString &errorMes
         if (colonIdx == -1) {
             int code = m_device->keycodeFromName(step);
             if (code <= 0) {
-                errorMessage = QString("Step %1: Unknown value '%2'").arg(i + 1).arg(step);
+                errorMessage =QStringLiteral("Step %1: Unknown value '%2'").arg(i + 1).arg(step);
                 return false;
             }
             continue;
@@ -179,7 +179,7 @@ bool MacroPlugin::validateSequence(const QString &sequenceStr, QString &errorMes
         if (cmd == "down" || cmd == "press" || cmd == "up" || cmd == "release" || cmd == "click") {
             int code = m_device->keycodeFromName(val);
             if (code <= 0) {
-                errorMessage = QString("Step %1 (%2): Unknown key '%3'").arg(i + 1).arg(cmd).arg(val);
+                errorMessage =QStringLiteral("Step %1 (%2): Unknown key '%3'").arg(i + 1).arg(cmd).arg(val);
                 return false;
             }
         } 
@@ -187,27 +187,27 @@ bool MacroPlugin::validateSequence(const QString &sequenceStr, QString &errorMes
             bool ok = false;
             int ms = val.toInt(&ok);
             if (!ok || ms < 0) {
-                errorMessage = QString("Step %1 (delay): Invalid delay value '%2'").arg(i + 1).arg(val);
+                errorMessage =QStringLiteral("Step %1 (delay): Invalid delay value '%2'").arg(i + 1).arg(val);
                 return false;
             }
         } 
         else if (cmd == "type") {
             if (val.isEmpty()) {
-                errorMessage = QString("Step %1 (type): Empty text").arg(i + 1);
+                errorMessage =QStringLiteral("Step %1 (type): Empty text").arg(i + 1);
                 return false;
             }
         } 
         else if (cmd == "mouse_move") {
             QStringList coords = val.split(';');
             if (coords.size() != 2) {
-                errorMessage = QString("Step %1 (mouse_move): needs this format X;Y (f.eks. 100;200)").arg(i + 1);
+                errorMessage =QStringLiteral("Step %1 (mouse_move): needs this format X;Y (f.eks. 100;200)").arg(i + 1);
                 return false;
             }
             bool ok1 = false, ok2 = false;
             coords[0].toInt(&ok1);
             coords[1].toInt(&ok2);
             if (!ok1 || !ok2) {
-                errorMessage = QString("Step %1 (mouse_move): Invalid cordinates '%2'").arg(i + 1).arg(val);
+                errorMessage =QStringLiteral("Step %1 (mouse_move): Invalid cordinates '%2'").arg(i + 1).arg(val);
                 return false;
             }
         } 
@@ -215,12 +215,12 @@ bool MacroPlugin::validateSequence(const QString &sequenceStr, QString &errorMes
             bool ok = false;
             val.toInt(&ok);
             if (!ok) {
-                errorMessage = QString("Step %1 (scroll): Invalid scroll number '%2'").arg(i + 1).arg(val);
+                errorMessage =QStringLiteral("Step %1 (scroll): Invalid scroll number '%2'").arg(i + 1).arg(val);
                 return false;
             }
         } 
         else {
-            errorMessage = QString("Step %1: Unknown commando '%2'").arg(i + 1).arg(cmd);
+            errorMessage =QStringLiteral("Step %1: Unknown commando '%2'").arg(i + 1).arg(cmd);
             return false;
         }
     }

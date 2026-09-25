@@ -4,7 +4,7 @@
 #pragma once
 #include "entity.h"
 using KIOTShared::Entities::Entity;
-#include "kiotshared_export.h"
+#include "KIOTShared/kiotshared_export.h"
 namespace KIOTShared {
 namespace Entities {
 
@@ -22,7 +22,7 @@ public:
 protected:
     void init() override;
 
-signals:
+Q_SIGNALS:
     void optionSelected(QString newOption);
 
 private:

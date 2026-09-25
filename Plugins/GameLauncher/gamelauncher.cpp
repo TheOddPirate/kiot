@@ -47,7 +47,7 @@ QString GameLauncherPlugin::name() const
 
 QString GameLauncherPlugin::description() const
 {
-    return QString(PLUGIN_DESCRIPTION).replace("\"", "") + QString(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
+    return QString(PLUGIN_DESCRIPTION).replace("\"", "") +QStringLiteral(" ") + QString(PLUGIN_DOMAIN).replace("\"", "");
 }
 QUrl GameLauncherPlugin::url() const
 {
@@ -276,11 +276,11 @@ void GameLauncherPlugin::onOptionSelected(const QString &option)
 
         QString launchCommand;
         if (data.launcher == "Steam") {
-            launchCommand = QString("xdg-open steam://rungameid/%1").arg(data.gameId);
+            launchCommand =QStringLiteral("xdg-open steam://rungameid/%1").arg(data.gameId);
         } else if (data.launcher == "Heroic") {
-            launchCommand = QString("xdg-open heroic://launch?appName=%1&runner=%2").arg(data.gameId).arg(data.runner);
+            launchCommand =QStringLiteral("xdg-open heroic://launch?appName=%1&runner=%2").arg(data.gameId).arg(data.runner);
         } else if (data.launcher == "Lutris") {
-            launchCommand = QString("env LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/%1").arg(data.gameId);
+            launchCommand =QStringLiteral("env LUTRIS_SKIP_INIT=1 lutris lutris:rungameid/%1").arg(data.gameId);
         } else if (data.launcher == "Faugus") {
             // TODO add faugust launch command
             qCWarning(plugin_logger) << "Faugus launcher not supported fully yet" << data.launcher;

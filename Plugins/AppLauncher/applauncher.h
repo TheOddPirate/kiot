@@ -27,7 +27,7 @@ public:
     explicit AppLauncher(QObject *parent = nullptr);
     ~AppLauncher() override = default;
 
-private slots:
+private Q_SLOTS:
     void onOptionSelected(const QString &option);
 
 private:

@@ -11,7 +11,7 @@ class LockedState : public QObject
 public:
     Q_INVOKABLE LockedState(QObject *parent);
 
-private slots:
+private Q_SLOTS:
     void screenLockedChanged(bool active);
     void stateChangeRequested(bool state);
 

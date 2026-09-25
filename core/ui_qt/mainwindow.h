@@ -31,13 +31,13 @@ public:
                                 QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information, 
                                 int millisecondsTimeoutHint = 10000);
     WId getWindowId();
-public slots:
+public Q_SLOTS:
     void toggleVisibility();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:
+private Q_SLOTS:
     void onMqttStateChanged(QMqttClient::ClientState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
     void onOpenSettings();
