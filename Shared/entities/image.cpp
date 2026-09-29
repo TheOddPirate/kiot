@@ -50,12 +50,12 @@ void Image::init()
     // MQTT Image supports either image_topic or url_topic. 
     if(m_isUrlMode)
     {
-        qCDebug(imgentity) << "Image entity is in URL mode";
+        qCDebug(imgentity)<< tr("Image entity is in URL mode");
         setDiscoveryConfig("url_topic", baseTopic() + "/url");
 
     }
     {
-        qCDebug(imgentity) << "Image entity is in image mode";
+        qCDebug(imgentity)<< tr("Image entity is in image mode");
         setDiscoveryConfig("image_topic", baseTopic() + "/image");
         setDiscoveryConfig("image_encoding", "b64");
         setDiscoveryConfig("content_type", m_mimeType);
@@ -71,7 +71,7 @@ void Image::publishImage(const QByteArray &imageDataBase64)
         return;
     if(m_isUrlMode)
     {
-        qCWarning(imgentity) << "Image entity is in URL mode, cannot publish image data";
+        qCWarning(imgentity)<< tr("Image entity is in URL mode, cannot publish image data");
         return;
     }
     // Publiserer selve bildeinnholdet til image_topic
@@ -90,7 +90,7 @@ void Image::publishImageUrl(const QString &imageUrl)
         return;
     if(!m_isUrlMode)
     {
-        qCWarning(imgentity) << "Image entity is in image mode, cannot publish url";
+        qCWarning(imgentity)<< tr("Image entity is in image mode, cannot publish url");
         return;
     }
 

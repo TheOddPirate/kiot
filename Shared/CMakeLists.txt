@@ -1,14 +1,20 @@
 cmake_minimum_required(VERSION 3.31)
+set(my_var "${PARENT_APP_NAME}")
+string(TOUPPER "${my_var}" upper_var)
+set(name "${upper_var}Shared")
+project(${name} VERSION ${PARENT_PROJECT_VERSION}  DESCRIPTION "${PARENT_PROJECT_DESCRIPTION}" HOMEPAGE_URL "${PARENT_PROJECT_DOMAIN}"  LANGUAGES CXX)
+
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
 set(CMAKE_AUTOMOC ON)
-set(LIB_TARGET "KIOTShared")
+set(LIB_TARGET "${PROJECT_NAME}")
 
 message(STATUS "[CMake] Generating Shared library (.so) for ${LIB_TARGET}")
 
 set(KIOT_SHARED_SRC
+    kiotshared_init.cpp
     Transport/transportmanager.cpp
     Config/configmanager.cpp
     entities/entity.cpp
@@ -30,7 +36,7 @@ set(KIOT_SHARED_SRC
     dbusproperty.cpp
 )
 
-add_library(${LIB_TARGET} SHARED ${KIOT_SHARED_SRC})
+add_library(${LIB_TARGET} SHARED  ${KIOT_SHARED_SRC})
 
 target_sources(${LIB_TARGET} PUBLIC
     FILE_SET HEADERS
@@ -61,6 +67,30 @@ target_sources(${LIB_TARGET} PUBLIC
         dbusproperty.h
 )
 
+# ------------------------------------------------------------------------------
+# Language support for KIOTShared
+# ------------------------------------------------------------------------------
+find_package(Qt6 REQUIRED COMPONENTS Core LinguistTools)
+
+set(TS_FILES 
+    "translations/kiotshared_en.ts"
+    "translations/kiotshared_nb.ts"
+    "translations/kiotshared_de.ts"
+    "translations/kiotshared_fr.ts"
+    "translations/kiotshared_es.ts"
+    "translations/kiotshared_zh_CN.ts"
+)
+set(KIOT_SHARED_ABSOLUTE_SOURCES)
+foreach(src ${KIOT_SHARED_SRC})
+    list(APPEND KIOT_SHARED_ABSOLUTE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
+endforeach()
+qt_add_translations(${LIB_TARGET}
+    TS_FILES ${TS_FILES}
+    RESOURCE_PREFIX "/kiotshared/translations"
+    # Gir lupdate beskjed om hvilke kildefiler den skal sjekke (hindrer rot med andre mapper)
+    SOURCES ${KIOT_SHARED_SRC}
+)
+
 find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
     Core
     DBus
@@ -82,6 +112,8 @@ target_link_libraries(${LIB_TARGET}
 )
 
 target_compile_definitions(${LIB_TARGET} PRIVATE
+    APP_ID="${APP_ID}"
+    PARENT_APP_NAME="${PARENT_APP_NAME}"
     PROJECT_NAME="${PROJECT_NAME}"
     PROJECT_VERSION="${PROJECT_VERSION}"
     PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}"
@@ -102,7 +134,7 @@ target_include_directories(${LIB_TARGET} PUBLIC
 # 4. Target Properties & Aliasing
 # ==============================================================================
 set_target_properties(${LIB_TARGET} PROPERTIES
-    VERSION "${PROJECT_VERSION}"
+    VERSION "${PARENT_PROJECT_VERSION}"
     SOVERSION "1"
     EXPORT_NAME KIOTShared
 )
@@ -111,7 +143,7 @@ set_target_properties(${LIB_TARGET} PROPERTIES
 add_library(KIOTShared::KIOTShared ALIAS ${LIB_TARGET})
 # Installasjonen blir kjempeenkel fordi FILE_SET tar seg av alt!
 install(TARGETS ${LIB_TARGET}
-    EXPORT "${LIB_TARGET}Targets"
+    EXPORT "KIOTSharedTargets"
     RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${KDE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${KDE_INSTALL_LIBDIR}
@@ -129,7 +161,7 @@ install(EXPORT KIOTSharedTargets
 # Generate and install CMake package version file
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/KIOTSharedConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
+    VERSION ${PARENT_PROJECT_VERSION}
     COMPATIBILITY AnyNewerVersion
 )
 

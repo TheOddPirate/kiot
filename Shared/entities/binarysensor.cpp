@@ -29,7 +29,7 @@ void BinarySensor::init()
 
 void BinarySensor::publish()
 {
-    qCDebug(binary) << name() << "publishing state" << m_state;
+    qCDebug(binary) << name() << tr("publishing state") << m_state;
     if (TransportManager::mqttClient() ->state() == QMqttClient::Connected) {
         TransportManager::mqttClient() ->publish(baseTopic(), m_state ? "true" : "false", 0, true);
     }

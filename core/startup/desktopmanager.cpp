@@ -1,5 +1,5 @@
 #include "desktopmanager.h"
-#include "core/core.h"
+#include "core.h"
 
 #include <QObject>
 #include <QFile>
@@ -27,7 +27,7 @@ QString DesktopManager::desktopFilePath() {
     QDir dir(path);
     if (!dir.exists()) {
         if (!dir.mkpath(path)) {
-            qCWarning(dm) << "Failed to create directory:" << path;
+            qCWarning(dm) << tr("Failed to create directory:") << path;
         }
     }
     return path + PlatformHelper::generateServiceName() + ".desktop";
@@ -87,7 +87,7 @@ bool DesktopManager::writeDesktopFile() {
         return true;
     }
 
-    qCWarning(dm) << "Failed to write desktop file:" << file.errorString();
+    qCWarning(dm) << tr("Failed to write desktop file:") << file.errorString();
     return false;
 }
 
@@ -101,20 +101,20 @@ bool DesktopManager::removeDesktopFile() {
 
 // Sett opp autostart for .desktop (ingen D-Bus kreves her)
 bool DesktopManager::setupAutostart(bool enabled) {
-    qCDebug(dm) << "Setting .desktop autostart to:" << enabled;
+    qCDebug(dm) << tr("Setting .desktop autostart to:") << enabled;
 
     if (enabled) {
-        qCDebug(dm) << "Writing desktop file to:" << desktopFilePath();
+        qCDebug(dm) << tr("Writing desktop file to:") << desktopFilePath();
         if (!writeDesktopFile()) {
-            qCWarning(dm) << "Failed to write desktop file";
+            qCWarning(dm) << tr("Failed to write desktop file");
             return false;
         }
         return true;
     } else {
-        qCDebug(dm) << "Removing desktop file";
+        qCDebug(dm) << tr("Removing desktop file");
         bool success = removeDesktopFile();
         if (!success) {
-            qCWarning(dm) << "Desktop file already removed or couldn't be removed";
+            qCWarning(dm) << tr("Desktop file already removed or couldn't be removed");
         }
         return success;
     }
@@ -126,7 +126,7 @@ bool DesktopManager::isAutostartEnabled()
     // 1. Sjekk at desktop-filen eksisterer
     QFile file(desktopFilePath());
     if (!file.exists()) {
-        qCDebug(dm) << "Desktop file missing:" << desktopFilePath();
+        qCDebug(dm) << tr("Desktop file missing:") << desktopFilePath();
         return false;
     }
 
@@ -148,11 +148,11 @@ bool DesktopManager::isAutostartEnabled()
         QString expectedExec = execLine;
 
         if (!content.contains(expectedExec)) {
-            qCDebug(dm) << "Desktop file Exec mismatch for current path";
+            qCDebug(dm) << tr("Desktop file Exec mismatch for current path");
             return false;
         }
     } else {
-        qCDebug(dm) << "Failed to open desktop file for reading:" << file.errorString();
+        qCDebug(dm) << tr("Failed to open desktop file for reading:") << file.errorString();
         return false;
     }
 

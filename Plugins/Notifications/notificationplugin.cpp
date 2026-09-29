@@ -86,7 +86,7 @@ bool NotificationPlugin::stopPlugin()
 
 void NotificationPlugin::notificationCallback(QByteArray message)
     {
-        QString title = QString(PROJECT_NAME);
+        QString title = QString(PARENT_APP_NAME);
         QJsonParseError err;
         QJsonDocument doc = QJsonDocument::fromJson(message, &err);
         if (err.error == QJsonParseError::NoError && doc.isObject()) {

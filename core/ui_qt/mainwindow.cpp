@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     s_instance = this;
     
     
-    setWindowTitle( QString(PROJECT_NAME) + " Settings");
+    setWindowTitle( QString(PARENT_APP_NAME) + " Settings");
     setWindowIcon(QIcon::fromTheme(PlatformHelper::generateServiceName()));
     setMinimumSize(800, 600);
     
@@ -120,7 +120,7 @@ void MainWindow::onMqttStateChanged(QMqttClient::ClientState state)
     updateIcon(state);
 
     const QString statusText = connected ? "Connected" : "Disconnected";
-    m_trayIcon->setToolTip(QStringLiteral(PROJECT_NAME) + " " + statusText);
+    m_trayIcon->setToolTip(QStringLiteral(PARENT_APP_NAME) + " " + statusText);
 }
 void MainWindow::onOpenSettings()
 {
@@ -177,7 +177,7 @@ void MainWindow::onQuit()
 void MainWindow::onRestart()
 {
     qCDebug(mw) << "Restart requested from system tray";
-    QProcess::startDetached(QStringLiteral(PROJECT_NAME) );
+    QProcess::startDetached(QStringLiteral(PARENT_APP_NAME) );
     QApplication::quit();
 }
 
@@ -231,7 +231,7 @@ void MainWindow::setupSystemTray()
     createIcons();
     m_statusAction = m_menu->addAction("Status: Disconnected");
     m_statusAction->setEnabled(false);
-    m_versionAction = m_menu->addAction("Version: " +  QStringLiteral(PROJECT_VERSION));
+    m_versionAction = m_menu->addAction("Version: " +  QStringLiteral(PARENT_PROJECT_VERSION));
     m_versionAction->setEnabled(false);
     m_menu->addSeparator();
     QAction *settingsAction = m_menu->addAction(QIcon::fromTheme("configure"), "Open Settings");
@@ -325,7 +325,7 @@ void MainWindow::updateIcon(QMqttClient::ClientState state)
     }
     const bool connected = (state == QMqttClient::Connected);
     const QString statusText = connected ? "Connected" : "Disconnected";
-    m_trayIcon->setToolTip(QStringLiteral(PROJECT_NAME) + " - " + statusText);
+    m_trayIcon->setToolTip(QStringLiteral(PARENT_APP_NAME) + " - " + statusText);
 }
 
 void MainWindow::sendNotification(const QString &title, const QString &msg, QSystemTrayIcon::MessageIcon icon, int millisecondsTimeoutHint)

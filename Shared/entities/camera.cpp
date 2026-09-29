@@ -50,7 +50,7 @@ void Camera::init()
     // but lets you publish a command and use it from the signal to trigger a fresh image in a integration
     auto subscription = TransportManager::mqttClient() ->subscribe(baseTopic() + "/command");
     connect(subscription, &QMqttSubscription::messageReceived, this, [this](const QMqttMessage &message) {
-        qCDebug(camentity) << name() << "Camera command received:" << QString::fromUtf8(message.payload());
+        qCDebug(camentity) << name() << tr("Camera command received:") << QString::fromUtf8(message.payload());
         emit commandReceived(QString::fromUtf8(message.payload()));
     });
 }

@@ -123,8 +123,7 @@ QString Entity::haIcon() const
 QString Entity::id() const
 {
     if (m_id.isEmpty()) {
-        qCWarning(base) << "Entity ID not set for entity" << name()
-                   << " remember to use setId(IDstring)";
+        qCWarning(base) << tr("Entity ID not set for entity") << name();
     }
     return sanitizeForMqttTopic(m_id);
 }
@@ -178,18 +177,18 @@ void Entity::runtimeRegistration()
         return;
     }
     
-    qCDebug(base) << "Runtime registration of entity:" << id() << "(" << name() << ")";
+    qCDebug(base) << tr("Runtime registration of entity:") << id() << "(" << name() << ")";
     init();
 }
 
 void Entity::unRegister()
 {
     if (TransportManager::mqttClient()->state() != QMqttClient::Connected) {
-        qCWarning(base) << "Cannot unregister entity" << id() << "(" << name() << ")"  << "- MQTT client not connected";
+        qCWarning(base) << tr("Cannot unregister entity") << id() << "(" << name() << ")"  << "- MQTT client not connected";
         return;
     }
     
-    qCDebug(base) << "Unregistering entity:" << id() << "(" << name() << ")";
+    qCDebug(base) << tr("Unregistering entity:") << id() << "(" << name() << ")";
     TransportManager::mqttClient()->publish(discoveryPrefix() + "/" + haType() + "/" + hostname() + "/" + id() + "/config",
     QByteArray(), 0, true);
 }

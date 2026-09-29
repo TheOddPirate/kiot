@@ -112,7 +112,7 @@ void Update::setUpdatePercentage(int percentage)
 {
     // Validate percentage range (-1 to clear, 0-100 for progress)
     if (percentage < -1 || percentage > 100) {
-        qCWarning(upd) << "Invalid update percentage:" << percentage << "(must be -1 to 100)";
+        qCWarning(upd) << "Invalid update percentage:" << percentage<< tr("(must be -1 to 100)");
         return;
     }
 

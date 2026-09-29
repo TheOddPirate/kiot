@@ -1,5 +1,5 @@
 #include "systemdmanager.h"
-#include "core/core.h"
+#include "core.h"
 
 #include <QObject>
 #include <QDBusConnection>
@@ -24,7 +24,7 @@ QString SystemdManager::serviceFilePath() {
     QDir dir(path);
     if (!dir.exists()) {
         if (!dir.mkpath(path)) {
-            qCWarning(sm) << "Failed to create directory:" << path;
+            qCWarning(sm) << tr("Failed to create directory:") << path;
         }
     }
     return path + QString(PROJECT_NAME) + ".service";
@@ -69,7 +69,7 @@ bool SystemdManager::writeServiceFile() {
         return true;
     }
 
-    qCWarning(sm) << "Failed to write service file:" << file.errorString();
+    qCWarning(sm) << tr("Failed to write service file:") << file.errorString();
     return false;
 }
 
@@ -87,7 +87,7 @@ bool SystemdManager::enableServiceViaDBus() {
     QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
 
     if (!systemd.isValid()) {
-        qCWarning(sm) << "Cannot connect to systemd via D-Bus";
+        qCWarning(sm) << tr("Cannot connect to systemd via D-Bus");
         return false;
     }
 
@@ -97,19 +97,19 @@ bool SystemdManager::enableServiceViaDBus() {
     );
 
     if (!enableReply.isValid()) {
-        qCWarning(sm) << "Failed to enable service:" << enableReply.error().message();
+        qCWarning(sm) << tr("Failed to enable service:") << enableReply.error().message();
         return false;
     }
 
     QDBusReply<void> reloadReply = systemd.call("Reload");
     if (!reloadReply.isValid()) {
-        qCWarning(sm) << "Failed to reload systemd:" << reloadReply.error().message();
+        qCWarning(sm) << tr("Failed to reload systemd:") << reloadReply.error().message();
     }
 
     QDBusReply<QDBusObjectPath> startReply = systemd.call("StartUnit", QString(PROJECT_NAME) + ".service","replace");
 
     if (!startReply.isValid()) {
-        qCWarning(sm) << "Failed to start service:" << startReply.error().message();
+        qCWarning(sm) << tr("Failed to start service:") << startReply.error().message();
     }
 
     return true;
@@ -119,52 +119,52 @@ bool SystemdManager::disableServiceViaDBus() {
     QDBusInterface systemd("org.freedesktop.systemd1", "/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
 
     if (!systemd.isValid()) {
-        qCWarning(sm) << "Cannot connect to systemd via D-Bus";
+        qCWarning(sm) << tr("Cannot connect to systemd via D-Bus");
         return false;
     }
 
     QDBusMessage stopReply = systemd.call("StopUnit", QString(PROJECT_NAME) + ".service", "replace");
 
     if (stopReply.type() == QDBusMessage::ErrorMessage) {
-        qCWarning(sm) << "Failed to stop service:" << stopReply.errorMessage();
+        qCWarning(sm) << tr("Failed to stop service:") << stopReply.errorMessage();
     }
 
     QDBusMessage disableReply = systemd.call("DisableUnitFiles",QStringList() << QString(PROJECT_NAME) + ".service",false);
 
     if (disableReply.type() == QDBusMessage::ErrorMessage) {
-        qCWarning(sm) << "Failed to disable service:" << disableReply.errorMessage();
+        qCWarning(sm) << tr("Failed to disable service:") << disableReply.errorMessage();
         return false;
     }
 
     QDBusMessage reloadReply = systemd.call("Reload");
     if (reloadReply.type() == QDBusMessage::ErrorMessage) {
-        qCWarning(sm) << "Failed to reload systemd:" << reloadReply.errorMessage();
+        qCWarning(sm) << tr("Failed to reload systemd:") << reloadReply.errorMessage();
     }
 
     return true;
 }
 
 bool SystemdManager::setupAutostart(bool enabled) {
-    qCDebug(sm) << "Setting autostart to:" << enabled;
+    qCDebug(sm) << tr("Setting autostart to:") << enabled;
 
     if (enabled) {
-        qCDebug(sm) << "Writing service file to:" << serviceFilePath();
+        qCDebug(sm) << tr("Writing service file to:") << serviceFilePath();
         if (!writeServiceFile()) {
-            qCWarning(sm) << "Failed to write service file";
+            qCWarning(sm) << tr("Failed to write service file");
             return false;
         }
-        qCDebug(sm) << "Enabling service via D-Bus";
+        qCDebug(sm) << tr("Enabling service via D-Bus");
         return enableServiceViaDBus();
     } else {
-        qCDebug(sm) << "Disabling service via D-Bus";
+        qCDebug(sm) << tr("Disabling service via D-Bus");
         bool success = disableServiceViaDBus();
         if (!success) {
-            qCWarning(sm) << "Failed to disable service via D-Bus";
+            qCWarning(sm) << tr("Failed to disable service via D-Bus");
         }
 
-        qCDebug(sm) << "Removing service file";
+        qCDebug(sm) << tr("Removing service file");
         if (!removeServiceFile()) {
-            qCDebug(sm) << "Service file already removed or couldn't be removed";
+            qCDebug(sm) << tr("Service file already removed or couldn't be removed");
         }
         return success;
     }
@@ -175,20 +175,20 @@ bool SystemdManager::isAutostartEnabled()
     QDBusInterface systemd("org.freedesktop.systemd1","/org/freedesktop/systemd1","org.freedesktop.systemd1.Manager",QDBusConnection::sessionBus());
 
     if (!systemd.isValid()) {
-        qCWarning(sm) << "Cannot connect to systemd via D-Bus";
+        qCWarning(sm) << tr("Cannot connect to systemd via D-Bus");
         return false;
     }
 
     QDBusReply<QString> stateReply = systemd.call("GetUnitFileState", QString(PROJECT_NAME) + ".service");
     if (!stateReply.isValid()) {
-        qCDebug(sm) << "Failed to get service state:" << stateReply.error().message();
+        qCDebug(sm) << tr("Failed to get service state:") << stateReply.error().message();
         return false;
     }
 
     QString state = stateReply.value();
     bool enabled = state == "enabled" || state == "enabled-runtime" || state == "static";
     if (!enabled) {
-        qCDebug(sm) << "Service is not enabled in systemd";
+        qCDebug(sm) << tr("Service is not enabled in systemd");
         return false;
     }
 
@@ -205,11 +205,11 @@ bool SystemdManager::isAutostartEnabled()
         QString expectedExec = "ExecStart=" + QCoreApplication::applicationFilePath();
 
         if (!content.contains(expectedExec)) {
-            qCDebug(sm) << "Service ExecStart mismatch for current platform";
+            qCDebug(sm) << tr("Service ExecStart mismatch for current platform");
             return false;
         }
     } else {
-        qCDebug(sm) << "Failed to open service file for reading:" << file.errorString();
+        qCDebug(sm) << tr("Failed to open service file for reading:") << file.errorString();
         return false;
     }
 

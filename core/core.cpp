@@ -6,7 +6,7 @@
 
 #include "ui_qt/mainwindow.h"
 #include "core.h"
-#include "core/startup/startupmanager.h"
+#include "startup/startupmanager.h"
 #include "plugins/pluginmanager.h"
 #include <KIOTShared/kiotshared.h>
 
@@ -15,8 +15,8 @@
 #include <QJsonObject>
 #include <QMqttClient>
 #include <QTimer>
-#include <QLoggingCategory>
 #include <QApplication>
+
 
 using KIOTShared::Entities::Entity;
 using KIOTShared::Transport::TransportManager;
@@ -41,25 +41,26 @@ void HaControl::validateStartup(bool autostart)
     auto startupManager = new StartupManager(this);
     bool currentlyEnabled = startupManager->isAutostartEnabled();
     if (currentlyEnabled == autostart) {
-        qCDebug(core) << "Autostart is already in desired state:" << autostart;
+        qCDebug(core) << tr("Autostart is already in desired state:") << autostart;
         return;
     }
 
-    QString actionStr = autostart ? "Enabling" : "Disabling";
-    qCInfo(core) << actionStr << " autostartup";
+    QString actionStr = autostart ? tr("Enabling autostartup") : tr("Disabling autostartup");
+    qCInfo(core) << actionStr;
 
     if (startupManager->setAutostart(autostart)) {
         if (autostart) {
-            qCInfo(core) << "Autostart successfully enabled.";
+            qCInfo(core) << tr("Autostart successfully enabled.");
             if (!PlatformHelper::isFlatpak()) {
-                qCInfo(core) << "Running natively with systemd, closing instance to let systemd manage lifecycle.";
+                qCInfo(core) << tr("Running natively with systemd, closing instance to let systemd manage lifecycle.");
                 QApplication::exit(0);
             }
         } else {
-            qCInfo(core) << "Autostart successfully disabled.";
+            qCInfo(core) << tr("Autostart successfully disabled.");
         }
     } else {
-        qCWarning(core) << "Failed to" << (autostart ? "enable" : "disable") << "autostartup";
+        QString actionMsg = autostart ? tr("Failed to enable autostartup") : tr("Failed to disable autostartup");
+        qCWarning(core) << actionMsg;
     }
 }
 
@@ -67,7 +68,7 @@ bool HaControl::validateConfig()
 {
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig );
     if (!config->hasGroup("general")) {
-        qCWarning(core) << "Config not found, creating default config and launching UI";
+        qCWarning(core) << tr("Config not found, creating default config and launching UI");
         KConfigGroup group(config, "general");
         group.writeEntry("host", "localhost");
         group.writeEntry("port", 1883);
@@ -81,7 +82,7 @@ bool HaControl::validateConfig()
     }else{
         KConfigGroup group(config, "general");
         if(group.readEntry("password") == "mqtt-password-here"){
-            MainWindow::sendNotification(QString(PROJECT_NAME),"Please configure your MQTT settings");
+            MainWindow::sendNotification(QString(PROJECT_NAME),tr("Please configure your MQTT settings"));
             m_mainWindow->show();
         }
 
@@ -115,7 +116,7 @@ HaControl::HaControl()
     
     connect(transportManager, &TransportManager::mqttConfigMissing, this, [this]() {
         if (m_mainWindow) {
-            MainWindow::sendNotification(QString(PROJECT_NAME), "Please configure your MQTT settings");
+            MainWindow::sendNotification(QString(PROJECT_NAME), tr("Please configure your MQTT settings"));
             m_mainWindow->show();
         }
     });
@@ -147,7 +148,7 @@ void HaControl::loadIntegrations()
     if(m_pluginManager)
         m_pluginManager->loadActivatedPlugins();
     else
-        qCWarning(core) << "PluginManager not initialized";
+        qCWarning(core) << tr("PluginManager not initialized");
 }
 
 ConnectedNode::ConnectedNode(QObject *parent)

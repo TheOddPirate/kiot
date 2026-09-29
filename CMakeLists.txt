@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.31)
 project(kiot VERSION 0.0.1 DESCRIPTION "KDE Internet of Things desktop integration for Home Automation" HOMEPAGE_URL "https://github.com/davidedmundson/kiot" LANGUAGES CXX )
 
 # ------------------------------------------------------------------------------
-# PROSJEKT DEVELOPERS Shown under device info in HA with version and more
+# PROJECTT DEVELOPERS Shown under device info in HA with version and more
 # ------------------------------------------------------------------------------
 set(PROJECT_DEVELOPERS "David Edmundson & Odd Østlie" CACHE STRING "List of developers, add yourself here to be shown with the device info")
 
@@ -34,11 +34,14 @@ set(CURRENT_YEAR ${CURRENT_YEAR} CACHE STRING "Current year")
 # ------------------------------------------------------------------------------
 # Adds project definition for reusability in sub directories cmakelists
 # ------------------------------------------------------------------------------
-add_definitions(-DPROJECT_NAME="${PROJECT_NAME}")
-add_definitions(-DPROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
-add_definitions(-DPROJECT_VERSION="${PROJECT_VERSION}")
-add_definitions(-DPROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
-add_definitions(-DAPP_ID="${APP_ID}")
+add_definitions(-DPARENT_PROJECT_NAME="${PROJECT_NAME}")
+add_definitions(-DPARENT_PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}")
+add_definitions(-DPARENT_PROJECT_VERSION="${PROJECT_VERSION}")
+
+set(PARENT_PROJECT_VERSION ${PROJECT_VERSION})
+add_definitions(-DPARENT_PROJECT_DOMAIN="${PROJECT_HOMEPAGE_URL}")
+#set(APP_ID ${APP_ID})
+add_definitions(-DPARENT_APP_NAME="${PROJECT_NAME}")
 set(PARENT_APP_NAME ${PROJECT_NAME})
 
 # ------------------------------------------------------------------------------

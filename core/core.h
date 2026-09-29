@@ -4,6 +4,7 @@
 #pragma once
 #include <KIOTShared/kiotshared.h>
 #include "plugins/pluginmanager.h"
+#include <QTranslator>
 #include <KSharedConfig>
 #include <QCoreApplication>
 #include <QMqttSubscription>

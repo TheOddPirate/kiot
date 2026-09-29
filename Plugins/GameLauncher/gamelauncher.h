@@ -12,7 +12,7 @@ using KIOTShared::Entities::Select;
 using KIOTShared::Plugins::KIOTPluginInterface;
 class GameLauncherPlugin : public QObject, public KIOTShared::Plugins::KIOTPluginInterface {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID KIOTPluginInterface_iid FILE "plugin.json")
+    Q_PLUGIN_METADATA(IID "org.kiot.PluginInterface/1.0" FILE "plugin.json")
     Q_INTERFACES(KIOTShared::Plugins::KIOTPluginInterface)
 
 public:

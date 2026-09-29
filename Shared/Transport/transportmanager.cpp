@@ -1,9 +1,10 @@
 #include "transportmanager.h"
 #include "platformhelper.h"
 #include <KSharedConfig>
+#include <QTranslator>
 #include <KConfigGroup>
 #include <QApplication>
-
+#include <QTranslator>
 DEFINE_LOGGER(transportlogger, Shared.TransportManager)
 
 namespace KIOTShared {
@@ -16,14 +17,14 @@ TransportManager *TransportManager::s_self = nullptr;
 TransportManager::TransportManager(QObject *parent) : QObject(parent), m_client(nullptr)
 {
     if (s_transportManagerInstantiated || s_self) {
-        qCFatal(transportlogger) << "TransportManager can only be instantiated once";
+        qCFatal(transportlogger)<< tr("TransportManager can only be instantiated once");
         return;
     }
     s_self = this;
     
     if(!initiateMqttClient())
     {
-        qCWarning(transportlogger) << "Mqtt client not initiated";
+        qCWarning(transportlogger)<< tr("Mqtt client not initiated");
         s_self = nullptr;
         deleteLater();
         return;
@@ -34,10 +35,10 @@ TransportManager::TransportManager(QObject *parent) : QObject(parent), m_client(
 
 TransportManager::~TransportManager()
 {
-    qCDebug(transportlogger) << "TransportManager destructor called";
+    qCDebug(transportlogger)<< tr("TransportManager destructor called");
 
     if (this == s_self) {
-        qCInfo(transportlogger) << "TransportManager destroyed, releasing lock";
+        qCInfo(transportlogger)<< tr("TransportManager destroyed, releasing lock");
         s_self = nullptr;
         s_transportManagerInstantiated = false;
     }
@@ -48,14 +49,14 @@ bool TransportManager::initiateMqttClient()
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
     if(!config->hasGroup("general"))
     {
-        qCFatal(transportlogger) << "No MQTT config found";
+        qCFatal(transportlogger)<< tr("No MQTT config found");
         Q_EMIT mqttConfigMissing();
         return false;
     }
     auto group = config->group("general");
 
     if(group.readEntry("password") == "mqtt-password-here"){
-        qCFatal(transportlogger) << "Default MQTT password detected";
+        qCFatal(transportlogger)<< tr("Default MQTT password detected");
         Q_EMIT mqttConfigMissing();
         return false;
     }
@@ -68,13 +69,13 @@ bool TransportManager::initiateMqttClient()
     m_client->setKeepAlive(3);
 
     if (m_client->hostname().isEmpty()) {
-        qCCritical(transportlogger) << "Server is not configured, please check config file at:" << PlatformHelper::configFilePath();
+        qCCritical(transportlogger) << tr("Server is not configured, please check config file at:") << PlatformHelper::configFilePath();
         m_client->deleteLater();
         m_client = nullptr;
         return false;
     }
     
-    qCInfo(transportlogger) << "MQTT server configured to" << m_client->hostname();
+    qCInfo(transportlogger) << tr("MQTT server configured to") << m_client->hostname();
 
     reconnectTimer = new QTimer(this);
     reconnectTimer->setInterval(5000);
@@ -88,15 +89,15 @@ void TransportManager::handleStateChanged(QMqttClient::ClientState state) {
     
     switch (state) {
     case QMqttClient::Connected:
-        qCInfo(transportlogger) << "connected";
+        qCInfo(transportlogger)<< tr("connected");
         reconnectTimer->stop();
         break;
     case QMqttClient::Connecting:
-        qCInfo(transportlogger) << "connecting";
+        qCInfo(transportlogger)<< tr("connecting");
         break;
     case QMqttClient::Disconnected:
-        qCWarning(transportlogger) << "Disconnected from broker";
-        qCInfo(transportlogger) << "disconnected";
+        qCWarning(transportlogger)<< tr("Disconnected from broker");
+        qCInfo(transportlogger)<< tr("disconnected");
         if(!QApplication::closingDown())
             reconnectTimer->start();
         break;
@@ -107,10 +108,10 @@ void TransportManager::doConnect()
 {
     if(m_client->state() == QMqttClient::Connecting || m_client->state() == QMqttClient::Connected)
     {
-        qCInfo(transportlogger) << "Already connected or connecting";
+        qCInfo(transportlogger)<< tr("Already connected or connecting");
         return;
     }
-    qCInfo(transportlogger) << "Connecting to MQTT broker";
+    qCInfo(transportlogger)<< tr("Connecting to MQTT broker");
     auto config = KSharedConfig::openConfig(PlatformHelper::configFilePath(), KConfig::SimpleConfig);
     auto group = config->group("general");
     if (group.readEntry("tls", false)) {
@@ -123,12 +124,12 @@ void TransportManager::doConnect()
 
 void TransportManager::doDisconnect()
 {
-    qCInfo(transportlogger) << "Disconnecting from MQTT broker";
+    qCInfo(transportlogger)<< tr("Disconnecting from MQTT broker");
     if(reconnectTimer->isActive())
         reconnectTimer->stop();
     if(m_client->state() == QMqttClient::Disconnected)
     {
-        qCInfo(transportlogger) << "Already disconnected";
+        qCInfo(transportlogger)<< tr("Already disconnected");
         return;
     }
     m_client->disconnectFromHost();

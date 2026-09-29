@@ -29,6 +29,7 @@
 #include <KConfigGroup>
 #include "platformhelper.h"
 #include "KIOTShared/kiotshared_export.h"
+#include <QTranslator>
 
 using KIOTShared::PlatformHelper;
 

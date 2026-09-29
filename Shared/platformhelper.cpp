@@ -23,7 +23,9 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QGuiApplication>
+#include <QApplication>
 
+#include <QTranslator>
 
 /**
  * @brief Logging category used by the platform helper.
@@ -181,7 +183,7 @@ QString PlatformHelper::generateServiceName()
  */
 QString PlatformHelper::getProjectName()
 {
-    return QString(PROJECT_NAME);    
+    return QString(PARENT_APP_NAME);    
 }
 
 /**
@@ -218,7 +220,7 @@ QString PlatformHelper::resolveOrganizationDomain(const QString &input)
  */
 QString PlatformHelper::configFilePath(const QString &fileType)
 {
-    QString configFilePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) +  "/" + QStringLiteral(PROJECT_NAME) + fileType;
+    QString configFilePath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) +  "/" + QStringLiteral(PARENT_APP_NAME) + fileType;
     QFile file(configFilePath);
     if(!file.exists())
     {
@@ -238,7 +240,7 @@ QString PlatformHelper::configFilePath(const QString &fileType)
  */
 QString PlatformHelper::configDirPath()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PROJECT_NAME) ;
+    return QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/" + QStringLiteral(PARENT_APP_NAME) ;
 }
 
 /**
@@ -484,7 +486,7 @@ bool PlatformHelper::checkFlatpakFeature(const QString &group, const QString &ke
 {
     QFile file(QStringLiteral("/.flatpak-info"));
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qCDebug(helper) << "Could not open /.flatpak-info file";
+        qCDebug(helper)<< QCoreApplication::translate("platformhelper","Could not open /.flatpak-info file");
         return false;
     }
 
@@ -517,14 +519,14 @@ bool PlatformHelper::checkFlatpakFeature(const QString &group, const QString &ke
                     // Flatpak bruker semikolon som separator (og ofte en avsluttende ';' på slutten)
                     QStringList values = rawValue.split(';', Qt::SkipEmptyParts);
                     
-                    qCDebug(helper) << "Flatpak feature check (manual):" << group << key << expectedValue << values;
+                    qCDebug(helper) << QCoreApplication::translate("platformhelper","Flatpak feature check (manual):") << group << key << expectedValue << values;
                     return values.contains(expectedValue);
                 }
             }
         }
     }
 
-    qCDebug(helper) << "Group or Key not found in /.flatpak-info:" << group << key;
+    qCDebug(helper) << QCoreApplication::translate("platformhelper","Group or Key not found in /.flatpak-info:") << group << key;
     return false;
 }
 /*

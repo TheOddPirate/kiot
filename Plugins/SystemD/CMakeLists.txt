@@ -59,6 +59,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # Inject project metadata as preprocessor definitions for runtime retrieval
 target_compile_definitions(${PROJECT_NAME} PRIVATE
+    APP_ID="${APP_ID}"
+    PARENT_APP_NAME="${PARENT_APP_NAME}"
     PLUGIN_NAME="${PROJECT_NAME}"
     PLUGIN_VERSION="${PROJECT_VERSION}"
     PLUGIN_DESCRIPTION="${PROJECT_DESCRIPTION}"

@@ -1,5 +1,7 @@
 
 #include "backgroundmanager.h"
+#include "core.h"
+
 #include <QDBusConnection>
 #include <QDBusPendingReply>
 #include <QLoggingCategory>
@@ -58,49 +60,50 @@ bool BackgroundManager::isAutostartEnabled() const
 bool BackgroundManager::enableAutostartup()
 {
     if (!m_backgroundIface->isValid()) {
-        qCWarning(bgm) << "Background portal interface is not valid on session bus!";
+        qCWarning(bgm) << tr("Background portal interface is not valid on session bus!");
         return false;
     }
     QString name = PlatformHelper::getProjectName();
+    QString msg = name.toUpper() + tr(" needs to run in the background to enable automatic startup and handle smart home automations, MQTT listeners, and system monitoring.");
     QVariantMap options;
     options.insert(QStringLiteral("autostart"), true);
-    options.insert(QStringLiteral("reason"), name.toUpper() + QStringLiteral(" needs to run in the background to enable automatic startup and handle smart home automations, MQTT listeners, and system monitoring."));
+    options.insert(QStringLiteral("reason"), msg);
     options.insert(QStringLiteral("silence"), false);
 
     QDBusPendingReply<QDBusObjectPath> reply = m_backgroundIface->RequestBackground(QString(), options);
     reply.waitForFinished();
 
     if (reply.isError()) {
-        qCWarning(bgm) << "Failed to request background execution:" << reply.error().message();
+        qCWarning(bgm) << tr("Failed to request background execution:") << reply.error().message();
         return false;
     }
 
     
-    qCDebug(bgm) << "Background request successful! Handle path:" << reply.value().path();
+    qCDebug(bgm) << tr("Background request successful! Handle path:") << reply.value().path();
     return true;
 }
 
 bool BackgroundManager::disableAutostartup()
 {
     if (!m_backgroundIface->isValid()) {
-        qCWarning(bgm) << "Background portal interface is not valid on session bus!";
+        qCWarning(bgm) << tr("Background portal interface is not valid on session bus!");
         return false;
     }
     QString name = PlatformHelper::getProjectName();
-   
+    QString msg = name.toUpper() + tr(" needs to run in the background to disable automatic startup and handle smart home automations, MQTT listeners, and system monitoring.");
     QVariantMap options;
     options.insert(QStringLiteral("autostart"), false);
-    options.insert(QStringLiteral("reason"), name.toUpper() + QStringLiteral(" needs to run in the background to disable automatic startup and handle smart home automations, MQTT listeners, and system monitoring."));
+    options.insert(QStringLiteral("reason"), msg);
     options.insert(QStringLiteral("silence"), false);
     
     QDBusPendingReply<QDBusObjectPath> reply = m_backgroundIface->RequestBackground(QString(), options);
     reply.waitForFinished();
 
     if (reply.isError()) {
-        qCWarning(bgm) << "Failed to disable background execution:" << reply.error().message();
+        qCWarning(bgm) << tr("Failed to disable background execution:") << reply.error().message();
         return false;
     }
 
-    qCDebug(bgm) << "Background autostart disabled successfully.";
+    qCDebug(bgm) << tr("Background autostart disabled successfully.");
     return true;
 }

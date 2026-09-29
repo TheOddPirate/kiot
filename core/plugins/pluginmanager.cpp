@@ -3,6 +3,8 @@
 #include <QDir>
 #include <KConfigGroup>
 #include <KSharedConfig>
+#include <QTranslator>
+
 DEFINE_LOGGER(pm_logger, Core.Plugins.PluginManager)
 
 PluginManager::PluginManager(QObject *parent): QObject(parent)
@@ -37,7 +39,8 @@ void PluginManager::unloadAllPlugins()
 bool PluginManager::startPlugin(QString pluginName)
 {
     if (m_loadedPlugins.contains(pluginName)) {
-        qCInfo(pm_logger) << "Plugin" << pluginName << "is already loaded";
+        auto msg = QString(tr("Plugin is already loaded:"));   
+        qCInfo(pm_logger) << msg<< pluginName;
         return true;
     }
     
@@ -55,30 +58,31 @@ bool PluginManager::startPlugin(QString pluginName)
                 {
                     if (kiotPlugin->checkCompatibility()) {
                         if (kiotPlugin->startPlugin()) {
-                            qCInfo(pm_logger) << "Started plugin integration:" << pluginName;
+                            qCInfo(pm_logger) << tr("Started plugin integration:") << pluginName;
                             m_loadedPlugins[pluginName] = {kiotPlugin, pluginLoader};
                         } else {
-                            qCWarning(pm_logger) << "Failed to start plugin:" << pluginName;
+                            qCWarning(pm_logger) << tr("Failed to start plugin:") << pluginName;
                             pluginLoader->unload();
                             pluginLoader->deleteLater();
                         }
                     } else {
-                        qCWarning(pm_logger) << "Plugin compatibility check failed for:" << pluginName << "Disabling";
+                        qCWarning(pm_logger) << tr("Plugin compatibility check failed for:") << pluginName << tr("Disabling");
                         pluginLoader->unload();
                         pluginLoader->deleteLater();
                     }
                 }
             }else {
-                qCWarning(pm_logger) << "File" << fileName << "does not cast to KIOTPluginInterface!";
+                auto msg = QString(tr("File is not recognised as a plugin: "));
+                qCWarning(pm_logger) << msg << fileName ;
                 pluginLoader->unload();
                 pluginLoader->deleteLater();
             }
         }else {
-            qCWarning(pm_logger) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
+            qCWarning(pm_logger) << tr("Failed to load plugin from file") << fileName << ":" << pluginLoader->errorString();
             pluginLoader->deleteLater();
         }
     }
-    qCWarning(pm_logger) << "Plugin" << pluginName << "failed to load";
+    qCWarning(pm_logger) << tr("Plugin failed to load:") << pluginName;
     //TODO implement me
     return false;
 }
@@ -86,7 +90,7 @@ bool PluginManager::startPlugin(QString pluginName)
 bool PluginManager::stopPlugin(QString pluginName)
 {
     if (!m_loadedPlugins.contains(pluginName)) {
-        qCWarning(pm_logger) << "Plugin" << pluginName << "is not loaded";
+        qCWarning(pm_logger) << tr("Plugin is not loaded: ") << pluginName;
         return false;
     }
     
@@ -102,7 +106,7 @@ bool PluginManager::stopPlugin(QString pluginName)
     
     // Fjern direkte fra hashen ved hjelp av nøkkelen
     m_loadedPlugins.remove(pluginName);
-    qCInfo(pm_logger) << "Stopped plugin" << pluginName;
+    qCInfo(pm_logger) << tr("Stopped plugin: ") << pluginName;
     return true;
 }
 
@@ -113,7 +117,7 @@ bool PluginManager::loadActivatedPlugins()
         loadPluginList();
         if(m_pluginFiles.size() == 0)
         {
-            qCWarning(pm_logger) << "No plugins found";
+            qCWarning(pm_logger) << tr("No plugins found");
             return false;
         }
     }
@@ -139,37 +143,37 @@ bool PluginManager::loadActivatedPlugins()
                 if (enabled) {
                     if (kiotPlugin->checkCompatibility()) {
                         if (kiotPlugin->startPlugin()) {
-                            qCInfo(pm_logger) << "Started plugin integration:" << pluginName;
+                            qCInfo(pm_logger) << tr("Started plugin integration:") << pluginName;
                             m_loadedPlugins[pluginName] = {kiotPlugin, pluginLoader};
                            // m_loadedPlugins.append({kiotPlugin, pluginLoader});
                         } else {
-                            qCWarning(pm_logger) << "Failed to start plugin:" << pluginName;
+                            qCWarning(pm_logger) << tr("Failed to start plugin:") << pluginName;
                             pluginLoader->unload();
                             pluginLoader->deleteLater();
                         }
                     } else {
-                        qCWarning(pm_logger) << "Plugin compatibility check failed for:" << pluginName << "Disabling";
+                        qCWarning(pm_logger) << tr("Plugin compatibility check failed for:") << pluginName << tr("Disabling");
                         integrationconfig.writeEntry(pluginName, false);
                         config->sync();
                         pluginLoader->unload();
                         pluginLoader->deleteLater();
                     }
                 } else {
-                    qCDebug(pm_logger) << "Skipped disabled plugin:" << pluginName;
+                    qCDebug(pm_logger) << tr("Skipped disabled plugin:") << pluginName;
                     pluginLoader->unload();
                     pluginLoader->deleteLater();
                 }
             }else {
-                qCWarning(pm_logger) << "File" << fileName << "does not cast to KIOTPluginInterface!";
+                qCWarning(pm_logger) << tr("File is not recognised as a plugin: ")<< fileName;
                 pluginLoader->unload();
                 pluginLoader->deleteLater();
             }
         }else {
-            qCWarning(pm_logger) << "Failed to load plugin from file" << fileName << ":" << pluginLoader->errorString();
+            qCWarning(pm_logger) << tr("Failed to load plugin from file") << fileName << ":" << pluginLoader->errorString();
             pluginLoader->deleteLater();
         }
     }
-    qCDebug(pm_logger) << "Loaded plugins:" << m_loadedPlugins.size();
+    qCDebug(pm_logger) << tr("Loaded plugins:") << m_loadedPlugins.size();
     if(m_loadedPlugins.isEmpty())
         return false;
     return true;
@@ -187,7 +191,7 @@ void PluginManager::loadPluginList()
     //For plugins in test env
     if(QDir(QCoreApplication::applicationDirPath() + "/plugins").exists())
     {
-        qCDebug(pm_logger) << "Found plugins in test env, using debug path";
+        qCDebug(pm_logger) << tr("Found plugins in test env, using debug path");
         pathList.clear();
         pathList.append(QCoreApplication::applicationDirPath() + "/plugins");
     }
@@ -214,7 +218,7 @@ void PluginManager::loadPluginList()
                 auto *kiotPlugin = qobject_cast<KIOTPluginInterface *>(pluginInstance);
                 if (kiotPlugin) {
                     //Add the plugin path to the list
-                    qCDebug(pm_logger) << "Found plugin: " << fileName << " in " << pathName;
+                    qCDebug(pm_logger) << tr("Found plugin: ") << fileName << tr(" in ") << pathName;
                     if(!m_pluginFiles.contains(pluginsDir.absoluteFilePath(fileName)))
                         m_pluginFiles.append(pluginsDir.absoluteFilePath(fileName));
                 }
@@ -223,6 +227,6 @@ void PluginManager::loadPluginList()
             pluginLoader->deleteLater();
         }
     }
-    qCDebug(pm_logger) << "Found " << m_pluginFiles.count() << " plugins";
+    qCDebug(pm_logger) << tr("Found plugins on disk: ") << m_pluginFiles.count() ;
 }
 

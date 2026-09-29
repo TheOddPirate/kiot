@@ -125,8 +125,8 @@ void SettingsManager::deleteNestedConfig(const QString &mainSection, const QStri
 
 void SettingsManager::applySettings()
 {
-    qCDebug(settings_sm) << "Settings applied, restarting " + QString(PROJECT_NAME);
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
+    qCDebug(settings_sm) << "Settings applied, restarting " + QString(PARENT_APP_NAME);
+    QProcess::startDetached(QString(PARENT_APP_NAME), QStringList());
     QApplication::quit();
 }
 
@@ -141,7 +141,7 @@ void SettingsManager::restoreDefaults()
     saveConfigValue("general", "useSSL", false);
     saveConfigValue("general", "autostart", true);
     
-    QProcess::startDetached(QString(PROJECT_NAME), QStringList());
+    QProcess::startDetached(QString(PARENT_APP_NAME), QStringList());
     QApplication::quit();
 }
 

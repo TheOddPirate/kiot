@@ -1,8 +1,9 @@
-#include "core/core.h"
+#include "core.h"
 #include "logging/messagehandler.h"
 #include "ui_qt/mainwindow.h"
-
+#include <KIOTShared/kiotshared.h>
 #include <QApplication>
+#include <QTranslator>
 #include <csignal>
 
 #include <KAboutData>
@@ -29,6 +30,24 @@ int main(int argc, char **argv)
     QApplication::setOrganizationDomain( domain);
     QApplication app(argc, argv);
 
+
+    QTranslator translator;
+    QTranslator libTranslator;
+
+    QString locale = QLocale::system().name(); // F.eks. "nb_NO" eller "nn_NO"
+    
+    // Prøver å laste inn en .qm-fil fra Qt sin ressursfil (f.eks. ":/i18n/kiot_nb_NO.qm")
+    if (translator.load("kiot_fr" , QStringLiteral(":/translations"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
+
+    QString libPath = "/mnt/Development/Clones/kiot/build/Shared/"; 
+    if (libTranslator.load("kiotshared_fr",   QStringLiteral(":/kiotshared/translations"))) {
+        QCoreApplication::installTranslator(&libTranslator);
+    }else {
+        qWarning() << "Failed to load library translations";
+    }
+
     initLogging();
     
     KAboutData aboutData(
@@ -41,7 +60,12 @@ int main(int argc, char **argv)
     );
     
     KDBusService service(KDBusService::Unique | KDBusService::Replace);
-    qCInfo(main_cpp) << "Starting" << PROJECT_NAME << "version:" << PROJECT_VERSION;
+    //qCInfo(main_cpp) << QCoreApplication::translate("Starting") << PROJECT_NAME << QCoreApplication::translate("version:") << PROJECT_VERSION;
+    qCInfo(main_cpp) << QCoreApplication::translate("main", "Starting") 
+                     << PROJECT_NAME 
+                     << QCoreApplication::translate("main", "version:") 
+                     << PROJECT_VERSION;
+    
     MainWindow mainWindow;
     HaControl appControl;
 
@@ -49,7 +73,7 @@ int main(int argc, char **argv)
     KSignalHandler::self()->watchSignal(SIGINT);
     QObject::connect(KSignalHandler::self(), &KSignalHandler::signalReceived, [](int sig) {
         if (sig == SIGTERM || sig == SIGINT) {
-            qCInfo(main_cpp) << "Shutting down" << QStringLiteral(PROJECT_NAME);
+            qCInfo(main_cpp) << QCoreApplication::translate("main", "Shutting down") << QStringLiteral(PROJECT_NAME);
             QApplication::quit();
         }
     });

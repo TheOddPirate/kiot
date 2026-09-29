@@ -121,7 +121,7 @@ public:
     /**
      * @brief Path of this application's configuration file.
      *
-     * @return the @c <PROJECT_NAME>rc file inside the platform configuration
+     * @return the @c <PARENT_APP_NAME>rc file inside the platform configuration
      *         directory (e.g. @c ~/.config/kiotrc on Linux).
      */
     static QString configFilePath(const QString &fileType=QStringLiteral("rc"));
@@ -289,9 +289,9 @@ private:
 #define DECLARE_LOGGER(Name) Q_DECLARE_LOGGING_CATEGORY(Name)
 
 // Macro for creating a log category matching project_name from cmakelists
-#define LOG_CAT(suffix) PROJECT_NAME "." #suffix
+#define LOG_CAT(suffix) PARENT_APP_NAME "." #suffix
 
-#define LOG_PLUGINCAT(suffix) PROJECT_NAME ".Plugins." #suffix
+#define LOG_PLUGINCAT(suffix) PARENT_APP_NAME ".Plugins." #suffix
 // Enkel makro for å definere kategorien i en .cpp-fil med automatisk prosjekt-prefix
 #define DEFINE_LOGGER(Name, SubCategory) \
         DECLARE_LOGGER(Name); \
